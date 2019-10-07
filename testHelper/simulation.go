@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/FactomProject/factomd/registry"
+	"github.com/FactomProject/factomd/worker"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -67,6 +69,7 @@ func optionsToParams(UserAddedOptions map[string]string) *globals.FactomParams {
 		"--net":                 "alot+",
 		"--enablenet":           "false",
 		"--blktime":             "15",
+		"--count":               fmt.Sprintf("%v", nodeCount),
 		"--startdelay":          "1",
 		"--stdoutlog":           "out.txt",
 		"--stderrlog":           "out.txt",
@@ -118,6 +121,14 @@ func optionsToParams(UserAddedOptions map[string]string) *globals.FactomParams {
 			typeOfT.Field(i).Name, f.Type(), f.Interface())
 	}
 	fmt.Println()
+	proc := registry.New()
+	proc(func(w *worker.Thread, args ...interface{}) {
+		engine.Factomd(w, params, false)
+	})
+	go proc.Run()
+	proc.WaitForRunning()
+	// KLUDGE: is there a better way to register this callback?
+	time.Sleep(50*time.Millisecond)
 
 	return params
 
