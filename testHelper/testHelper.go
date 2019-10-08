@@ -5,12 +5,11 @@ package testHelper
 import (
 	"bytes"
 	"encoding/binary"
-	"fmt"
-	"os"
+	"github.com/FactomProject/factomd/registry"
+	"github.com/FactomProject/factomd/worker"
 	"os/exec"
 	"regexp"
 	"runtime"
-	"time"
 
 	"github.com/FactomProject/factom"
 	"github.com/FactomProject/factomd/common/adminBlock"
@@ -19,11 +18,18 @@ import (
 	"github.com/FactomProject/factomd/common/entryBlock"
 	"github.com/FactomProject/factomd/common/interfaces"
 	"github.com/FactomProject/factomd/common/messages"
-	"github.com/FactomProject/factomd/common/messages/electionMsgs"
 	"github.com/FactomProject/factomd/common/primitives"
 	"github.com/FactomProject/factomd/database/databaseOverlay"
 	"github.com/FactomProject/factomd/database/mapdb"
+
+	"time"
+
+	"fmt"
+	"os"
+
 	"github.com/FactomProject/factomd/state"
+
+	"github.com/FactomProject/factomd/common/messages/electionMsgs"
 )
 
 var BlockCount int = 10
@@ -48,7 +54,12 @@ func CreateEmptyTestState() *state.State {
 
 func CreateAndPopulateTestStateAndStartValidator() *state.State {
 	s := CreateAndPopulateTestState()
-	go s.ValidatorLoop()
+	p := registry.New()
+	p.Register(func(w *worker.Thread, args ...interface{}) {
+		s.ValidatorLoop(w)
+	})
+	go p.Run()
+
 	time.Sleep(30 * time.Millisecond)
 
 	return s
@@ -57,7 +68,11 @@ func CreateAndPopulateTestStateAndStartValidator() *state.State {
 func CreatePopulateAndExecuteTestState() *state.State {
 	s := CreateAndPopulateTestState()
 	ExecuteAllBlocksFromDatabases(s)
-	go s.ValidatorLoop()
+	p := registry.New()
+	p.Register(func(w *worker.Thread, args ...interface{}) {
+		s.ValidatorLoop(w)
+	})
+	go p.Run()
 	time.Sleep(30 * time.Millisecond)
 
 	return s
@@ -197,7 +212,7 @@ func ExecuteAllBlocksFromDatabases(s *state.State) {
 	}
 }
 
-func CreateTestBlockCommitList() []interfaces.IMsg {
+func CreateTestDBStateList() []interfaces.IMsg {
 	answer := make([]interfaces.IMsg, BlockCount)
 	var prev *BlockSet = nil
 
@@ -262,7 +277,7 @@ func PopulateTestDatabaseOverlay(dbo *databaseOverlay.Overlay) {
 		}
 	}
 	/*
-		err = dbo.RebuildDirBlockInfo()
+		err = dbo.ReparseAnchorChains()
 		if err != nil {
 			panic(err)
 		}
