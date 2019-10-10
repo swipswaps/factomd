@@ -5,7 +5,6 @@
 package interfaces
 
 import (
-	"github.com/FactomProject/factomd/worker"
 	"regexp"
 	"time"
 
@@ -253,8 +252,6 @@ type IState interface {
 	GetTrueLeaderHeight() uint32
 	Print(a ...interface{}) (n int, err error)
 	Println(a ...interface{}) (n int, err error)
-
-	ValidatorLoop(w *worker.Thread)
 
 	UpdateECs(IEntryCreditBlock)
 	SetIsReplaying()
