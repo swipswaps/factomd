@@ -393,7 +393,7 @@ func (m *MessageBase) InvalidateSignatures() {
 	m.Sigvalid = false
 }
 
-func GetLabel(msg interfaces.IMsg) string{
+func GetLabel(msg interfaces.IMsg) string {
 	switch msg.Type() {
 	case constants.EOM_MSG: // 1
 		return "eom"
