@@ -337,3 +337,7 @@ func NewChangeServerKeyMsg(state interfaces.IState, identityChain interfaces.IHa
 	return msg
 
 }
+
+func (m *ChangeServerKeyMsg) Label() string {
+	return msgbase.GetLabel(m)
+}

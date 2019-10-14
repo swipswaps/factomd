@@ -304,3 +304,7 @@ func NewMissingMsgResponse(state interfaces.IState, msgResponse interfaces.IMsg,
 
 	return msg
 }
+
+func (m *MissingMsgResponse) Label() string {
+	return msgbase.GetLabel(m)
+}

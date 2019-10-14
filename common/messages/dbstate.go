@@ -859,3 +859,7 @@ func (sl *SigList) UnmarshalBinaryData(data []byte) (newData []byte, err error) 
 	}
 	return newData, nil
 }
+
+func (a *DBStateMsg) Label() string {
+	return msgbase.GetLabel(a)
+}
