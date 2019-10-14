@@ -12,6 +12,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/FactomProject/factomd/worker"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -1005,7 +1006,7 @@ func (s *State) GetSalt(ts interfaces.Timestamp) uint32 {
 	return binary.BigEndian.Uint32(c.Bytes())
 }
 
-func (s *State) Init() {
+func (s *State) Init(w *worker.Thread) {
 	if s.Salt == nil {
 		b := make([]byte, 32)
 		_, err := rand.Read(b)
@@ -1038,7 +1039,7 @@ func (s *State) Init() {
 		//s.Logger = log.NewLogFromConfig(s.LogPath, s.LogLevel, "State")
 	}
 
-	s.Hold.Init(s)                           // setup the dependent holding map
+	s.Hold.Init(w, s)                           // setup the dependent holding map
 	s.TimeOffset = new(primitives.Timestamp) //interfaces.Timestamp(int64(rand.Int63() % int64(time.Microsecond*10)))
 
 	s.InvalidMessages = make(map[[32]byte]interfaces.IMsg, 0)
