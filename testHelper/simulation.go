@@ -122,7 +122,7 @@ func optionsToParams(UserAddedOptions map[string]string) *globals.FactomParams {
 	}
 	fmt.Println()
 	p := registry.New()
-	p.Register(func(w *worker.Thread, args ...interface{}) {
+	p.Register(func(w *worker.Thread) {
 		engine.Factomd(w, params, false)
 	})
 	go p.Run()
