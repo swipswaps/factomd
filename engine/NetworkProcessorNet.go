@@ -6,6 +6,7 @@ package engine
 
 import (
 	"fmt"
+	"github.com/FactomProject/factomd/fnode"
 	"github.com/FactomProject/factomd/worker"
 	"math/rand"
 	"time"
@@ -19,13 +20,13 @@ import (
 
 var _ = fmt.Print
 
-func NetworkProcessorNet(w *worker.Thread, fnode *FactomNode) {
+func NetworkProcessorNet(w *worker.Thread, fnode *fnode.FactomNode) {
 	Peers(w, fnode)
 	w.Run(func() { NetworkOutputs(fnode) }, "NetworkOutputs")
 	w.Run(func() { InvalidOutputs(fnode) }, "InvalidOutputs")
 }
 
-func Peers(w *worker.Thread, fnode *FactomNode) {
+func Peers(w *worker.Thread, fnode *fnode.FactomNode) {
 	// FIXME: bind to
 	saltReplayFilterOn := true
 
@@ -311,6 +312,7 @@ func Peers(w *worker.Thread, fnode *FactomNode) {
 					//}
 
 					var in string
+					_ = in // KLUDGE golang error?
 					if msg.IsPeer2Peer() {
 						in = "P2P In"
 					} else {
@@ -341,7 +343,7 @@ func Peers(w *worker.Thread, fnode *FactomNode) {
 	}, "Peers")
 }
 
-func sendToExecute(msg interfaces.IMsg, fnode *FactomNode, source string) {
+func sendToExecute(msg interfaces.IMsg, fnode *fnode.FactomNode, source string) {
 	t := msg.Type()
 	switch t {
 	case constants.MISSING_MSG:
@@ -369,9 +371,6 @@ func sendToExecute(msg interfaces.IMsg, fnode *FactomNode, source string) {
 	case constants.COMMIT_ENTRY_MSG:
 		Q2(fnode, source, msg) // slow track
 
-	case constants.MISSING_DATA:
-		DataQ(fnode, source, msg) // separated missing data queue
-
 	default:
 		//todo: Probably should send EOM/DBSig and their ACKs on a faster yet track
 		// in general this makes ACKs more likely to arrive first.
@@ -384,25 +383,19 @@ func sendToExecute(msg interfaces.IMsg, fnode *FactomNode, source string) {
 	}
 }
 
-func Q1(fnode *FactomNode, source string, msg interfaces.IMsg) {
+func Q1(fnode *fnode.FactomNode, source string, msg interfaces.IMsg) {
 	fnode.State.LogMessage("NetworkInputs", source+", enqueue", msg)
 	fnode.State.LogMessage("InMsgQueue", source+", enqueue", msg)
 	fnode.State.InMsgQueue().Enqueue(msg)
 }
 
-func Q2(fnode *FactomNode, source string, msg interfaces.IMsg) {
+func Q2(fnode *fnode.FactomNode, source string, msg interfaces.IMsg) {
 	fnode.State.LogMessage("NetworkInputs", source+", enqueue2", msg)
 	fnode.State.LogMessage("InMsgQueue2", source+", enqueue2", msg)
 	fnode.State.InMsgQueue2().Enqueue(msg)
 }
 
-func DataQ(fnode *FactomNode, source string, msg interfaces.IMsg) {
-	q := fnode.State.DataMsgQueue()
-	fnode.State.LogMessage("DataQueue", fmt.Sprintf(source+", enqueue %v", len(q)), msg)
-	q <- msg
-}
-
-func NetworkOutputs(fnode *FactomNode) {
+func NetworkOutputs(fnode *fnode.FactomNode) {
 	for {
 		// if len(fnode.State.NetworkOutMsgQueue()) > 500 {
 		// 	fmt.Print(fnode.State.GetFactomNodeName(), "-", len(fnode.State.NetworkOutMsgQueue()), " ")
@@ -509,8 +502,7 @@ func NetworkOutputs(fnode *FactomNode) {
 				}
 				// Don't resend to the node that sent it to you.
 				if i != p || wt > 1 {
-					bco := fmt.Sprintf("%s/%d/%d", "BCast", p, i)
-					fnode.MLog.Add2(fnode, true, peer.GetNameTo(), bco, true, msg)
+					//bco := fmt.Sprintf("%s/%d/%d", "BCast", p, i)
 					if !fnode.State.GetNetStateOff() { // Don't send him broadcast message if he is off
 						if fnode.State.GetDropRate() > 0 && rand.Int()%1000 < fnode.State.GetDropRate() && !msg.IsFullBroadcast() {
 							//drop the message, rather than processing it normally
@@ -533,7 +525,7 @@ func NetworkOutputs(fnode *FactomNode) {
 }
 
 // Just throw away the trash
-func InvalidOutputs(fnode *FactomNode) {
+func InvalidOutputs(fnode *fnode.FactomNode) {
 	for {
 		time.Sleep(1 * time.Millisecond)
 		_ = <-fnode.State.NetworkInvalidMsgQueue()
