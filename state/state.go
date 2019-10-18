@@ -177,12 +177,12 @@ type State struct {
 	timerMsgQueue          chan interfaces.IMsg
 	TimeOffset             interfaces.Timestamp
 	MaxTimeOffset          interfaces.Timestamp
-	networkOutMsgQueue     queue.MsgQueue
+	networkOutMsgQueue     *queue.MsgQueue
 	networkInvalidMsgQueue chan interfaces.IMsg
-	inMsgQueue             queue.MsgQueue
-	inMsgQueue2            queue.MsgQueue
-	electionsQueue         queue.MsgQueue
-	apiQueue               queue.MsgQueue
+	inMsgQueue             *queue.MsgQueue
+	inMsgQueue2            *queue.MsgQueue
+	electionsQueue         *queue.MsgQueue
+	apiQueue               *queue.MsgQueue
 	ackQueue               chan interfaces.IMsg
 	msgQueue               chan interfaces.IMsg
 	dataQueue              chan interfaces.IMsg
