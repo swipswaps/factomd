@@ -1043,6 +1043,7 @@ func (s *State) Initialize(w *worker.Thread) {
 	}
 
 	s.Hold = NewHoldingList(w, s)            // setup the dependent holding map
+
 	s.TimeOffset = new(primitives.Timestamp) //interfaces.Timestamp(int64(rand.Int63() % int64(time.Microsecond*10)))
 
 	s.InvalidMessages = make(map[[32]byte]interfaces.IMsg, 0)
@@ -1273,6 +1274,10 @@ func (s *State) Initialize(w *worker.Thread) {
 		path := filepath.Join(s.LdbPath, s.Network, "dbstates")
 		os.MkdirAll(path, 0775)
 	}
+
+	// Setup the Skeleton Identity & Registration
+	s.IntiateNetworkSkeletonIdentity()
+	s.InitiateNetworkIdentityRegistration()
 }
 
 func (s *State) HookLogstash() error {
