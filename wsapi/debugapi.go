@@ -5,7 +5,6 @@
 package wsapi
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -97,9 +96,6 @@ func HandleDebugRequest(state interfaces.IState, j *primitives.JSON2Request) (*p
 		break
 	case "holding-queue":
 		resp, jsonError = HandleHoldingQueue(state, params)
-		break
-	case "messages":
-		resp, jsonError = HandleMessages(state, params)
 		break
 	case "network-info":
 		resp, jsonError = HandleNetworkInfo(state, params)
@@ -260,17 +256,6 @@ func HandleHoldingQueue(state interfaces.IState, params interface{}) (interface{
 	r := new(ret)
 
 	for _, v := range state.LoadHoldingMap() {
-		r.Messages = append(r.Messages, v)
-	}
-	return r, nil
-}
-
-func HandleMessages(state interfaces.IState, params interface{}) (interface{}, *primitives.JSONError) {
-	type ret struct {
-		Messages []json.RawMessage
-	}
-	r := new(ret)
-	for _, v := range state.GetJournalMessages() {
 		r.Messages = append(r.Messages, v)
 	}
 	return r, nil
