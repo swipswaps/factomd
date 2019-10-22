@@ -6,16 +6,13 @@ package engine
 
 import (
 	"fmt"
-	"runtime"
-
 	"github.com/FactomProject/factomd/registry"
 	"github.com/FactomProject/factomd/worker"
+	"runtime"
 
 	"github.com/FactomProject/factomd/common/constants/runstate"
 	. "github.com/FactomProject/factomd/common/globals"
 	"github.com/FactomProject/factomd/common/interfaces"
-	"github.com/FactomProject/factomd/common/primitives"
-	"github.com/FactomProject/factomd/state"
 
 	"bufio"
 	"io"
@@ -27,7 +24,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/FactomProject/factomd/common/messages/electionMsgs"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -45,41 +41,23 @@ var packageLogger = log.WithFields(log.Fields{"package": "engine"})
 func Run(params *FactomParams) {
 	p := registry.New()
 	p.Register(func(w *worker.Thread) {
-		state := Factomd(w, params, params.Sim_Stdin)
-		w.OnRun(func() {
-			for state.GetRunState() != runstate.Stopped {
-				time.Sleep(time.Second)
-			}
-		}).OnComplete(func() {
-			fmt.Println("Waiting to Shut Down") // This may not be necessary anymore with the new run state method
+		Factomd(w, params, params.Sim_Stdin)
+		w.OnComplete(func() {
+			fmt.Println("Waiting to Shut Down")
 			time.Sleep(time.Second * 5)
 		})
 	}, "Factomd")
 	p.Run()
 }
 
-func Factomd(w *worker.Thread, params *FactomParams, listenToStdin bool) interfaces.IState {
+func Factomd(w *worker.Thread, params *FactomParams, listenToStdin bool) {
 	fmt.Printf("SpawnRun compiler version: %s\n", runtime.Version())
 	fmt.Printf("Using build: %s\n", Build)
 	fmt.Printf("Version: %s\n", FactomdVersion)
 	StartTime = time.Now()
 	fmt.Printf("Start time: %s\n", StartTime.String())
-
-	state0 := new(state.State)
-	state0.RunState = runstate.New
-
-	// Setup the name to catch any early logging
-	state0.FactomNodeName = state0.Prefix + "FNode0"
-	state0.TimestampAtBoot = primitives.NewTimestampNow()
-	state0.SetLeaderTimestamp(state0.TimestampAtBoot)
-	// build a timestamp 20 minutes before boot so we will accept messages from nodes who booted before us.
-	preBootTime := new(primitives.Timestamp)
-	preBootTime.SetTimeMilli(state0.TimestampAtBoot.GetTimeMilli() - constants.PreBootWindow*60*1000)
-	state0.SetMessageFilterTimestamp(preBootTime)
-	state0.EFactory = new(electionMsgs.ElectionsFactory)
-
-	NetStart(w, state0, params, listenToStdin)
-	return state0
+	go StartProfiler(params.MemProfileRate, params.ExposeProfiling)
+	NetStart(w, params, listenToStdin)
 }
 
 func HandleLogfiles(stdoutlog string, stderrlog string) {

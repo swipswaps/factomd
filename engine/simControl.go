@@ -18,7 +18,6 @@ import (
 
 	"github.com/FactomProject/factomd/fnode"
 	"github.com/FactomProject/factomd/worker"
-
 	"github.com/FactomProject/factomd/common/constants"
 	"github.com/FactomProject/factomd/common/factoid"
 	"github.com/FactomProject/factomd/common/globals"
@@ -91,7 +90,7 @@ func GetFocus() *fnode.FactomNode {
 	return nil
 }
 
-func SimControl(w *worker.Thread, listenTo int, listenStdin bool) {
+func startSimControl(w *worker.Thread, listenTo int, listenStdin bool) {
 	var _ = time.Sleep
 	var summary int
 	var elections int

@@ -7,9 +7,10 @@ package engine
 import (
 	"bytes"
 	"fmt"
-	"os"
-
+	"github.com/FactomProject/factomd/fnode"
 	"github.com/FactomProject/factomd/worker"
+	"os"
+	"time"
 
 	// "github.com/FactomProject/factomd/common/constants"
 
@@ -200,9 +201,15 @@ func (f *P2PProxy) Len() int {
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 func (p *P2PProxy) StartProxy(w *worker.Thread) {
+	{ // FIXME refactor
+		node0 := fnode.Get(0)
+		node0.Peers = append(node0.Peers, p2pProxy)
+	}
+
 	p.logger.Info("Starting P2PProxy")
 	w.Run(p.ManageOutChannel, "OutChannel") // Bridges between network format Parcels and factomd messages (incl. addressing to peers)
 	w.Run(p.ManageInChannel, "InChannel")
+	w.Run(networkHousekeeping, "NetworkHousekeeping") // This goroutine executes once a second to keep the proxy apprised of the network status.
 }
 
 func (p *P2PProxy) StopProxy() {
