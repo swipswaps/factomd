@@ -4,11 +4,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/FactomProject/factomd/fnode"
-
 	"github.com/FactomProject/factomd/common/messages"
 	"github.com/FactomProject/factomd/common/primitives"
 	. "github.com/FactomProject/factomd/engine"
+	"github.com/FactomProject/factomd/fnode"
 	"github.com/FactomProject/factomd/state"
 )
 
