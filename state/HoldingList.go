@@ -2,7 +2,6 @@ package state
 
 import (
 	"fmt"
-
 	"github.com/FactomProject/factomd/common"
 	"github.com/FactomProject/factomd/worker"
 
@@ -28,7 +27,7 @@ type HoldingList struct {
 
 // access gauge w/ proper labels
 func (l *HoldingList) metric(msg interfaces.IMsg) telemetry.Gauge {
-	return telemetry.MapSize.WithLabelValues("state", l.GetName(), l.w.Label(), msg.Label())
+	return telemetry.MapSize.WithLabelValues(l.GetName(), msg.Label())
 }
 
 func NewHoldingList(w *worker.Thread, s *State) *HoldingList {
@@ -170,7 +169,7 @@ func (l *HoldingList) isMsgStale(msg interfaces.IMsg) (res bool) {
 		//		l.s.LogMessage("DependentHolding", "SKIP_DBHT_REVIEW", msg)
 	}
 
-	if msg.GetTimestamp().GetTime().UnixNano() < l.s.GetMessageFilterTimestamp().GetTime().UnixNano() {
+	if msg.GetTimestamp().GetTime().UnixNano() < l.s.GetFilterTimeNano() {
 		res = true
 	}
 

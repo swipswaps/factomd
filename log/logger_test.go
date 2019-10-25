@@ -23,6 +23,6 @@ func TestRegisterThread(t *testing.T) {
 	}
 	// create a process with 3 root nodes
 	p := registry.New()
-	p.Register(threadFactory, "TestProc0")
+	p.Register(threadFactory)
 	p.Run()
 }

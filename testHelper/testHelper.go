@@ -44,7 +44,12 @@ func CreateEmptyTestState() *state.State {
 	s.LoadConfig("", "")
 	s.Network = "LOCAL"
 	s.LogPath = "stdout"
-	s.Initialize(worker.New())
+
+	p := registry.New()
+	p.Register(s.Initialize)
+	go p.Run()
+	p.WaitForRunning()
+
 	s.Network = "LOCAL"
 	s.CheckChainHeads.CheckChainHeads = false
 	state.LoadDatabase(s)
@@ -58,7 +63,7 @@ func CreateAndPopulateTestStateAndStartValidator() *state.State {
 	p := registry.New()
 	p.Register(func(w *worker.Thread) {
 		s.ValidatorLoop(w)
-	}, "MockState")
+	})
 	go p.Run()
 
 	time.Sleep(30 * time.Millisecond)
@@ -72,7 +77,7 @@ func CreatePopulateAndExecuteTestState() *state.State {
 	p := registry.New()
 	p.Register(func(w *worker.Thread) {
 		s.ValidatorLoop(w)
-	}, "MockState")
+	})
 	go p.Run()
 	time.Sleep(30 * time.Millisecond)
 
@@ -139,7 +144,11 @@ func CreateAndPopulateTestState() *state.State {
 	os.Stderr.WriteString(fmt.Sprintf("%20s %v\n", "Network", s.Network))
 	s.LogPath = "stdout"
 
-	s.Initialize(worker.New())
+	p := registry.New()
+	p.Register(s.Initialize)
+	go p.Run()
+	p.WaitForRunning()
+
 	s.Network = "LOCAL"
 	/*err := s.RecalculateBalances()
 	if err != nil {

@@ -126,7 +126,7 @@ func optionsToParams(UserAddedOptions map[string]string) *globals.FactomParams {
 	p := registry.New()
 	p.Register(func(w *worker.Thread) {
 		engine.Factomd(w, params, false)
-	}, "FactomdSim")
+	})
 	go p.Run()
 	p.WaitForRunning()
 	// KLUDGE: is there a better way to register this callback?

@@ -26,7 +26,7 @@ func TestGetEndpoints(t *testing.T) {
 	p := registry.New()
 	p.Register(func(w *worker.Thread) {
 		Start(w, state)
-	}, "MockState")
+	})
 	go p.Run()
 	p.WaitForRunning()
 
@@ -71,7 +71,7 @@ func TestAuthenticatedUnauthorizedRequest(t *testing.T) {
 	p := registry.New()
 	p.Register(func(w *worker.Thread) {
 		Start(w, state)
-	}, "MockState")
+	})
 	go p.Run()
 	p.WaitForRunning()
 
@@ -140,7 +140,7 @@ func TestHTTPS(t *testing.T) {
 			},
 		}
 		Start(w, mState)
-	}, "MockState")
+	})
 	go p.Run()
 	p.WaitForRunning()
 

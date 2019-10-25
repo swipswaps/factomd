@@ -27,7 +27,7 @@ func RunState(state *state.State) {
 	p := registry.New()
 	p.Register(func(w *worker.Thread) {
 		Start(w, state)
-	}, "RunState")
+	})
 	go p.Run()
 	p.WaitForRunning()
 }
