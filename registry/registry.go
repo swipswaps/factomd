@@ -3,6 +3,7 @@ package registry
 import (
 	"fmt"
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 	"github.com/FactomProject/factomd/worker"
 >>>>>>> Squashed commit of the following:
@@ -10,6 +11,11 @@ import (
 	"sync"
 
 	"github.com/FactomProject/factomd/telemetry"
+=======
+	"runtime"
+	"sync"
+
+>>>>>>> Moved creation of election factory so inint doesn't panic
 	"github.com/FactomProject/factomd/worker"
 )
 

@@ -12,12 +12,14 @@ package p2p
 
 import (
 	"fmt"
-	"github.com/FactomProject/factomd/worker"
 	"math/rand"
 	"net"
 	"strings"
 	"time"
 	"unicode"
+
+	"github.com/FactomProject/factomd/common"
+	"github.com/FactomProject/factomd/worker"
 
 	"github.com/FactomProject/factomd/common/primitives"
 
@@ -688,6 +690,7 @@ func (c *Controller) broadcast(parcel Parcel, full bool) {
 		BlockFreeChannelSend(connection.SendChannel, ConnectionParcel{Parcel: parcel})
 		connection.peer.PrevMsgs.Add(msgHash) // record that we know this peer has seen this message
 	}
+
 	SentToPeers.Set(float64(numSent))
 }
 

@@ -150,7 +150,6 @@ type State struct {
 	transCnt    int
 	lasttime    time.Time
 	tps         float64
-	longTps     float64
 	ResetTryCnt int
 	ResetCnt    int
 
@@ -430,8 +429,7 @@ type State struct {
 	StateUpdateState      int64
 	ValidatorLoopSleepCnt int64
 	processCnt            int64 // count of attempts to process .. so we can see if the thread is running
-	ProcessTime           interfaces.Timestamp
-	MMRInfo               // fields for MMR processing
+	MMRInfo                     // fields for MMR processing
 
 	reportedActivations       [activations.ACTIVATION_TYPE_COUNT + 1]bool // flags about which activations we have reported (+1 because we don't use 0)
 	validatorLoopThreadID     string
@@ -2612,7 +2610,6 @@ func (s *State) IsActive(id activations.ActivationType) bool {
 }
 
 func (s *State) PassOutputRegEx(RegEx *regexp.Regexp, RegExString string) {
-	s.LogPrintf("networkOutputs", "SetOutputRegEx to '%s'", RegExString)
 	s.OutputRegEx = RegEx
 	s.OutputRegExString = RegExString
 }
@@ -2622,7 +2619,6 @@ func (s *State) GetOutputRegEx() (*regexp.Regexp, string) {
 }
 
 func (s *State) PassInputRegEx(RegEx *regexp.Regexp, RegExString string) {
-	s.LogPrintf("networkInputs", "SetInputRegEx to '%s'", RegExString)
 	s.InputRegEx = RegEx
 	s.InputRegExString = RegExString
 }
@@ -2645,6 +2641,6 @@ func (s *State) GetDBFinished() bool {
 	return s.DBFinished
 }
 
-func (s *State) IsRunLeader() bool {
+func (s *State) GetRunLeader() bool {
 	return s.RunLeader
 }

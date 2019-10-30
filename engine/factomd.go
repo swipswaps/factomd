@@ -6,13 +6,10 @@ package engine
 
 import (
 	"fmt"
-	"github.com/FactomProject/factomd/registry"
-	"github.com/FactomProject/factomd/worker"
 	"runtime"
 
-	"github.com/FactomProject/factomd/common/constants/runstate"
-	. "github.com/FactomProject/factomd/common/globals"
-	"github.com/FactomProject/factomd/common/interfaces"
+	"github.com/FactomProject/factomd/registry"
+	"github.com/FactomProject/factomd/worker"
 
 	"bufio"
 	"io"
@@ -23,6 +20,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	. "github.com/FactomProject/factomd/common/globals"
 
 	log "github.com/sirupsen/logrus"
 )
