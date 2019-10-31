@@ -8,8 +8,12 @@
 
 //ᐸif false  ᐳ
 package Dummy // this is only here to make gofmt happy and is never in the generated code
-import "github.com/FactomProject/factomd/telemetry"
+//ᐸend ᐳ
 
+//ᐸdefine "accountedqueue-imports" ᐳ
+import (
+	"github.com/FactomProject/factomd/telemetry"
+)
 //ᐸend ᐳ
 
 //ᐸdefine "accountedqueue" ᐳ

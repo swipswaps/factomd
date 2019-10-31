@@ -7,7 +7,6 @@ import (
 	"github.com/FactomProject/factomd/common/interfaces"
 	"github.com/FactomProject/factomd/generated"
 	"github.com/FactomProject/factomd/telemetry"
-	"github.com/FactomProject/factomd/worker"
 )
 
 //FactomGenerate template accountedqueue typename Queue_IMsg type interfaces.IMsg import github.com/FactomProject/factomd/common/interfaces
@@ -24,18 +23,14 @@ import (
 
 type MsgQueue struct {
 	generated.Queue_IMsg
-	Package string
-	Thread  *worker.Thread
 }
 
-func NewMsgQueue(thread *worker.Thread, parent common.NamedObject, packagename string, name string, size int) *MsgQueue {
-	q := new(MsgQueue).Init(thread, packagename, parent, name, size)
+func NewMsgQueue(parent common.NamedObject, name string, size int) *MsgQueue {
+	q := new(MsgQueue).Init(parent, name, size)
 	return q
 }
 
-func (q *MsgQueue) Init(thread *worker.Thread, packagename string, parent common.NamedObject, name string, size int) *MsgQueue {
-	q.Thread = thread
-	q.Package = packagename
+func (q *MsgQueue) Init(parent common.NamedObject, name string, size int) *MsgQueue {
 	q.Queue_IMsg.Init(parent, name, size)
 	return q
 }
@@ -47,7 +42,7 @@ func (q *MsgQueue) Metric(msg interfaces.IMsg) telemetry.Gauge {
 		label = msg.Label()
 	}
 
-	return telemetry.ChannelSize.WithLabelValues(q.Package, q.GetPath()+label, "thread", "current")
+	return telemetry.ChannelSize.WithLabelValues(q.GetPath()+label, "current")
 }
 
 // construct counter for tracking totals
@@ -56,17 +51,17 @@ func (q *MsgQueue) TotalMetric(msg interfaces.IMsg) telemetry.Counter {
 	if msg != nil {
 		label = msg.Label()
 	}
-	return telemetry.TotalCounter.WithLabelValues(q.Package, q.GetPath()+label, "thread", "total")
+	return telemetry.TotalCounter.WithLabelValues(q.GetPath()+label, "total")
 }
 
 // construct counter for intermittent polling of queue size
 func (q *MsgQueue) PollMetric() telemetry.Gauge {
-	return telemetry.ChannelSize.WithLabelValues(q.Package, q.GetPath(), "thread", "aggregate")
+	return telemetry.ChannelSize.WithLabelValues(q.GetPath(), "aggregate")
 }
 
 // add metric to poll size of queue
 func (q *MsgQueue) RegisterPollMetric() {
-	q.Thread.RegisterMetric(func(poll *time.Ticker, exit chan bool) {
+	telemetry.RegisterMetric(func(poll *time.Ticker, exit chan bool) {
 		gauge := q.PollMetric()
 
 		for {
