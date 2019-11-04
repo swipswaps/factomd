@@ -6,6 +6,8 @@
 
 package generated
 
+// publish-imports
+
 // No Imports
 
 // End fileheader template

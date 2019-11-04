@@ -8,7 +8,7 @@ package generated
 
 import (
 	"sync"
-
+q
 	"github.com/FactomProject/factomd/common"
 )
 
