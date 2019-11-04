@@ -96,7 +96,6 @@ func (vm *VM) ReportMissing(height int, delay int64) {
 	for i = lenVMList; i <= height; i++ {
 		vm.p.State.Ask(int(vm.p.DBHeight), vm.VmIndex, i, now+delay) // send it to the MMR thread
 	}
-
 }
 
 // Ask is called from ReportMissing which comes from validation thread to notify MMR that we are missing a message
