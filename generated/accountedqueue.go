@@ -76,9 +76,7 @@ func (q Queue_IMsg) DequeueNonBlocking() (rval interfaces.IMsg) {
 }
 
 // Dequeue removes an item from channel
-// Returns nil if nothing in // queue
-//
-//
+// Returns open and empty flags
 func (q Queue_IMsg) DequeueFlags() (rval interfaces.IMsg, open bool, empty bool) {
 	select {
 	case rval, open = <-q.Channel:
@@ -92,11 +90,17 @@ func (q Queue_IMsg) DequeueFlags() (rval interfaces.IMsg, open bool, empty bool)
 }
 
 // Dequeue removes an item from channel
-func (q Queue_IMsg) BlockingDequeue() (rval interfaces.IMsg, open bool) {
+func (q Queue_IMsg) BlockingDequeueFlags() (rval interfaces.IMsg, open bool) {
 	v, open := <-q.Channel
 	if open {
 		q.Metric().Dec()
 	}
+	return v, open
+}
+
+// Dequeue removes an item from channel
+func (q Queue_IMsg) BlockingDequeue() (rval interfaces.IMsg) {
+	v, _ := <-q.Channel
 	return v, open
 }
 
