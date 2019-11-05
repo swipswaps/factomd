@@ -271,6 +271,11 @@ func (m *TimeoutInternal) Type() byte {
 	return constants.INTERNALTIMEOUT
 }
 
+func (m *TimeoutInternal) WellFormed() bool {
+	// TODO: Flush this out
+	return true
+}
+
 func (m *TimeoutInternal) Validate(state interfaces.IState) int {
 	return 1
 }

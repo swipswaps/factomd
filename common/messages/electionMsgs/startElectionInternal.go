@@ -94,6 +94,11 @@ func (m *StartElectionInternal) ElectionValidate(ie interfaces.IElections) int {
 	return 1
 }
 
+func (m *StartElectionInternal) WellFormed() bool {
+	// TODO: Flush this out
+	return true
+}
+
 func (m *StartElectionInternal) Validate(state interfaces.IState) int {
 	return 1
 }
