@@ -4,15 +4,20 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/FactomProject/factomd/pubsub"
+	"github.com/FactomProject/factomd/pubsub/publishers"
+	"github.com/FactomProject/factomd/pubsub/pubregistry"
+	"github.com/FactomProject/factomd/pubsub/subscribers"
 )
 
 // Atomic counter keeps all subscribers on the same level
 
 func main() {
-	pub := new(pubsub.PubBase).Publish("/source")
+	reg := pubregistry.NewRegistry()
+	pub := new(publishers.Base)
+	panicError(reg.Register("/source", pub))
+
 	for i := 0; i < 5; i++ {
-		ValueWatcher(i)
+		ValueWatcher(i, reg)
 	}
 
 	var i int64
@@ -24,17 +29,19 @@ func main() {
 	}
 }
 
-func ValueWatcher(worker int) {
+func ValueWatcher(worker int, reg *pubregistry.Registry) {
 	// Channel based subscription is just a channel written to by a publisher
-	sub := pubsub.NewAtomicValueSubscriber()
+	sub := subscribers.NewValueSubscriber()
 
 	// Let's add callbacks
-	callbackSub := pubsub.NewCallback(sub).Subscribe("/source")
+	callbackSub := subscribers.NewCallback(sub)
 	callbackSub.AfterWrite = func(o interface{}) {
 		if i, ok := o.(int64); ok {
 			fmt.Printf("\t%d updated to %d\n", worker, i)
 		}
 	}
+
+	panicError(reg.SubscribeTo("/source", callbackSub))
 }
 
 func panicError(err error) {

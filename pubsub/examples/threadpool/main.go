@@ -57,7 +57,7 @@ func PrimeWorker() {
 
 	for {
 		// WithInfo to detect a close.
-		v, open := sub.ReceiveWithInfo()
+		v, open := sub.ReadWithFlag()
 		if !open {
 			fmt.Println("\tWorker closing....")
 			_ = agg.Close()

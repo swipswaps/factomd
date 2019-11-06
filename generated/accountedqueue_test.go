@@ -20,7 +20,7 @@ import (
 // Start accountedqueue_test generated go code
 
 func TestAccountedQueue_Queue_IMsg(t *testing.T) {
-	q := new(Queue_IMsg).Init(common.NilName, "Test", 10)
+	q := new(Queue_IMsg).Init(common.NilName, "TestQueue_IMsg", 10)
 
 	if q.Dequeue() != nil {
 		t.Fatal("empty dequeue return non-nil")
@@ -43,7 +43,7 @@ func TestAccountedQueue_Queue_IMsg(t *testing.T) {
 		//}
 	}
 
-	if q.Dequeue() != nil {
+	if q.DequeueNonBlocking() != nil {
 		t.Fatal("empty dequeue return non-nil")
 	}
 }
