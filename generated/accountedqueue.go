@@ -172,14 +172,14 @@ func (q Queue_IMsg) DequeueNonBlockingFlags() (rval interfaces.IMsg, open bool, 
 // Dequeue removes an item from channel
 <<<<<<< HEAD
 // Returns nil if nothing in // queue
-func (q Queue_int) Dequeue() int {
+func (q Queue_int) Dequeue() (v int) {
 	select {
-	case v := <-q.Channel:
+	case v = <-q.Channel:
 		q.Metric().Dec()
-		return v
 	default:
-		return nil
 	}
+
+	return v
 }
 
 // Dequeue removes an item from channel
