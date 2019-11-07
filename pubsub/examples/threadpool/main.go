@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math/big"
+	"time"
 
 	"github.com/FactomProject/factomd/pubsub"
 )
@@ -18,14 +19,11 @@ func main() {
 
 	// One person publishes the work on a round robin basis
 	robinPub := pubsub.PubFactory.RoundRobin(buffer).Publish("/source")
-	go robinPub.Run() // The writer is threaded
+	go robinPub.Start() // The writer is threaded
 
-	panicError(reg.Register("/source", robinPub))
-
-	// Agg is a publisher with many writers.
-	agg := pubsub.PubFactory.Multi(buffer).Publish("/aggregate")
-	go agg.Run() // Writes are threaded
-	panicError(reg.Register("/aggregate", agg))
+	// Agg is a publisher with many writers. Need to publish so a subscriber
+	// can find it.
+	pubsub.PubFactory.Threaded(100).Publish("/aggregate", pubsub.PubMultiWrap())
 
 	workers := 5
 	for i := 0; i < workers; i++ {
@@ -38,6 +36,9 @@ func main() {
 
 	// Load the work
 	go func() {
+		for robinPub.NumberOfSubscribers() != workers {
+			time.Sleep(25 * time.Millisecond)
+		}
 		for i := int64(0); i < max; i++ {
 			robinPub.Write(i) // Write all numbers to the /source
 		}
@@ -54,11 +55,13 @@ func PrimeWorker() {
 	sub := pubsub.SubFactory.Channel(5).Subscribe("/source")
 
 	// agg is where we write our results.
-	agg := pubsub.PubFactory.Multi(buffer).Publish("/aggregate")
+	//agg := pubsub.PubFactory.Multi(buffer).Publish("/aggregate")
+	agg := pubsub.PubFactory.Threaded(100).Publish("/aggregate", pubsub.PubMultiWrap())
+	go agg.Start()
 
 	for {
 		// WithInfo to detect a close.
-		v, open := sub.ReadWithFlag()
+		v, open := sub.ReceiveWithInfo()
 		if !open {
 			fmt.Println("\tWorker closing....")
 			_ = agg.Close()
