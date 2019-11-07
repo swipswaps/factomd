@@ -175,7 +175,7 @@ func NetStart(w *worker.Thread, p *globals.FactomParams, listenToStdin bool) {
 	startNetwork(w, p)
 	startFnodes(w)
 	startWebserver(w)
-	startSimControl(w, p.ListenTo, listenToStdin)
+	simulation.StartSimControl(w, p.ListenTo, listenToStdin)
 }
 
 // initialize package-level vars
@@ -354,7 +354,7 @@ func startNetwork(w *worker.Thread, p *globals.FactomParams) {
 
 	// Modify Identities of simulated nodes
 	if fnode.Len() > 1 && len(s.Prefix) == 0 {
-		modifySimulatorIdentities() // set proper chain id & keys
+		simulation.ModifySimulatorIdentities() // set proper chain id & keys
 	}
 
 	// Start the P2P network

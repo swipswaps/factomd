@@ -613,9 +613,6 @@ func (s *State) Initialize(w *worker.Thread) {
 	// Allocate the missing message handler
 	s.MissingMessageResponseHandler = NewMissingMessageReponseCache(s)
 
-	// Election factory was created and passed int to avoid import loop
-	s.EFactory = electionFactory
-
 	if s.StateSaverStruct.FastBoot {
 		d, err := s.DB.FetchDBlockHead()
 		if err != nil {
