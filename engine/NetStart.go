@@ -9,9 +9,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	"github.com/FactomProject/factomd/registry"
-	"io/ioutil"
-	"math"
+	"github.com/FactomProject/factomd/simulation"
 	"os"
 	"strings"
 	"sync"
@@ -28,6 +26,7 @@ import (
 	"github.com/FactomProject/factomd/elections"
 	"github.com/FactomProject/factomd/fnode"
 	"github.com/FactomProject/factomd/p2p"
+	"github.com/FactomProject/factomd/registry"
 	"github.com/FactomProject/factomd/state"
 	"github.com/FactomProject/factomd/util"
 	"github.com/FactomProject/factomd/worker"
@@ -52,7 +51,7 @@ func echo(s string, more ...interface{}) {
 	_, _ = os.Stderr.WriteString(fmt.Sprintf(s, more...))
 }
 
-func echoConfig(s *state.State, p *FactomParams) {
+func echoConfig(s *state.State, p *globals.FactomParams) {
 
 	fmt.Println(">>>>>>>>>>>>>>>>")
 	fmt.Println(">>>>>>>>>>>>>>>> Net Sim Start!")
@@ -160,7 +159,7 @@ func initEntryHeight(s *state.State, target int) {
 		height, err := s.DB.FetchDatabaseEntryHeight()
 		if err != nil {
 			s.LogPrintf("EntrySync", "Error reading EntryDBHeightComplete NetStart EntryDBHeightComplete = %d", s.EntryDBHeightComplete)
-			os.Stderr.WriteString(fmt.Sprintf("ERROR reading Entry DBHeight Complete: %v\n", err))
+			_, _ = os.Stderr.WriteString(fmt.Sprintf("ERROR reading Entry DBHeight Complete: %v\n", err))
 		} else {
 			s.EntryDBHeightComplete = height
 			s.LogPrintf("EntrySync", "NetStart EntryDBHeightComplete = %d", s.EntryDBHeightComplete)
@@ -185,7 +184,7 @@ func initEngine(w *worker.Thread, p *globals.FactomParams) {
 	w.RegisterInterruptHandler(interruptHandler)
 
 	// nodes can spawn with a different thread lifecycle
-	fnode.Factory =  func(w *worker.Thread) {
+	fnode.Factory = func(w *worker.Thread) {
 		makeServer(w, p)
 	}
 }
@@ -403,9 +402,9 @@ func startNetwork(w *worker.Thread, p *globals.FactomParams) {
 	}
 
 	p2p.NetworkDeadline = time.Duration(p.Deadline) * time.Millisecond
-	buildNetTopology(p)
+	simulation.BuildNetTopology(p)
 
-	if ! p.EnableNet {
+	if !p.EnableNet {
 		return
 	}
 
@@ -464,7 +463,7 @@ func makeServer(w *worker.Thread, p *globals.FactomParams) (node *fnode.FactomNo
 	} else {
 		node = fnode.New(state.Clone(fnode.Get(0).State, i).(*state.State))
 	}
-	node.State.Initialize(w, new(electionMsgs.ElectionsFactory))
+	node.State.Initialize(w)
 
 	state0Init.Do(func() {
 		logPort = p.LogPort
@@ -475,6 +474,7 @@ func makeServer(w *worker.Thread, p *globals.FactomParams) (node *fnode.FactomNo
 		echoConfig(node.State, p) // print the config only once
 	})
 
+	node.State.EFactory = new(electionMsgs.ElectionsFactory)
 	time.Sleep(10 * time.Millisecond)
 
 	return node
@@ -510,23 +510,12 @@ func setupFirstAuthority(s *state.State) {
 
 // create a new simulated fnode
 func AddNode() {
-	fnodes := fnode.GetFnodes()
-	s := fnodes[0].State
-	i := len(fnodes)
-
-	makeServer(s)
-	modifyLoadIdentities()
-
-	fnodes = fnode.GetFnodes()
-	fnodes[i].State.IntiateNetworkSkeletonIdentity()
-	fnodes[i].State.InitiateNetworkIdentityRegistration()
-	AddSimPeer(fnodes, i, i-1) // KLUDGE peer w/ only last node
 	p := registry.New()
-	p.Register(func(w *worker.Thread){
+	p.Register(func(w *worker.Thread) {
 		i := fnode.Len()
 		fnode.Factory(w)
-		modifySimulatorIdentity(i)
-		AddSimPeer(fnode.GetFnodes(), i, i-1) // KLUDGE peer w/ only last node
+		simulation.ModifySimulatorIdentity(i)
+		simulation.AddSimPeer(fnode.GetFnodes(), i, i-1) // KLUDGE peer w/ only last node
 		n := fnode.Get(i)
 		startServer(w, n)
 	})

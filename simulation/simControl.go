@@ -16,8 +16,6 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/FactomProject/factomd/fnode"
-	"github.com/FactomProject/factomd/worker"
 	"github.com/FactomProject/factomd/common/constants"
 	"github.com/FactomProject/factomd/common/factoid"
 	"github.com/FactomProject/factomd/common/globals"
@@ -27,7 +25,8 @@ import (
 	"github.com/FactomProject/factomd/common/primitives"
 	"github.com/FactomProject/factomd/controlPanel"
 	elections2 "github.com/FactomProject/factomd/elections"
-	"github.com/FactomProject/factomd/p2p"
+	"github.com/FactomProject/factomd/fnode"
+	"github.com/FactomProject/factomd/worker"
 	"github.com/FactomProject/factomd/wsapi"
 )
 
@@ -415,7 +414,7 @@ func startSimControl(w *worker.Thread, listenTo int, listenStdin bool) {
 						}
 					}
 				case 'f' == b[0]:
-					mLog.all = false
+					//mLog.all = false
 					for _, node := range fnode.GetFnodes() {
 						node.State.SetOut(false)
 					}
@@ -447,7 +446,7 @@ func startSimControl(w *worker.Thread, listenTo int, listenStdin bool) {
 						}
 					}
 				case 'd' == b[0]:
-					mLog.all = false
+					//mLog.all = false
 					for _, node := range fnode.GetFnodes() {
 						node.State.SetOut(false)
 					}
@@ -560,7 +559,7 @@ func startSimControl(w *worker.Thread, listenTo int, listenStdin bool) {
 					}
 
 				case 'k' == b[0]:
-					mLog.all = false
+					//mLog.all = false
 					for _, fnode := range fnode.GetFnodes() {
 						fnode.State.SetOut(false)
 					}

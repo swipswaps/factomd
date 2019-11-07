@@ -110,7 +110,31 @@ func optionsToParams(UserAddedOptions map[string]string) *globals.FactomParams {
 		}
 	}
 
-	params := engine.ParseCmdLine(optionsToCmdLine(CmdLineOptions))
+	// default the fault time and round time based on the blk time out
+	blktime, err := strconv.Atoi(CmdLineOptions["--blktime"])
+	if err != nil {
+		panic(err)
+	}
+
+	if CmdLineOptions["--faulttimeout"] == "" {
+		CmdLineOptions["--faulttimeout"] = fmt.Sprintf("%d", blktime/5) // use 2 minutes ...
+	}
+
+	if CmdLineOptions["--roundtimeout"] == "" {
+		CmdLineOptions["--roundtimeout"] = fmt.Sprintf("%d", blktime/5)
+	}
+
+	// built the fake command line
+	returningSlice := []string{}
+	for key, value := range CmdLineOptions {
+		returningSlice = append(returningSlice, key+"="+value)
+	}
+
+	fmt.Println("Command Line Arguments:")
+	for _, v := range returningSlice {
+		fmt.Printf("\t%s\n", v)
+	}
+	params := engine.ParseCmdLine(returningSlice)
 	fmt.Println()
 
 	fmt.Println("Parameter:")
@@ -132,6 +156,7 @@ func optionsToParams(UserAddedOptions map[string]string) *globals.FactomParams {
 	// KLUDGE: is there a better way to register this callback?
 	time.Sleep(50 * time.Millisecond)
 
+	return fnode.GetFnodes()[0].State
 }
 
 func setTestTimeouts(state0 *state.State, calcTime time.Duration) {
@@ -307,7 +332,7 @@ func createAuthoritySet(creatingNodes string, state0 *state.State, t *testing.T)
 func WaitForAllNodes(state *state.State) {
 	height := ""
 	simFnodes := fnode.GetFnodes()
-	engine.PrintOneStatus(0, 0) // Print a status
+	simulation.PrintOneStatus(0, 0) // Print a status
 	fmt.Printf("Wait for all nodes done\n%s", height)
 	block := state.LLeaderHeight
 	minute := state.CurrentMinute
@@ -359,7 +384,7 @@ func StatusEveryMinute(s *state.State) {
 						n.State.SetString()
 					}
 
-					engine.PrintOneStatus(0, 0)
+					simulation.PrintOneStatus(0, 0)
 				} else {
 					return
 				}
@@ -514,16 +539,16 @@ func CheckAuthoritySet(t *testing.T) {
 	leadercnt, auditcnt, followercnt := CountAuthoritySet()
 
 	if leadercnt != Leaders {
-		engine.PrintOneStatus(0, 0)
+		simulation.PrintOneStatus(0, 0)
 		t.Fatalf("found %d leaders, expected %d", leadercnt, Leaders)
 	}
 	if auditcnt != Audits {
-		engine.PrintOneStatus(0, 0)
+		simulation.PrintOneStatus(0, 0)
 		t.Fatalf("found %d audit servers, expected %d", auditcnt, Audits)
 		t.Fail()
 	}
 	if followercnt != Followers {
-		engine.PrintOneStatus(0, 0)
+		simulation.PrintOneStatus(0, 0)
 		t.Fatalf("found %d followers, expected %d", followercnt, Followers)
 		t.Fail()
 	}
@@ -559,7 +584,7 @@ func ShutDownEverything(t *testing.T) {
 		t.Fatal("Failed to shut down factomd via ShutdownChan")
 	}
 
-	engine.PrintOneStatus(0, 0) // Print a final status
+	simulation.PrintOneStatus(0, 0) // Print a final status
 	fmt.Printf("Test took %d blocks and %s time\n", fnode.GetFnodes()[0].State.LLeaderHeight, time.Now().Sub(startTime))
 }
 
