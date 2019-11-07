@@ -114,6 +114,7 @@ type State struct {
 	Salt              interfaces.IHash
 	Cfg               interfaces.IFactomConfig
 	ConfigFilePath    string // $HOME/.factom/m2/factomd.conf by default
+
 	LogPath           string
 	LdbPath           string
 	BoltDBPath        string
@@ -129,6 +130,11 @@ type State struct {
 	FReplay              *Replay
 	CrossReplay          *CrossReplayFilter
 	Delay                int64 // Simulation delays sending messages this many milliseconds
+
+	// Keeping the last display state lets us know when to send over the new blocks
+	LastDisplayState        *DisplayState
+	ControlPanelChannel     chan DisplayState
+	ControlPanelDataRequest bool // If true, update Display state
 
 	IdentityChainID interfaces.IHash // If this node has an identity, this is it
 	//Identities      []*Identity      // Identities of all servers in management chain
@@ -1546,6 +1552,9 @@ func (s *State) UpdateState() (progress bool) {
 	}
 
 	s.SetString()
+	if s.ControlPanelDataRequest {
+		s.CopyStateToControlPanel()
+	}
 
 	// Update our TPS every ~ 3 seconds at the earliest
 	if s.lasttime.Before(time.Now().Add(-3 * time.Second)) {

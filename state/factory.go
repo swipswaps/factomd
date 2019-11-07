@@ -442,6 +442,7 @@ func (s *State) Initialize(w *worker.Thread) {
 	s.ShutdownChan = make(chan int, 1)                                      //Channel to gracefully shut down.
 	s.tickerQueue = make(chan int, 100)                                     //ticks from a clock
 	s.timerMsgQueue = make(chan interfaces.IMsg, 100)                       //incoming eom notifications, used by leaders
+	s.ControlPanelChannel = make(chan DisplayState, 20)                     //
 	s.networkInvalidMsgQueue = make(chan interfaces.IMsg, 100)              //incoming message queue from the network messages
 	s.networkOutMsgQueue = NewNetOutMsgQueue(w, constants.INMSGQUEUE_MED)   //Messages to be broadcast to the network
 	s.inMsgQueue = NewInMsgQueue(w, constants.INMSGQUEUE_HIGH)              //incoming message queue for Factom application messages
@@ -611,6 +612,9 @@ func (s *State) Initialize(w *worker.Thread) {
 
 	// Allocate the missing message handler
 	s.MissingMessageResponseHandler = NewMissingMessageReponseCache(s)
+
+	// Election factory was created and passed int to avoid import loop
+	s.EFactory = electionFactory
 
 	if s.StateSaverStruct.FastBoot {
 		d, err := s.DB.FetchDBlockHead()

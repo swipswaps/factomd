@@ -96,6 +96,14 @@ func (s *State) DeleteFromHolding(hash [32]byte, msg interfaces.IMsg, reason str
 
 var FilterTimeLimit = int64(Range * 60 * 2 * 1000000000) // Filter hold two hours of messages, one in the past one in the future
 
+func (s *State) GetFilterTimeNano() int64 {
+	t := s.GetMessageFilterTimestamp().GetTime().UnixNano() // this is the start of the filter
+	if t == 0 {
+		panic("got 0 time")
+	}
+	return t
+}
+
 // this is the common validation to all messages. they must not be a reply, they must not be out size the time window
 // for the replay filter.
 func (s *State) Validate(msg interfaces.IMsg) (validToSend int, validToExec int) {
@@ -121,7 +129,7 @@ func (s *State) Validate(msg interfaces.IMsg) (validToSend int, validToExec int)
 
 	if constants.NeedsAck(msg.Type()) {
 		// Make sure we don't put in an old ack'd message (outside our repeat filter range)
-		filterTime := s.GetMessageFilterTimestamp().GetTime().UnixNano()
+		filterTime := s.GetFilterTimeNano()
 		if filterTime == 0 {
 			panic("got 0 time")
 		}
@@ -858,9 +866,6 @@ func (s *State) MoveStateToHeight(dbheight uint32, newMinute int) {
 			s.DBStates.UpdateState() // call to get the state signed now that the DBSigs have processed
 		case 2:
 			s.ExpireHolding() // expire anything in holding that is old.
-			fallthrough
-		default:
-			// pass
 		}
 		s.CurrentMinute = newMinute // Update just the minute
 		// We are between blocks make sure we are setup to sync
@@ -1688,7 +1693,7 @@ func (s *State) ProcessAddServer(dbheight uint32, addServerMsg interfaces.IMsg) 
 
 	if ok && !ProcessIdentityToAdminBlock(s, as.ServerChainID, as.ServerType) {
 		s.LogPrintf("process", "Failed to add %x as server type %d", as.ServerChainID.Bytes()[3:6], as.ServerType)
-		// REVIEW: should this return false?
+		return true // If it fails it will never work so just move along.
 	}
 	return true
 }
@@ -2807,7 +2812,12 @@ func (s *State) GetDirectoryBlock() interfaces.IDirectoryBlock {
 }
 
 func (s *State) GetNewHash() (rval interfaces.IHash) {
-	defer func() { rval = primitives.CheckNil(rval, "State.GetNewHash") }()
+	defer func() {
+		if rval != nil && reflect.ValueOf(rval).IsNil() {
+			rval = nil // convert an interface that is nil to a nil interface
+			primitives.LogNilHashBug("State.GetNewHash() saw an interface that was nil")
+		}
+	}()
 	return new(primitives.Hash)
 }
 
