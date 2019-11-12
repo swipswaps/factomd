@@ -9,11 +9,13 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	"github.com/FactomProject/factomd/simulation"
+	"github.com/FactomProject/factomd/modules/debugsettings"
 	"os"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/FactomProject/factomd/simulation"
 
 	"github.com/FactomProject/factomd/common/constants"
 	"github.com/FactomProject/factomd/common/globals"
@@ -109,33 +111,6 @@ func echoConfig(s *state.State, p *globals.FactomParams) {
 	echo("%20s \"%d\"\n", "TCP port", s.PortNumber)
 	echo("%20s \"%s\"\n", "pprof port", logPort)
 	echo("%20s \"%d\"\n", "Control Panel port", s.ControlPanelPort)
-}
-
-// init mlog & set log levels
-func SetLogLevel(p *globals.FactomParams) {
-	mLog.Init(p.RuntimeLog, p.Cnt)
-
-	log.SetOutput(os.Stdout)
-	switch strings.ToLower(p.Loglvl) {
-	case "none":
-		log.SetOutput(ioutil.Discard)
-	case "debug":
-		log.SetLevel(log.DebugLevel)
-	case "info":
-		log.SetLevel(log.InfoLevel)
-	case "warning", "warn":
-		log.SetLevel(log.WarnLevel)
-	case "error":
-		log.SetLevel(log.ErrorLevel)
-	case "fatal":
-		log.SetLevel(log.FatalLevel)
-	case "panic":
-		log.SetLevel(log.PanicLevel)
-	}
-
-	if p.Logjson {
-		log.SetFormatter(&log.JSONFormatter{})
-	}
 }
 
 // shutdown factomd
@@ -472,6 +447,9 @@ func makeServer(w *worker.Thread, p *globals.FactomParams) (node *fnode.FactomNo
 		initEntryHeight(node.State, p.Sync2)
 		initAnchors(node.State, p.ReparseAnchorChains)
 		echoConfig(node.State, p) // print the config only once
+		// Init settings
+		// TODO: Init any settings from the config
+		debugsettings.NewNode(node.State.GetFactomNodeName())
 	})
 
 	node.State.EFactory = new(electionMsgs.ElectionsFactory)
