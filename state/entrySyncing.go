@@ -32,7 +32,7 @@ type EntrySync struct {
 	SyncingBlocks            map[int][]*ReCheck         // Map of Directory blocks by height
 	finishedDBlocks          chan int                   // Channel of finished Directory blocks
 	finishedEntries          chan int                   // We get a ping every time an entry is done
-	SendRequest              chan *messages.MissingData // Channel for inMessages being requested
+	SendRequest              chan *messages.MissingData // Channel for messages being requested
 	Processing               int                        // Directory block we are processing
 	EntriesProcessing        int                        // Total of Entries being processed
 	EntryRequests            int                        // Requests made
