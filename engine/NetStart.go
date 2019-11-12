@@ -15,6 +15,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/FactomProject/factomd/modules/debugsettings"
+
 	"github.com/FactomProject/factomd/simulation"
 
 	"github.com/FactomProject/factomd/common/constants"
@@ -452,7 +454,9 @@ func makeServer(w *worker.Thread, p *globals.FactomParams) (node *fnode.FactomNo
 		debugsettings.NewNode(node.State.GetFactomNodeName())
 	})
 
-	node.State.EFactory = new(electionMsgs.ElectionsFactory)
+	// TODO: Init any settings from the config
+	debugsettings.NewNode(node.State.GetFactomNodeName())
+
 	time.Sleep(10 * time.Millisecond)
 
 	return node
