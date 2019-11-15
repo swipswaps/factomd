@@ -73,7 +73,7 @@ type ControllerInit struct {
 	SeedURL                  string           // URL to a source of peer info
 	ConfigPeers              string           // Peers to always connect to at startup, and stay persistent, passed from the config file
 	CmdLinePeers             string           // Additional special peers passed from the command line
-	ConnectionMetricsChannel chan interface{} // Channel on which we put the connection metrics map, periodically.
+	ConnectionMetricsChannel chan interface{} // SubChannel on which we put the connection metrics map, periodically.
 	LogPath                  string           // Path for logs
 	LogLevel                 string           // Logging level
 }

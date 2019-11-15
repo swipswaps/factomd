@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 
 package state
+<<<<<<< HEAD
 
 import (
 	"encoding/binary"
@@ -164,3 +165,5 @@ func (s *State) Reset() {
 func (s *State) DoReset() {
 	return
 }
+=======
+>>>>>>> Ripped out old logging

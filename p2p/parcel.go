@@ -110,6 +110,7 @@ func ParcelsForPayload(network NetworkID, payload []byte, msg interfaces.IMsg) [
 		parcel.Header.PartsTotal = uint16(parcelCount)
 		parcels[i] = *parcel
 	}
+
 	return parcels
 }
 

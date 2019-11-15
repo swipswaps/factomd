@@ -8,6 +8,7 @@ import (
 	"encoding/gob"
 	"fmt"
 	"hash/crc32"
+	"io"
 	"net"
 	"os"
 	"time"

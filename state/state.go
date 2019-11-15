@@ -37,7 +37,13 @@ import (
 	"github.com/FactomProject/factomd/p2p"
 	"github.com/FactomProject/factomd/util"
 	"github.com/FactomProject/factomd/util/atomic"
+	"github.com/FactomProject/logrustash"
+	log "github.com/sirupsen/logrus"
 )
+
+// packageLogger is the general logger for all package related logs. You can add additional fields,
+// or create more context loggers off of this
+var packageLogger = log.WithFields(log.Fields{"package": "state"})
 
 // loaded directly from factomParams
 type StateConfig struct {
@@ -126,12 +132,7 @@ type State struct {
 	Replay               *Replay
 	FReplay              *Replay
 	CrossReplay          *CrossReplayFilter
-	Delay                int64 // Simulation delays sending messages this many milliseconds
-
-	// Keeping the last display state lets us know when to send over the new blocks
-	LastDisplayState        *DisplayState
-	ControlPanelChannel     chan DisplayState
-	ControlPanelDataRequest bool // If true, update Display state
+	Delay                int64 // Simulation delays sending inMessages this many milliseconds
 
 	IdentityChainID interfaces.IHash // If this node has an identity, this is it
 	//Identities      []*Identity      // Identities of all servers in management chain
