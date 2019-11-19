@@ -432,7 +432,7 @@ func (s *State) Initialize(w *worker.Thread) {
 	s.IgnoreMissing = true
 	s.BootTime = s.GetTimestamp().GetTimeSeconds()
 	s.TimestampAtBoot = primitives.NewTimestampNow()
-
+	s.ProcessTime = s.TimestampAtBoot
 	if s.LogPath == "stdout" {
 		//wsapi.InitLogs(s.LogPath, s.LogLevel)
 	} else {
@@ -611,8 +611,8 @@ func (s *State) Initialize(w *worker.Thread) {
 	// end of FER removal
 	s.Starttime = time.Now()
 	// Allocate the MMR queues
-	s.asks = make(chan askRef, 50) // Should be > than the number of VMs so each VM can have at least one outstanding ask.
-	s.adds = make(chan plRef, 50)  // No good rule of thumb on the size of this
+	s.asks = make(chan askRef, 100) // Should be > than the number of VMs so each VM can have at least one outstanding ask.
+	s.adds = make(chan plRef, 50)   // No good rule of thumb on the size of this
 	s.dbheights = make(chan int, 1)
 	s.rejects = make(chan MsgPair, 1) // Messages rejected from process list
 
