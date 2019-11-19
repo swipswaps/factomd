@@ -14,7 +14,9 @@ import (
 	"sort"
 	"time"
 
-	"github.com/FactomProject/factomd/activations"
+	"github.com/FactomProject/factomd/log"
+	"github.com/FactomProject/factomd/modules/logging"
+
 	"github.com/FactomProject/factomd/common/constants"
 	"github.com/FactomProject/factomd/common/entryBlock"
 	"github.com/FactomProject/factomd/common/entryCreditBlock"

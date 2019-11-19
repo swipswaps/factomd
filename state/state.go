@@ -111,7 +111,6 @@ type StateConfig struct {
 type State struct {
 	common.Name
 	StateConfig
-	logging           *logging.LayerLogger
 	RunState          runstate.RunState
 	NetworkController *p2p.Controller
 	Salt              interfaces.IHash

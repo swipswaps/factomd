@@ -20,13 +20,6 @@ type root struct {
 // factory method to spawn new nodes
 var Factory func(w *worker.Thread)
 
-// root of object hierarchy
-var Root = &root{}
-
-func init() {
-	Root.Init(Root, "")
-}
-
 type FactomNode struct {
 	common.Name
 	Index       int
@@ -39,7 +32,7 @@ type FactomNode struct {
 func New(s *state.State) *FactomNode {
 	n := new(FactomNode)
 	n.State = s
-	n.Init(Root, "svc") // root of service
+	n.Init(common.NilName, s.GetFactomNodeName()) // All Fnodes are off the root
 	fnodes = append(fnodes, n)
 	n.addFnodeName()
 	//	n.State.Init(n, n.State.FactomNodeName)
@@ -52,6 +45,13 @@ var fnodes []*FactomNode
 
 func GetFnodes() []*FactomNode {
 	return fnodes
+}
+
+func AddFnode(node *FactomNode) {
+	node.Init(common.NilName, node.State.FactomNodeName) // root of service
+	node.State.Init(node, node.State.FactomNodeName+"State")
+	node.State.Hold.Init(node.State, "HoldingList")
+	fnodes = append(fnodes, node)
 }
 
 func Get(i int) *FactomNode {
