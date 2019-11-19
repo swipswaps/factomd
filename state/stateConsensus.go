@@ -71,6 +71,7 @@ func (s *State) LogPrintf(logName string, format string, more ...interface{}) {
 		}
 	}
 }
+
 func (s *State) AddToHolding(hash [32]byte, msg interfaces.IMsg) {
 	if !constants.NeedsAck(msg.Type()) {
 		s.LogMessage("holding", "add non-ack'd", msg)

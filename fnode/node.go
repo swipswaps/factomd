@@ -29,10 +29,10 @@ type FactomNode struct {
 	outMessages *generated.Publish_PubBase_IMsg_type
 }
 
-func New(o common.NamedObject, s *state.State) *FactomNode {
+func New(s *state.State) *FactomNode {
 	n := new(FactomNode)
 	n.State = s
-	n.Init(o, s.GetFactomNodeName()+"NODE") // All Fnodes are off the root
+	n.NameInit(common.NilName, s.GetFactomNodeName(), reflect.TypeOf(n).String()) // All Fnodes are off the root
 	fnodes = append(fnodes, n)
 	n.addFnodeName()
 	//	n.State.Init(n, n.State.FactomNodeName)
