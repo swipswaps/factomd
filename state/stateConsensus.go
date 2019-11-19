@@ -335,7 +335,7 @@ func (s *State) executeMsg(msg interfaces.IMsg) (ret bool) {
 		return true
 
 	case 0:
-		// Sometimes messages we have already processed are in the msgQueue from holding when we execute them
+		// Sometimes inMessages we have already processed are in the msgQueue from holding when we execute them
 		// this check makes sure we don't put them back in holding after just deleting them
 		s.LogMessage("executeMsg", "hold executeMsg", msg)
 		s.AddToHolding(msg.GetMsgHash().Fixed(), msg) // Add message where validToExecute==0
@@ -419,7 +419,7 @@ func (s *State) Process() (progress bool) {
 
 	hsb := s.GetHighestSavedBlk()
 
-	// trim any received DBStatesReceived messages that are fully processed
+	// trim any received DBStatesReceived inMessages that are fully processed
 	completed := s.GetHighestLockedSignedAndSavesBlk()
 
 	cut := int(completed) - s.DBStatesReceivedBase
