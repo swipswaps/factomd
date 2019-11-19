@@ -471,7 +471,9 @@ func startFnodes(w *worker.Thread) {
 
 	for i, _ := range fnode.GetFnodes() {
 		node := fnode.Get(i)
-		w.Spawn(node.GetName()+"Thread", func(w *worker.Thread) { startServer(w, node) })
+		w.Spawn(node.GetName()+"Thread", func(w *worker.Thread) {
+			startServer(w, node)
+		})
 	}
 	time.Sleep(10 * time.Second)
 	common.PrintAllNames()
