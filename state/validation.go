@@ -142,6 +142,17 @@ func (s *State) MsgSort() {
 				eom.VMIndex = s.LeaderVMIndex
 				eom.Minute = byte(currentMinute)
 			}
+			{	// hook into internal events
+				pl := s.ProcessLists.Get(s.LLeaderHeight)
+
+				s.Pub.EOMTicker.Write(&event.EOM{
+					Timestamp:     s.GetTimestamp(),
+					LLeaderHeight: s.LLeaderHeight,
+					SysHeight:     uint32(pl.System.Height),
+					VMIndex:       s.LeaderVMIndex,
+					Minute:        byte(currentMinute),
+				})
+			}
 
 			eom.Sign(s)
 			eom.SetLocal(true) // local EOMs are really just timeout indicators that we need to generate an EOM

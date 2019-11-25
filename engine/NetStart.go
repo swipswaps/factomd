@@ -318,12 +318,16 @@ var state0Init sync.Once // we do some extra init for the first state
 //**********************************************************************
 func makeServer(w *worker.Thread, p *globals.FactomParams) (node *fnode.FactomNode) {
 	i := fnode.Len()
+
 	if i == 0 {
 		node = fnode.New(state.NewState(p, FactomdVersion))
 	} else {
 		node = fnode.New(state.Clone(fnode.Get(0).State, i).(*state.State))
 	}
-	node.State.Initialize(w)
+
+	// Election factory was created and passed int to avoid import loop
+	node.State.Initialize(w, new(electionMsgs.ElectionsFactory))
+	node.State.BindPublishers()
 
 	state0Init.Do(func() {
 		logPort = p.LogPort
@@ -332,9 +336,15 @@ func makeServer(w *worker.Thread, p *globals.FactomParams) (node *fnode.FactomNo
 		initEntryHeight(node.State, p.Sync2)
 		initAnchors(node.State, p.ReparseAnchorChains)
 		echoConfig(node.State, p) // print the config only once
-		// Init settings
-		// TODO: Init any settings from the config
-		debugsettings.NewNode(node.State.GetFactomNodeName())
+
+		{ // Leader thread
+			l := leader.New(node.State)
+			l.Start(w)              // KLUDGE: only running leader on state0
+			OutputString := "ACK.*" // KLUDGE filter acks while developing leader thread
+			OutputRegEx := regexp.MustCompile(OutputString)
+			node.State.PassOutputRegEx(OutputRegEx, OutputString)
+		}
+
 	})
 
 	// TODO: Init any settings from the config
@@ -361,7 +371,6 @@ func startFnodes(w *worker.Thread) {
 }
 
 func startServer(w *worker.Thread, node *fnode.FactomNode) {
-
 	NetworkProcessorNet(w, node)
 	s := node.State
 	w.Run("MsgSort", s.MsgSort)

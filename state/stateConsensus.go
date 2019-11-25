@@ -1968,8 +1968,8 @@ func (s *State) SendDBSig(dbheight uint32, vmIndex int) {
 			if dbs == nil {
 				return
 			}
-			//
-			//dbslog.WithFields(dbs.LogFields()).WithFields(log.Fields{"lheight": s.GetLeaderHeight(), "node-name": s.GetFactomNodeName()}).Infof("Generate DBSig")
+
+			dbslog.WithFields(dbs.LogFields()).WithFields(log.Fields{"lheight": s.GetLeaderHeight(), "node-name": s.GetFactomNodeName()}).Infof("Generate DBSig")
 			dbs.LeaderExecute(s)
 			vm.Signed = true
 			pl.DBSigAlreadySent = true

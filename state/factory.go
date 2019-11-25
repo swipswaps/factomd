@@ -24,6 +24,8 @@ import (
 	"github.com/FactomProject/factomd/p2p"
 	"github.com/FactomProject/factomd/util"
 	"github.com/FactomProject/factomd/worker"
+	"github.com/FactomProject/factomd/wsapi"
+	log "github.com/sirupsen/logrus"
 )
 
 func (s *State) LoadConfigFromFile(filename string, networkFlag string) {
@@ -423,7 +425,7 @@ func Clone(s *State, cloneNumber int) interfaces.IState {
 	return newState
 }
 
-func (s *State) Initialize(w *worker.Thread) {
+func (s *State) Initialize(w *worker.Thread, electionFactory interfaces.IElectionsFactory) {
 	if s.Salt == nil {
 		b := make([]byte, 32)
 		_, err := rand.Read(b)
@@ -442,13 +444,13 @@ func (s *State) Initialize(w *worker.Thread) {
 	s.TimestampAtBoot = primitives.NewTimestampNow()
 	s.ProcessTime = s.TimestampAtBoot
 	if s.LogPath == "stdout" {
-		//wsapi.InitLogs(s.LogPath, s.LogLevel)
+		wsapi.InitLogs(s.LogPath, s.LogLevel)
 	} else {
 		er := os.MkdirAll(s.LogPath, 0775)
 		if er != nil {
 			panic("Could not create " + s.LogPath + "\n error: " + er.Error())
 		}
-		//wsapi.InitLogs(s.LogPath+s.FactomNodeName+".log", s.LogLevel)
+		wsapi.InitLogs(s.LogPath+s.FactomNodeName+".log", s.LogLevel)
 	}
 
 	s.Hold = NewHoldingList(s)                                              // setup the dependent holding map
@@ -504,6 +506,7 @@ func (s *State) Initialize(w *worker.Thread) {
 	s.DBStates = new(DBStateList)
 	s.DBStates.State = s
 	s.DBStates.DBStates = make([]*DBState, 0)
+	w.Run(s.DBStates.Catchup)
 
 	s.StatesMissing = NewStatesMissing()
 	s.StatesWaiting = NewStatesWaiting()
@@ -654,16 +657,16 @@ func (s *State) Initialize(w *worker.Thread) {
 			}
 		}
 	}
-	//
-	//	s.Logger = log.WithFields(log.Fields{"node-name": s.GetFactomNodeName(), "identity": s.GetIdentityChainID().String()})
+
+	s.Logger = log.WithFields(log.Fields{"node-name": s.GetFactomNodeName(), "identity": s.GetIdentityChainID().String()})
 
 	// Set up Logstash Hook for Logrus (if enabled)
-	//if s.UseLogstash {
-	//	err := s.HookLogstash()
-	//	if err != nil {
-	//		log.Fatal(err)
-	//	}
-	//}
+	if s.UseLogstash {
+		err := s.HookLogstash()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 
 	if globals.Params.WriteProcessedDBStates {
 		path := filepath.Join(s.LdbPath, s.Network, "dbstates")
