@@ -8,14 +8,12 @@ import (
 	"errors"
 	"fmt"
 	"hash"
-	"math"
 	"os"
 	"reflect"
 	"sort"
 	"time"
 
-	"github.com/FactomProject/factomd/log"
-	"github.com/FactomProject/factomd/modules/logging"
+	"github.com/FactomProject/factomd/modules/event"
 
 	"github.com/FactomProject/factomd/common/constants"
 	"github.com/FactomProject/factomd/common/entryBlock"
@@ -29,11 +27,12 @@ import (
 	"github.com/FactomProject/factomd/util/atomic"
 
 	llog "github.com/FactomProject/factomd/log"
+	log "github.com/sirupsen/logrus"
 )
 
 // consenLogger is the general logger for all consensus related logs. You can add additional fields,
 // or create more context loggers off of this
-//var consenLogger = packageLogger.WithFields(log.Fields{"subpack": "consensus"})
+var consenLogger = packageLogger.WithFields(log.Fields{"subpack": "consensus"})
 
 var _ = fmt.Print
 var _ = (*hash.Hash32)(nil)
@@ -189,7 +188,7 @@ func (s *State) Validate(msg interfaces.IMsg) (validToSend int, validToExec int)
 
 	_, ok := s.Replay.Valid(constants.INTERNAL_REPLAY, msg.GetRepeatHash().Fixed(), msg.GetTimestamp(), s.GetTimestamp())
 	if !ok {
-		//		//		consenLogger.WithFields(msg.LogFields()).Debug("executeMsg (Replay Invalid)")
+		consenLogger.WithFields(msg.LogFields()).Debug("executeMsg (Replay Invalid)")
 		s.LogMessage("executeMsg", "drop, INTERNAL_REPLAY2", msg)
 		return -1, -1
 	}
@@ -364,11 +363,11 @@ func (s *State) Process() (progress bool) {
 	}
 
 	s.StateProcessCnt++
-	//if s.ResetRequest {
-	//	s.ResetRequest = false
-	//	s.DoReset()
-	//	return false
-	//}
+	if s.ResetRequest {
+		s.ResetRequest = false
+		s.DoReset()
+		return false
+	}
 
 	LeaderPL := s.ProcessLists.Get(s.LLeaderHeight)
 
@@ -778,12 +777,19 @@ processholdinglist:
 	TotalReviewHoldingTime.Add(float64(reviewHoldingTime.Nanoseconds()))
 }
 
-func (s *State) MoveStateToHeight(dbheight uint32, newMinute int) {
+func (s *State) MoveStateToHeight(dbheight uint32, newMinute int, flags ...bool) {
 	//	s.LogPrintf("dbstateprocess", "MoveStateToHeight(%d-:-%d) called from %s", dbheight, newMinute, atomic.WhereAmIString(1))
 	s.LogPrintf("dbstateprocess", "MoveStateToHeight(%d-:-%d)", dbheight, newMinute)
 
 	if (s.LLeaderHeight+1 == dbheight && newMinute == 0) || (s.LLeaderHeight == dbheight && s.CurrentMinute+1 == newMinute) {
-		// these are the allowed cases; move to nextblock-:-0 or move to next minute
+
+		// KLUDGE State is moved in two places
+		//1-:-10 goroutine 189-/state/processListManager.go:49
+		//1-:-10 goroutine 189-/state/dbStateManager.go:1224
+		if len(flags) == 0 {
+			// added flag to only trigger after dbstateChange
+			s.Pub.BlkSeq.Write(&event.DBHT{dbheight, newMinute})
+		}
 	} else {
 		s.LogPrintf("dbstateprocess", "State move between non-sequential heights from %d to %d", s.LLeaderHeight, dbheight)
 		if s.LLeaderHeight != dbheight {
@@ -1937,8 +1943,9 @@ func (s *State) CreateDBSig(dbheight uint32, vmIndex int) (interfaces.IMsg, inte
 // that is missing the DBSig.  If the DBSig isn't our responsibility, then
 // this call will do nothing.  Assumes the state for the leader is set properly
 func (s *State) SendDBSig(dbheight uint32, vmIndex int) {
+
 	s.LogPrintf("executeMsg", "SendDBSig(dbht=%d,vm=%d)", dbheight, vmIndex)
-	//	//	dbslog := consenLogger.WithFields(log.Fields{"func": "SendDBSig"})
+	dbslog := consenLogger.WithFields(log.Fields{"func": "SendDBSig"})
 
 	ht := s.GetHighestSavedBlk()
 	if dbheight <= ht { // if it's in the past, just return.
@@ -1969,6 +1976,18 @@ func (s *State) SendDBSig(dbheight uint32, vmIndex int) {
 				return
 			}
 
+			{ // KLUDGE dispatch params to leader thread can send dbsig
+				v := dbs.(*messages.DirectoryBlockSignature)
+
+				s.Pub.Directory.Write(&event.Directory{
+					DBHeight:             dbheight,
+					VMIndex:              vmIndex,
+					DirectoryBlockHeader: v.DirectoryBlockHeader,
+					Timestamp:            s.GetTimestamp(),
+				})
+
+			}
+
 			dbslog.WithFields(dbs.LogFields()).WithFields(log.Fields{"lheight": s.GetLeaderHeight(), "node-name": s.GetFactomNodeName()}).Infof("Generate DBSig")
 			dbs.LeaderExecute(s)
 			vm.Signed = true
@@ -1978,16 +1997,16 @@ func (s *State) SendDBSig(dbheight uint32, vmIndex int) {
 	}
 }
 
-// TODO: Should fault the server if we don't have the proper sequence of EOM messages.
+// TODO: Should fault the server if we don't have the proper sequence of EOM inMessages.
 func (s *State) ProcessEOM(dbheight uint32, msg interfaces.IMsg) bool {
 	TotalProcessEOMs.Inc()
 	e := msg.(*messages.EOM)
-	//	//	// plog := consenLogger.WithFields(log.Fields{"func": "ProcessEOM", "msgheight": e.DBHeight, "lheight": s.GetLeaderHeight(), "min", e.Minute})
+	// plog := consenLogger.WithFields(log.Fields{"func": "ProcessEOM", "msgheight": e.DBHeight, "lheight": s.GetLeaderHeight(), "min", e.Minute})
 	pl := s.ProcessLists.Get(dbheight)
 	vmIndex := msg.GetVMIndex()
 	vm := pl.VMs[vmIndex]
 
-	s.LogPrintf("dbsig-eom", "ProcessEOM@%7d/%02d/%d minute %d, Syncing %v , EOM %v, EOMDone %v, EOMProcessed %v, EOMLimit %v DBSigDone %v",
+	s.LogPrintf("dbsig-eom", "ProcessEOM@%d/%d/%d minute %d, Syncing %v , EOM %v, EOMDone %v, EOMProcessed %v, EOMLimit %v DBSigDone %v",
 		dbheight, msg.GetVMIndex(), len(vm.List), s.CurrentMinute, s.Syncing, s.EOM, s.EOMDone, s.EOMProcessed, s.EOMLimit, s.DBSigDone)
 
 	// debug
@@ -2197,6 +2216,7 @@ func (s *State) ProcessEOM(dbheight uint32, msg interfaces.IMsg) bool {
 		s.EOMProcessed++
 		//fmt.Println(fmt.Sprintf("EOM PROCESS: %10s vm %2d EOMProcessed++ (%2d)", s.FactomNodeName, e.VMIndex, s.EOMProcessed))
 		vm.Synced = true // ProcessEOM
+		markNoFault(pl, msg.GetVMIndex())
 		//fmt.Println(fmt.Sprintf("SigType PROCESS: %10s vm %2d Process this SigType: return on s.SigType(%v) && int(e.Minute(%v)) > s.EOMMinute(%v)", s.FactomNodeName, e.VMIndex, s.SigType, e.Minute, s.EOMMinute))
 		return false
 	}
@@ -2278,6 +2298,13 @@ func (s *State) CheckForIDChange() {
 		s.LocalServerPrivKey = config.App.LocalServerPrivKey
 		s.initServerKeys()
 		s.LogPrintf("AckChange", "ReloadIdentity new local_priv: %v ident_chain: %v, prev local_priv: %v ident_chain: %v", s.LocalServerPrivKey, s.IdentityChainID, prev_LocalServerPrivKey, prev_ChainID)
+
+		s.Pub.LeaderConfig.Write(&event.LeaderConfig{
+			IdentityChainID: s.IdentityChainID,
+			Salt:            s.Salt,
+			ServerPrivKey:   s.ServerPrivKey,
+			FactomSecond:    s.FactomSecond(),
+		})
 	}
 }
 
