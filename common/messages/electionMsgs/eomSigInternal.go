@@ -40,10 +40,10 @@ func Title() string {
 		"Type",
 		"Node",
 		"M:DBHt",
-		"M:Min",
+		"M:Minute",
 		"M:VM",
 		"E:DBHt",
-		"E:Min",
+		"E:Minute",
 		"E:VM")
 }
 

@@ -6,6 +6,7 @@ package state
 
 import (
 	"fmt"
+	"github.com/FactomProject/factomd/modules/event"
 	"time"
 
 	"github.com/FactomProject/factomd/common/constants"
@@ -14,6 +15,7 @@ import (
 	"github.com/FactomProject/factomd/common/messages"
 	llog "github.com/FactomProject/factomd/log"
 	"github.com/FactomProject/factomd/util/atomic"
+	"github.com/FactomProject/factomd/worker"
 )
 
 var ValidationDebug bool = false

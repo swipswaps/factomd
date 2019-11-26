@@ -862,6 +862,17 @@ func (s *State) MoveStateToHeight(dbheight uint32, newMinute int, flags ...bool)
 		// Do not send out dbsigs while loading from disk
 		if s.Leader && !s.LeaderPL.DBSigAlreadySent && s.LLeaderHeight > s.DBHeightAtBoot {
 			s.SendDBSig(s.LLeaderHeight, s.LeaderVMIndex) // MoveStateToHeight()
+			{
+				dbstate := s.DBStates.Get(int(dbheight - 1))
+
+				s.Pub.Directory.Write(&event.Directory{
+					DBHeight:             dbheight,
+					VMIndex:              s.LeaderVMIndex,
+					DirectoryBlockHeader: dbstate.DirectoryBlock.GetHeader(),
+					Timestamp:            s.GetTimestamp(),
+				})
+
+			}
 		}
 		s.DBStates.UpdateState() // go process the DBSigs
 
@@ -2194,23 +2205,6 @@ func (s *State) ProcessEOM(dbheight uint32, msg interfaces.IMsg) bool {
 		)
 		s.electionsQueue.Enqueue(InMsg)
 
-		// Prometheus metrics to analyze timing delays
-		msgDelay := e.GetReceivedTime().Sub(e.Timestamp.GetTime())
-		LeaderSyncMsgDelay.WithLabelValues(e.ChainID.String()).Set(msgDelay.Seconds())
-		// Grab the ack (should always work)
-		if vm.Height < len(vm.ListAck) { // This shouldn't fail...
-			ack := vm.ListAck[vm.Height]
-			if ack != nil && ack.GetHash() != nil && ack.GetHash().IsSameAs(e.GetMsgHash()) {
-				// Measure Ack delay
-				ackDelay := ack.GetReceivedTime().Sub(ack.Timestamp.GetTime())
-				LeaderSyncAckDelay.WithLabelValues(e.ChainID.String()).Set(ackDelay.Seconds())
-
-				// Measure Pair Delay. The delay between the msg and ack
-				pairDelay := ack.GetReceivedTime().Sub(e.GetReceivedTime())
-				LeaderSyncAckPairDelay.WithLabelValues(e.ChainID.String()).Set(math.Abs(pairDelay.Seconds()))
-			}
-		}
-
 		//fmt.Println(fmt.Sprintf("SigType PROCESS: %10s vm %2d Process Once: !e.Processed(%v) SigType: %s", s.FactomNodeName, e.VMIndex, e.Processed, e.String()))
 		vm.LeaderMinute++
 		s.EOMProcessed++
@@ -2332,7 +2326,7 @@ func (s *State) ProcessDBSig(dbheight uint32, msg interfaces.IMsg) bool {
 	vm := s.ProcessLists.Get(dbheight).VMs[msg.GetVMIndex()]
 
 	// debug
-	s.LogPrintf("dbsig-eom", "ProcessDBSig@%7d/%02d/%d minute %d, Syncing %v , DBSig %v, DBSigDone %v, DBSigProcessed %v, DBSigLimit %v DBSigDone %v",
+	s.LogPrintf("dbsig-eom", "ProcessDBSig@%d/%d/%d minute %d, Syncing %v , DBSig %v, DBSigDone %v, DBSigProcessed %v, DBSigLimit %v DBSigDone %v",
 		dbheight, msg.GetVMIndex(), len(vm.List), s.CurrentMinute, s.Syncing, s.DBSig, s.DBSigDone, s.DBSigProcessed, s.DBSigLimit, s.DBSigDone)
 
 	// debug
@@ -2727,7 +2721,7 @@ func (s *State) GetLeaderHeight() uint32 {
 }
 
 // The highest block for which we have received a message.  Sometimes the same as
-// BuildingBlock(), but can be different depending or the order messages are received.
+// BuildingBlock(), but can be different depending or the order inMessages are received.
 func (s *State) GetHighestKnownBlock() uint32 {
 	if s.ProcessLists == nil {
 		return 0
