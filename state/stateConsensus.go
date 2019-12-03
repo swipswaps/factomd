@@ -774,6 +774,7 @@ processholdinglist:
 func (s *State) MoveStateToHeight(dbheight uint32, newMinute int, flags ...bool) {
 	//	s.LogPrintf("dbstateprocess", "MoveStateToHeight(%d-:-%d) called from %s", dbheight, newMinute, atomic.WhereAmIString(1))
 	s.LogPrintf("dbstateprocess", "MoveStateToHeight(%d-:-%d)", dbheight, newMinute)
+	s.LogPrintf("executemsg", "MoveStateToHeight(%d-:-%d)", dbheight, newMinute)
 
 	if (s.LLeaderHeight+1 == dbheight && newMinute == 0) || (s.LLeaderHeight == dbheight && s.CurrentMinute+1 == newMinute) {
 
@@ -922,8 +923,14 @@ func (s *State) MoveStateToHeight(dbheight uint32, newMinute int, flags ...bool)
 	s.DBSigLimit = s.EOMLimit               // We add or remove server only on block boundaries
 	s.LogPrintf("dbstateprocess", "MoveStateToHeight(%d-:-%d) leader=%v leaderPL=%p, leaderVMIndex=%d", dbheight, newMinute, s.Leader, s.LeaderPL, s.LeaderVMIndex)
 
-	s.Hold.ExecuteForNewHeight(s.LLeaderHeight, s.CurrentMinute) // execute held messages
-	s.Hold.Review()                                              // cleanup old messages
+	s.Pub.BlkSeq.Write(&event.DBHT{
+		DBHeight: s.LLeaderHeight,
+		VMIndex: s.LeaderVMIndex,
+		Minute: s.CurrentMinute,
+	})
+
+	s.Hold.ExecuteForNewHeight(s.LLeaderHeight, s.CurrentMinute) // execute held Messages
+	s.Hold.Review()                                              // cleanup old Messages
 }
 
 // Adds blocks that are either pulled locally from a database, or acquired from peers.
@@ -1456,27 +1463,20 @@ func (s *State) FollowerExecuteRevealEntry(m interfaces.IMsg) {
 	pl.PendingChainHeads.Put(msg.Entry.GetChainID().Fixed(), msg)
 }
 
-func (s *State) LeaderExecute(m interfaces.IMsg) {
-	vm := s.LeaderPL.VMs[s.LeaderVMIndex]
-	if len(vm.List) != vm.Height {
-		s.repost(m, 1) // Goes in the "do this really fast" queue so we are prompt about EOM's while syncing
-		return
-	}
-	LeaderExecutions.Inc()
-	_, ok := s.Replay.Valid(constants.INTERNAL_REPLAY, m.GetRepeatHash().Fixed(), m.GetTimestamp(), s.GetTimestamp())
-	if !ok {
-		TotalHoldingQueueOutputs.Inc()
-		//delete(s.Holding, m.GetMsgHash().Fixed())
-		s.DeleteFromHolding(m.GetMsgHash().Fixed(), m, "INTERNAL_REPLAY")
-		if s.DebugExec() {
-			s.LogMessage("executeMsg", "drop replay", m)
-		}
-		return
-	}
 
 	ack := s.NewAck(m, nil).(*messages.Ack) // LeaderExecute
 	m.SetLeaderChainID(ack.GetLeaderChainID())
 	m.SetMinute(ack.Minute)
+
+	//s.Pub.LeaderMsgIn.Write(m) // TODO: continue to refactor
+	//switch m.Type() {
+	//case constants.DIRECTORY_BLOCK_SIGNATURE_MSG:
+	//	//execute()
+	//case constants.EOM_MSG, constants.FACTOID_TRANSACTION_MSG, constants.COMMIT_CHAIN_MSG, constants.REVEAL_ENTRY_MSG:
+	//	execute()
+	//default:
+	//	panic(fmt.Sprintf("Unsupported msg %v", m.Type()))
+	//}
 
 	s.ProcessLists.Get(ack.DBHeight).AddToProcessList(s, ack, m)
 }

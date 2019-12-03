@@ -7,6 +7,7 @@ package state
 import (
 	"fmt"
 	"github.com/FactomProject/factomd/modules/event"
+	"github.com/FactomProject/factomd/pubsub"
 	"time"
 
 	"github.com/FactomProject/factomd/common/constants"
