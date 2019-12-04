@@ -15,7 +15,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/FactomProject/factomd/common"
+	"github.com/FactomProject/factomd/modules/leader"
+
 	"github.com/FactomProject/factomd/modules/debugsettings"
 
 	"github.com/FactomProject/factomd/simulation"
