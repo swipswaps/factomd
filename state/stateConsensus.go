@@ -184,7 +184,6 @@ func (s *State) Validate(msg interfaces.IMsg) (validToSend int, validToExec int)
 
 	_, ok := s.Replay.Valid(constants.INTERNAL_REPLAY, msg.GetRepeatHash().Fixed(), msg.GetTimestamp(), s.GetTimestamp())
 	if !ok {
-		consenLogger.WithFields(msg.LogFields()).Debug("executeMsg (Replay Invalid)")
 		s.LogMessage("executeMsg", "drop, INTERNAL_REPLAY2", msg)
 		return -1, -1
 	}

@@ -15,6 +15,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/FactomProject/factomd/common"
+	"github.com/FactomProject/factomd/modules/debugsettings"
 	"github.com/FactomProject/factomd/modules/leader"
 
 	"github.com/FactomProject/factomd/modules/debugsettings"
@@ -328,6 +330,7 @@ func makeServer(w *worker.Thread, p *globals.FactomParams) (node *fnode.FactomNo
 
 	// Election factory was created and passed int to avoid import loop
 	node.State.Initialize(w, new(electionMsgs.ElectionsFactory))
+	node.State.NameInit(node, node.State.GetFactomNodeName()+"STATE", reflect.TypeOf(node.State).String())
 	node.State.BindPublishers()
 
 	state0Init.Do(func() {
@@ -368,7 +371,6 @@ func startFnodes(w *worker.Thread) {
 	time.Sleep(10 * time.Second)
 	common.PrintAllNames()
 	fmt.Println(registry.Graph())
-
 }
 
 func startServer(w *worker.Thread, node *fnode.FactomNode) {
