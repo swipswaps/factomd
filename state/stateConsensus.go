@@ -775,6 +775,7 @@ func (s *State) MoveStateToHeight(dbheight uint32, newMinute int, flags ...bool)
 	//	s.LogPrintf("dbstateprocess", "MoveStateToHeight(%d-:-%d) called from %s", dbheight, newMinute, atomic.WhereAmIString(1))
 	s.LogPrintf("dbstateprocess", "MoveStateToHeight(%d-:-%d)", dbheight, newMinute)
 	s.LogPrintf("executemsg", "MoveStateToHeight(%d-:-%d)", dbheight, newMinute)
+	s.LogPrintf("leader", "MoveStateToHeight(%d-:-%d)", dbheight, newMinute)
 
 	if (s.LLeaderHeight+1 == dbheight && newMinute == 0) || (s.LLeaderHeight == dbheight && s.CurrentMinute+1 == newMinute) {
 
@@ -1981,6 +1982,7 @@ func (s *State) SendDBSig(dbheight uint32, vmIndex int) {
 				return
 			}
 
+			panic("still used")
 			{ // KLUDGE dispatch params to leader thread can send dbsig
 				v := dbs.(*messages.DirectoryBlockSignature)
 
