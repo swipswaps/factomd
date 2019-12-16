@@ -16,6 +16,7 @@ import (
 	"github.com/FactomProject/factomd/common/interfaces"
 	"github.com/FactomProject/factomd/common/messages"
 	llog "github.com/FactomProject/factomd/log"
+	"github.com/FactomProject/factomd/modules/event"
 	"github.com/FactomProject/factomd/pubsub"
 	"github.com/FactomProject/factomd/util/atomic"
 	"github.com/FactomProject/factomd/worker"
@@ -88,6 +89,11 @@ func (s *State) MsgExecute() {
 }
 
 func (s *State) MsgSort() {
+	CheckGrants()
+
+	// We should only generate 1 EOM for each height/minute/vmindex
+	lastHeight, lastMinute, lastVM := -1, -1, -1
+
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("A panic state occurred in ValidatorLoop.", r)

@@ -17,6 +17,7 @@ import (
 	"github.com/FactomProject/factomd/common/interfaces"
 	"github.com/FactomProject/factomd/common/primitives"
 	"github.com/FactomProject/factomd/database/databaseOverlay"
+	"github.com/FactomProject/factomd/log"
 	"github.com/FactomProject/factomd/modules/logging"
 	"github.com/FactomProject/factomd/p2p"
 	"github.com/FactomProject/factomd/util"

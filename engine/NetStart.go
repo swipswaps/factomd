@@ -343,12 +343,8 @@ func makeServer(w *worker.Thread, p *globals.FactomParams) (node *fnode.FactomNo
 
 		{ // Leader thread
 			l := leader.New(node.State)
-			l.Start(w)              // KLUDGE: only running leader on state0
-			OutputString := "ACK.*" // KLUDGE filter acks while developing leader thread
-			OutputRegEx := regexp.MustCompile(OutputString)
-			node.State.PassOutputRegEx(OutputRegEx, OutputString)
+			l.Start(w) // KLUDGE: only running leader on state0
 		}
-
 	})
 
 	// TODO: Init any settings from the config
@@ -361,7 +357,6 @@ func makeServer(w *worker.Thread, p *globals.FactomParams) (node *fnode.FactomNo
 
 func startFnodes(w *worker.Thread) {
 	state.CheckGrants() // check the grants table hard coded into the build is well formed.
-
 	for i, _ := range fnode.GetFnodes() {
 		node := fnode.Get(i)
 		w.Spawn(node.GetName()+"Thread", func(w *worker.Thread) {
