@@ -9,10 +9,9 @@ import (
 	"time"
 
 	"github.com/FactomProject/factomd/common"
+	"github.com/FactomProject/factomd/common/interfaces"
 	"github.com/FactomProject/factomd/common/messages"
 	"github.com/FactomProject/factomd/modules/debugsettings"
-
-	"github.com/FactomProject/factomd/common/interfaces"
 	"github.com/FactomProject/factomd/pubsub"
 )
 
