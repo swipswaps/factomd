@@ -6,6 +6,7 @@ package electionMsgs
 
 import (
 	"fmt"
+	"reflect"
 
 	"github.com/FactomProject/factomd/common/constants"
 	"github.com/FactomProject/factomd/common/interfaces"
