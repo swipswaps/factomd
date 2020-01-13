@@ -33,8 +33,10 @@ import (
 	"github.com/FactomProject/factomd/database/databaseOverlay"
 	"github.com/FactomProject/factomd/elections"
 	"github.com/FactomProject/factomd/fnode"
+	"github.com/FactomProject/factomd/modules/debugsettings"
 	"github.com/FactomProject/factomd/p2p"
 	"github.com/FactomProject/factomd/registry"
+	"github.com/FactomProject/factomd/simulation"
 	"github.com/FactomProject/factomd/state"
 	"github.com/FactomProject/factomd/util"
 	"github.com/FactomProject/factomd/worker"
@@ -167,7 +169,6 @@ func initEngine(w *worker.Thread, p *globals.FactomParams) {
 	// add these to the name substitution table in logs so election dumps of the authority set look better
 	globals.FnodeNames["Fed"] = "erated "
 	globals.FnodeNames["Aud"] = "id     "
-
 	// nodes can spawn with a different thread lifecycle
 	fnode.Factory = func(w *worker.Thread) {
 		makeServer(w, p)
