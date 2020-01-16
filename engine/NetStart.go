@@ -9,7 +9,6 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	"github.com/FactomProject/factomd/modules/debugsettings"
 	"os"
 	"reflect"
 	"sync"
@@ -18,9 +17,6 @@ import (
 	"github.com/FactomProject/factomd/common"
 	"github.com/FactomProject/factomd/modules/debugsettings"
 	"github.com/FactomProject/factomd/modules/leader"
-
-	"github.com/FactomProject/factomd/modules/debugsettings"
-
 	"github.com/FactomProject/factomd/simulation"
 
 	"github.com/FactomProject/factomd/common/constants"
@@ -344,8 +340,8 @@ func makeServer(w *worker.Thread, p *globals.FactomParams) (node *fnode.FactomNo
 		echoConfig(node.State, p) // print the config only once
 
 		{ // Leader thread
-			l := leader.New(node.State)
-			l.Start(w) // KLUDGE: only running leader on state0
+			//l := leader.New(node.State)
+			//l.Start(w) // KLUDGE: only running leader on state0
 		}
 	})
 
