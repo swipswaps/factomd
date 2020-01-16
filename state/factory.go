@@ -437,22 +437,24 @@ func (s *State) Initialize(w *worker.Thread, electionFactory interfaces.IElectio
 		wsapi.InitLogs(s.LogPath+s.FactomNodeName+".log", s.LogLevel)
 	}
 
-	s.Hold = NewHoldingList(s)                                              // setup the dependent holding map
-	s.TimeOffset = new(primitives.Timestamp)                                //interfaces.Timestamp(int64(rand.Int63() % int64(time.Microsecond*10)))
-	s.InvalidMessages = make(map[[32]byte]interfaces.IMsg, 0)               //
-	s.ShutdownChan = make(chan int, 1)                                      //Channel to gracefully shut down.
-	s.tickerQueue = make(chan int, 100)                                     //ticks from a clock
-	s.timerMsgQueue = make(chan interfaces.IMsg, 100)                       //incoming eom notifications, used by leaders
-	s.ControlPanelChannel = make(chan DisplayState, 20)                     //
-	s.networkInvalidMsgQueue = make(chan interfaces.IMsg, 100)              //incoming message queue from the network messages
-	s.networkOutMsgQueue = NewNetOutMsgQueue(w, constants.INMSGQUEUE_MED)   //Messages to be broadcast to the network
-	s.inMsgQueue = NewInMsgQueue(w, constants.INMSGQUEUE_HIGH)              //incoming message queue for Factom application messages
-	s.inMsgQueue2 = NewInMsgQueue2(w, constants.INMSGQUEUE_HIGH)            //incoming message queue for Factom application messages
-	s.electionsQueue = NewElectionQueue(w, constants.INMSGQUEUE_HIGH)       //incoming message queue for Factom application messages
-	s.apiQueue = NewAPIQueue(w, constants.INMSGQUEUE_HIGH)                  //incoming message queue from the API
-	s.ackQueue = make(chan interfaces.IMsg, 50)                             //queue of Leadership messages
-	s.msgQueue = make(chan interfaces.IMsg, 50)                             //queue of Follower messages
-	s.prioritizedMsgQueue = make(chan interfaces.IMsg, 50)                  //a prioritized queue of Follower messages (from mmr.go)
+	s.Hold = NewHoldingList(s)                                // setup the dependent holding map
+	s.TimeOffset = new(primitives.Timestamp)                  //interfaces.Timestamp(int64(rand.Int63() % int64(time.Microsecond*10)))
+	s.InvalidMessages = make(map[[32]byte]interfaces.IMsg, 0) //
+	s.ShutdownChan = make(chan int, 1)                        //SubChannel to gracefully shut down.
+	if !EnableLeaderThread {
+		s.tickerQueue = make(chan int, 100)               //ticks from a clock
+		s.timerMsgQueue = make(chan interfaces.IMsg, 100) //incoming eom notifications, used by leaders
+	}
+	//	s.ControlPanelChannel = make(chan DisplayState, 20)                     //
+	s.networkInvalidMsgQueue = make(chan interfaces.IMsg, 100)              //incoming message queue from the network inMessages
+	s.networkOutMsgQueue = NewNetOutMsgQueue(s, constants.INMSGQUEUE_MED)   //Messages to be broadcast to the network
+	s.inMsgQueue = NewInMsgQueue(s, constants.INMSGQUEUE_HIGH)              //incoming message queue for Factom application inMessages
+	s.inMsgQueue2 = NewInMsgQueue2(s, constants.INMSGQUEUE_HIGH)            //incoming message queue for Factom application inMessages
+	s.electionsQueue = NewElectionQueue(s, constants.INMSGQUEUE_HIGH)       //incoming message queue for Factom application inMessages
+	s.apiQueue = NewAPIQueue(s, constants.INMSGQUEUE_HIGH)                  //incoming message queue from the API
+	s.ackQueue = make(chan interfaces.IMsg, 50)                             //queue of Leadership inMessages
+	s.msgQueue = make(chan interfaces.IMsg, 50)                             //queue of Follower inMessages
+	s.prioritizedMsgQueue = make(chan interfaces.IMsg, 50)                  //a prioritized queue of Follower inMessages (from mmr.go)
 	s.MissingEntries = make(chan *MissingEntry, constants.INMSGQUEUE_HIGH)  //Entries I discover are missing from the database
 	s.UpdateEntryHash = make(chan *EntryUpdate, constants.INMSGQUEUE_HIGH)  //Handles entry hashes and updating Commit maps.
 	s.WriteEntry = make(chan interfaces.IEBEntry, constants.INMSGQUEUE_LOW) //Entries to be written to the database

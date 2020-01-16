@@ -184,6 +184,7 @@ type State struct {
 	ResendCnt int
 	ExpireCnt int
 
+	tickerQueue            chan int
 	timerMsgQueue          chan interfaces.IMsg
 	TimeOffset             interfaces.Timestamp
 	MaxTimeOffset          interfaces.Timestamp
@@ -220,10 +221,12 @@ type State struct {
 
 	CorsDomains []string
 	// Server State
-	StartDelay int64 // Time in Milliseconds since the last DBState was applied
-	DBFinished bool
-	RunLeader  bool
-	BootTime   int64 // Time in seconds that we last booted
+	StartDelay   int64 // Time in Milliseconds since the last DBState was applied
+	DBFinished   bool
+	RunLeader    bool
+	BootTime     int64 // Time in seconds that we last booted
+	EOMIssueTime int64
+	EOMSyncEnd   int64
 
 	// Ignore missing messages for a period to allow rebooting a network where your
 	// own messages from the previously executing network can confuse you.
@@ -1794,6 +1797,13 @@ func (s *State) SetPort(port int) {
 
 func (s *State) GetPort() int {
 	return s.PortNumber
+}
+
+func (s *State) TickerQueue() chan int {
+	if EnableLeaderThread {
+		panic("LeaderThreadEnabled")
+	}
+	return s.tickerQueue
 }
 
 func (s *State) TimerMsgQueue() chan interfaces.IMsg {
