@@ -372,6 +372,7 @@ func startServer(w *worker.Thread, node *fnode.FactomNode) {
 	NetworkProcessorNet(w, node)
 	s := node.State
 	w.Run("MsgSort", s.MsgSort)
+
 	w.Run("MsgExecute", s.MsgExecute)
 
 	elections.Run(w, s)
