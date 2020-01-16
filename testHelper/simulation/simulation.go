@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -25,12 +23,28 @@ import (
 	"github.com/FactomProject/factomd/common/primitives"
 	"github.com/FactomProject/factomd/engine"
 	"github.com/FactomProject/factomd/state"
+	"github.com/FactomProject/factomd/worker"
 	"github.com/stretchr/testify/assert"
 )
 
 var par = globals.FactomParams{}
 
 var quit = make(chan struct{})
+
+// expose simulation functions
+var GetFocus = simulation.GetFocus
+var PrintOneStatus = simulation.PrintOneStatus
+var FundWallet = simulation.FundWallet
+var RandomFctAddressPair = simulation.RandomFctAddressPair
+var SendTxn = simulation.SendTxn
+var GetBalance = simulation.GetBalance
+
+// SetupSim takes care of your options, and setting up nodes
+// pass in a string for nodes: 4 Leaders, 3 Audit, 4 Followers: "LLLLAAAFFFF" as the first argument
+// Pass in the Network type ex. "LOCAL" as the second argument
+// It has default but if you want just add it like "map[string]string{"--Other" : "Option"}" as the third argument
+// Pass in t for the testing as the 4th argument
+
 var ExpectedHeight, Leaders, Audits, Followers int
 var startTime, endTime time.Time
 var RanSimTest = false // only run 1 sim test at a time

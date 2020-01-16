@@ -13,6 +13,7 @@ import (
 	//"github.com/FactomProject/factomd/common/factoid/wallet"
 	"encoding/hex"
 	"fmt"
+	simulation2 "github.com/FactomProject/factomd/testHelper/simulation"
 	"testing"
 
 	"github.com/FactomProject/factomd/common/entryBlock"
@@ -200,7 +201,7 @@ func TestCommitEntry(t *testing.T) {
 		Content: encode("Hello World!"),
 	}
 
-	commit, _ := ComposeCommitEntryMsg(pkey, e)
+	commit, _ := simulation2.ComposeCommitEntryMsg(pkey, e)
 
 	assert.True(t, commit.CommitEntry.IsValid())
 	assert.True(t, commit.IsValid())
@@ -222,7 +223,7 @@ func TestRevealEntry(t *testing.T) {
 		Content: encode("Hello World!"),
 	}
 
-	reveal, err := ComposeRevealEntryMsg(pkey, &e)
+	reveal, err := simulation2.ComposeRevealEntryMsg(pkey, &e)
 	assert.Nil(t, err)
 	assert.True(t, reveal.IsValid())
 	//println(reveal.String())
@@ -231,12 +232,12 @@ func TestRevealEntry(t *testing.T) {
 
 func TestAccountHelper(t *testing.T) {
 	fctS := "Fs1d5u3kambHECzarPsXWQTtYyf7womvg9u6kmFDm8F9cv5bSysh"
-	a := AccountFromFctSecret(fctS)
+	a := simulation2.AccountFromFctSecret(fctS)
 	assert.Equal(t, a.FctPriv(), fctS)
 }
 
 func TestChainCommit(t *testing.T) {
-	b := GetBankAccount()
+	b := simulation2.GetBankAccount()
 	id := "92475004e70f41b94750f4a77bf7b430551113b25d3d57169eadca5692bb043d"
 	extids := [][]byte{encode("foo"), encode("bar")}
 
@@ -244,7 +245,7 @@ func TestChainCommit(t *testing.T) {
 	c := factom.NewChain(&e)
 	assert.Equal(t, c.ChainID, id)
 
-	m, err := ComposeChainCommit(b.Priv, c)
+	m, err := simulation2.ComposeChainCommit(b.Priv, c)
 
 	assert.Nil(t, err)
 	assert.True(t, m.CommitChain.IsValid())
@@ -261,10 +262,10 @@ func TestGetName(t *testing.T) {
 }
 
 func TestResetFactomHome(t *testing.T) {
-	s := GetSimTestHome(t)
+	s := simulation2.GetSimTestHome(t)
 	t.Logf("simhome: %v", s)
 
-	h := ResetSimHome(t)
+	h := simulation2.ResetSimHome(t)
 
 	t.Logf("reset home: %v", h)
 	t.Logf("util home: %v", util.GetHomeDir())
