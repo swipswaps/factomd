@@ -9,6 +9,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"github.com/FactomProject/factomd/modules/leader"
 	"os"
 	"reflect"
 	"sync"
@@ -337,11 +338,6 @@ func makeServer(w *worker.Thread, p *globals.FactomParams) (node *fnode.FactomNo
 		initEntryHeight(node.State, p.Sync2)
 		initAnchors(node.State, p.ReparseAnchorChains)
 		echoConfig(node.State, p) // print the config only once
-
-		{ // Leader thread
-			//l := leader.New(node.State)
-			//l.Start(w) // KLUDGE: only running leader on state0
-		}
 	})
 
 	// TODO: Init any settings from the config
