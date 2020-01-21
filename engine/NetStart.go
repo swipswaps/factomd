@@ -9,16 +9,12 @@ import (
 	"encoding/binary"
 	"fmt"
 	"github.com/FactomProject/factomd/modules/leader"
-	controlpanel "github.com/FactomProject/factomd/controlPanel"
 	"os"
 	"reflect"
 	"sync"
 	"time"
 
 	"github.com/FactomProject/factomd/common"
-	"github.com/FactomProject/factomd/modules/debugsettings"
-	"github.com/FactomProject/factomd/simulation"
-
 	"github.com/FactomProject/factomd/common/constants"
 	"github.com/FactomProject/factomd/common/globals"
 	"github.com/FactomProject/factomd/common/messages"
@@ -28,8 +24,10 @@ import (
 	"github.com/FactomProject/factomd/database/databaseOverlay"
 	"github.com/FactomProject/factomd/elections"
 	"github.com/FactomProject/factomd/fnode"
+	"github.com/FactomProject/factomd/modules/debugsettings"
 	"github.com/FactomProject/factomd/p2p"
 	"github.com/FactomProject/factomd/registry"
+	"github.com/FactomProject/factomd/simulation"
 	"github.com/FactomProject/factomd/state"
 	"github.com/FactomProject/factomd/util"
 	"github.com/FactomProject/factomd/worker"
@@ -357,7 +355,6 @@ func makeServer(w *worker.Thread, p *globals.FactomParams) (node *fnode.FactomNo
 	}
 
 	// Election factory was created and passed int to avoid import loop
-	//node.State.BindPublishers() // REVIEW: has this been fully refactored?
 	node.State.Initialize(w, new(electionMsgs.ElectionsFactory))
 	node.State.NameInit(node, node.State.GetFactomNodeName()+"STATE", reflect.TypeOf(node.State).String())
 	node.State.BuildPubRegistry()
@@ -368,12 +365,11 @@ func makeServer(w *worker.Thread, p *globals.FactomParams) (node *fnode.FactomNo
 		initEntryHeight(node.State, p.Sync2)
 		initAnchors(node.State, p.ReparseAnchorChains)
 		echoConfig(node.State, p) // print the config only once
-		// Init settings
 	})
 
 	if state.EnableLeaderThread {
-		l := leader.New(node.State)
-		l.Start(w)
+		leader.New(node.State).Start(w)
+		msgorder.New(node.State.GetFactomNodeName()).Start(w)
 	}
 
 	// TODO: Init any settings from the config
