@@ -14,6 +14,8 @@ type pubSubPaths struct {
 	LeaderMsgIn  string
 	LeaderMsgOut string
 	AuthoritySet string
+	ConnectionAdded   string
+	ConnectionRemoved string
 }
 
 var Path = pubSubPaths{
@@ -25,6 +27,8 @@ var Path = pubSubPaths{
 	LeaderMsgIn:  "leader-msg-in",
 	LeaderMsgOut: "leader-msg-out",
 	AuthoritySet: "authority-set",
+	ConnectionAdded:   "connection-added",
+	ConnectionRemoved: "connection-removed",
 }
 
 type Balance struct {
@@ -62,8 +66,26 @@ type EOM struct {
 	Timestamp interfaces.Timestamp
 }
 
+
 type AuthoritySet struct {
 	LeaderHeight uint32
 	FedServers   []interfaces.IServer
 	AuditServers []interfaces.IServer
+}
+
+type ConnectionChanged struct {
+	IP       string
+	Status   string
+	Duration string
+	Send     string
+	Received string
+	IsOnline bool
+	State    string
+}
+
+type ConnectionAdded struct {
+	ConnectionChanged
+}
+type ConnectionRemoved struct {
+	ConnectionChanged
 }
