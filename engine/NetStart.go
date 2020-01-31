@@ -155,6 +155,7 @@ func NetStart(w *worker.Thread, p *globals.FactomParams, listenToStdin bool) {
 	startNetwork(w, p)
 	startFnodes(w)
 	startWebserver(w)
+	startControlPanel(w)
 	simulation.StartSimControl(w, p.ListenTo, listenToStdin)
 }
 
@@ -205,10 +206,26 @@ func startWebserver(w *worker.Thread) {
 
 	// Start prometheus on port
 	launchPrometheus(9876)
+}
 
-	w.Run(func() {
-		controlPanel.ServeControlPanel(state0.ControlPanelChannel, state0, connectionMetricsChannel, p2pNetwork, Build, state0.FactomNodeName)
-	}, "ControlPanel")
+func startControlPanel(w *worker.Thread) {
+	state0 := fnode.Get(0).State
+	w.Run("controlpanel", func() {
+		controlPanelConfig := &controlpanel.Config{
+			Port:       state0.ControlPanelPort,
+			TLSEnabled: state0.FactomdTLSEnable,
+			CertFile:   state0.FactomdTLSCertFile,
+			KeyFile:    state0.FactomdTLSKeyFile,
+
+			NodeName:   state0.FactomNodeName,
+			BuildNumer: Build,
+			Version:    FactomdVersion,
+
+			CompleteHeight: state0.EntryDBHeightComplete,
+			LeaderHeight:   state0.LLeaderHeight,
+		}
+		controlpanel.New(controlPanelConfig)
+	})
 }
 
 func startNetwork(w *worker.Thread, p *globals.FactomParams) {
@@ -287,6 +304,10 @@ func startNetwork(w *worker.Thread, p *globals.FactomParams) {
 		ConnectionMetricsChannel: connectionMetricsChannel,
 	}
 
+	// start a worker that publishes the connection metrics
+	connectionMetricsPublisher := p2p.NewMetricPublisher(s.FactomNodeName, connectionMetricsChannel)
+	connectionMetricsPublisher.Start(w)
+
 	p2pNetwork = new(p2p.Controller).Initialize(ci)
 	s.NetworkController = p2pNetwork
 	p2pNetwork.NameInit(s, "p2pNetwork", reflect.TypeOf(p2pNetwork).String())
@@ -297,6 +318,7 @@ func startNetwork(w *worker.Thread, p *globals.FactomParams) {
 	p2pProxy.FromNetwork = p2pNetwork.FromNetwork
 	p2pProxy.ToNetwork = p2pNetwork.ToNetwork
 	p2pProxy.StartProxy(w)
+
 }
 
 func printGraphData(filename string, period int) {
@@ -338,6 +360,7 @@ func makeServer(w *worker.Thread, p *globals.FactomParams) (node *fnode.FactomNo
 		initEntryHeight(node.State, p.Sync2)
 		initAnchors(node.State, p.ReparseAnchorChains)
 		echoConfig(node.State, p) // print the config only once
+		// Init settings
 	})
 
 	// TODO: Init any settings from the config
