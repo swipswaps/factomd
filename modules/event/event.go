@@ -3,30 +3,33 @@ package event
 import (
 	"github.com/FactomProject/factomd/common/interfaces"
 	"github.com/FactomProject/factomd/common/primitives"
+	"path"
 )
 
 type pubSubPaths struct {
-	EOM          string
-	Seq          string
-	Directory    string
-	Bank         string
-	LeaderConfig string
-	LeaderMsgIn  string
-	LeaderMsgOut string
+	EOM               string
+	Seq               string
+	Directory         string
+	Bank              string
+	LeaderConfig      string
+	LeaderMsgIn       string
+	LeaderMsgOut      string
 	AuthoritySet string
+	ConnectionMetrics string
 	ConnectionAdded   string
 	ConnectionRemoved string
 }
 
 var Path = pubSubPaths{
-	EOM:          "EOM",
-	Seq:          "seq",
-	Directory:    "directory",
-	Bank:         "bank",
-	LeaderConfig: "leader-config",
-	LeaderMsgIn:  "leader-msg-in",
-	LeaderMsgOut: "leader-msg-out",
+	EOM:               "EOM",
+	Seq:               "seq",
+	Directory:         "directory",
+	Bank:              "bank",
+	LeaderConfig:      "leader-config",
+	LeaderMsgIn:       "leader-msg-in",
+	LeaderMsgOut:      "leader-msg-out",
 	AuthoritySet: "authority-set",
+	ConnectionMetrics: path.Join("connection", "metrics"),
 	ConnectionAdded:   "connection-added",
 	ConnectionRemoved: "connection-removed",
 }
@@ -48,7 +51,7 @@ type DBHT struct {
 	Minute   int
 }
 
-// event created when Ack is crafted by the leader thread
+// event created when Ack is actually sent out
 type Ack struct {
 	Height      uint32
 	MessageHash interfaces.IHash
