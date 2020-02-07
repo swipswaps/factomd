@@ -18,6 +18,7 @@ type pubSubPaths struct {
 	ConnectionMetrics string
 	ConnectionAdded   string
 	ConnectionRemoved string
+	ProcessListInfo   string
 }
 
 var Path = pubSubPaths{
@@ -32,6 +33,7 @@ var Path = pubSubPaths{
 	ConnectionMetrics: path.Join("connection", "metrics"),
 	ConnectionAdded:   "connection-added",
 	ConnectionRemoved: "connection-removed",
+	ProcessListInfo:   "process-list",
 }
 
 type Balance struct {
