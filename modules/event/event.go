@@ -73,6 +73,11 @@ type EOM struct {
 	Timestamp interfaces.Timestamp
 }
 
+type ProcessListInfo struct {
+	ProcessTime interfaces.Timestamp
+	Dump        string
+	PrintMap    string
+}
 
 type AuthoritySet struct {
 	LeaderHeight uint32
