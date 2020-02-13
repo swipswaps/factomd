@@ -19,6 +19,7 @@ type pubSubPaths struct {
 	ConnectionAdded   string
 	ConnectionRemoved string
 	ProcessListInfo   string
+	StateUpdate       string
 }
 
 var Path = pubSubPaths{
@@ -34,6 +35,7 @@ var Path = pubSubPaths{
 	ConnectionAdded:   "connection-added",
 	ConnectionRemoved: "connection-removed",
 	ProcessListInfo:   "process-list",
+	StateUpdate:       "state-update",
 }
 
 type Balance struct {
@@ -93,4 +95,10 @@ type ConnectionAdded struct {
 }
 type ConnectionRemoved struct {
 	ConnectionChanged
+}
+
+type StateUpdate struct {
+	NodeTime     interfaces.Timestamp
+	LeaderHeight uint32
+	Summary      string
 }

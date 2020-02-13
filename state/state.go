@@ -1578,6 +1578,11 @@ entryHashProcessing:
 			break entryHashProcessing
 		}
 	}
+
+	// publish new updated state
+	stateUpdate := s.stateUpdate()
+	s.Pub.StateUpdate.Write(stateUpdate)
+
 	return
 }
 
