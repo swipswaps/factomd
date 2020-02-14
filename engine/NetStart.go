@@ -223,6 +223,9 @@ func startControlPanel(w *worker.Thread) {
 
 			CompleteHeight: state0.EntryDBHeightComplete,
 			LeaderHeight:   state0.LLeaderHeight,
+
+			IdentityChainID: state0.GetIdentityChainID().String(),
+			PublicKey:       state0.GetServerPublicKeyString(),
 		}
 		controlpanel.New(controlPanelConfig)
 	})
