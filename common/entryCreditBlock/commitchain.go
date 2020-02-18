@@ -8,6 +8,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"os"
+	"reflect"
 
 	"github.com/FactomProject/factomd/common/constants"
 	"github.com/FactomProject/factomd/common/interfaces"
@@ -131,7 +132,13 @@ func NewCommitChain() *CommitChain {
 	c := new(CommitChain)
 	c.Init()
 	c.Version = 0
+	c.MilliTime = new(primitives.ByteSlice6)
+	c.ChainIDHash = primitives.NewZeroHash()
+	c.Weld = primitives.NewZeroHash()
+	c.EntryHash = primitives.NewZeroHash()
 	c.Credits = 0
+	c.ECPubKey = new(primitives.ByteSlice32)
+	c.Sig = new(primitives.ByteSlice64)
 	return c
 }
 
@@ -440,4 +447,32 @@ func (c *CommitChain) JSONByte() ([]byte, error) {
 // JSONString returns the json encoded string
 func (c *CommitChain) JSONString() (string, error) {
 	return primitives.EncodeJSONString(c)
+}
+
+func (c *CommitChain) GetVersion() uint8 {
+	return c.Version
+}
+
+func (c *CommitChain) GetMilliTime() *primitives.ByteSlice6 {
+	return c.MilliTime
+}
+
+func (c *CommitChain) GetChainIDHash() interfaces.IHash {
+	return c.ChainIDHash
+}
+
+func (c *CommitChain) GetWeld() interfaces.IHash {
+	return c.Weld
+}
+
+func (c *CommitChain) GetCredits() uint8 {
+	return c.Credits
+}
+
+func (c *CommitChain) GetECPubKey() *primitives.ByteSlice32 {
+	return c.ECPubKey
+}
+
+func (c *CommitChain) GetSig() *primitives.ByteSlice64 {
+	return c.Sig
 }

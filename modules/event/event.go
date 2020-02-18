@@ -7,13 +7,19 @@ import (
 )
 
 type pubSubPaths struct {
-	EOM               string
-	Seq               string
-	Directory         string
-	Bank              string
-	LeaderConfig      string
-	LeaderMsgIn       string
-	LeaderMsgOut      string
+	EOM           string
+	Seq           string
+	Directory     string
+	Bank          string
+	LeaderConfig  string
+	LeaderMsgIn   string
+	LeaderMsgOut  string
+	CommitChain   string
+	CommitEntry   string
+	RevealEntry   string
+	CommitDBState string
+	DBAnchored    string
+	NodeMessage   string
 	AuthoritySet string
 	ConnectionMetrics string
 	ConnectionAdded   string
@@ -23,19 +29,24 @@ type pubSubPaths struct {
 }
 
 var Path = pubSubPaths{
-	EOM:               "EOM",
-	Seq:               "seq",
-	Directory:         "directory",
-	Bank:              "bank",
-	LeaderConfig:      "leader-config",
-	LeaderMsgIn:       "leader-msg-in",
-	LeaderMsgOut:      "leader-msg-out",
-	AuthoritySet: "authority-set",
-	ConnectionMetrics: path.Join("connection", "metrics"),
+	EOM:           "EOM",
+	Seq:           "seq",
+	Directory:     "directory",
+	Bank:          "bank",
+	LeaderConfig:  "leader-config",
+	LeaderMsgIn:   "leader-msg-in",
+	LeaderMsgOut:  "leader-msg-out",
+	CommitChain:   "commit-chain",
+	CommitEntry:   "commit-entry",
+	RevealEntry:   "reveal-entry",
+	CommitDBState: "commit-dbstate",
+	NodeMessage:   "node-message",
+	ConnectionMetrics: path.Join("connection", "metrics"), // REVIEW: pubsub has it's own path maybe should use that
 	ConnectionAdded:   "connection-added",
-	ConnectionRemoved: "connection-removed",
+	ConnectionRemoved: "connection-removed",	
 	ProcessListInfo:   "process-list",
 	StateUpdate:       "state-update",
+	AuthoritySet: "authority-set",
 }
 
 type Balance struct {
@@ -98,8 +109,15 @@ type ConnectionChanged struct {
 type ConnectionAdded struct {
 	ConnectionChanged
 }
+
 type ConnectionRemoved struct {
 	ConnectionChanged
+}
+
+type ProcessListInfo struct {
+	ProcessTime interfaces.Timestamp
+	Dump        string
+	PrintMap    string
 }
 
 type StateUpdate struct {
@@ -108,4 +126,33 @@ type StateUpdate struct {
 	Summary            string
 	IdentitiesDetails  string
 	AuthoritiesDetails string
+}
+
+type CommitChain struct {
+	RequestState RequestState
+	DBHeight     uint32
+	CommitChain  ICommitChain
+}
+
+type CommitEntry struct {
+	RequestState RequestState
+	DBHeight     uint32
+	CommitEntry  ICommitEntry
+}
+
+type RevealEntry struct {
+	RequestState RequestState
+	DBHeight     uint32
+	RevealEntry  IRevealEntry
+	MsgTimestamp interfaces.Timestamp
+}
+
+type DBStateCommit struct {
+	DBHeight uint32
+	DBState  IDBState
+}
+
+type DBAnchored struct {
+	DBHeight     uint32
+	DirBlockInfo interfaces.IDirBlockInfo
 }

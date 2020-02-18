@@ -8,6 +8,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"os"
+	"reflect"
 
 	"github.com/FactomProject/factomd/common/constants"
 	"github.com/FactomProject/factomd/common/interfaces"
@@ -37,19 +38,18 @@ var _ interfaces.ShortInterpretable = (*CommitEntry)(nil)
 var _ interfaces.IECBlockEntry = (*CommitEntry)(nil)
 var _ interfaces.ISignable = (*CommitEntry)(nil)
 
-// Init initializes all nil objects
-func (e *CommitEntry) Init() {
-	if e.MilliTime == nil {
-		e.MilliTime = new(primitives.ByteSlice6)
+func (c *CommitEntry) Init() {
+	if c.MilliTime == nil {
+		c.MilliTime = new(primitives.ByteSlice6)
 	}
-	if e.EntryHash == nil {
-		e.EntryHash = primitives.NewZeroHash()
+	if c.EntryHash == nil {
+		c.EntryHash = primitives.NewZeroHash()
 	}
-	if e.ECPubKey == nil {
-		e.ECPubKey = new(primitives.ByteSlice32)
+	if c.ECPubKey == nil {
+		c.ECPubKey = new(primitives.ByteSlice32)
 	}
-	if e.Sig == nil {
-		e.Sig = new(primitives.ByteSlice64)
+	if c.Sig == nil {
+		c.Sig = new(primitives.ByteSlice64)
 	}
 	/*
 		if e.SigHash == nil {
@@ -58,18 +58,18 @@ func (e *CommitEntry) Init() {
 	*/
 }
 
-// IsSameAs only checks if everything in the item is identical.
+//this function only checks if everything in the item is identical.
 // It does not catch if the private key holder has created a malleated version
-// which is functionally identical in come cases from the protocol perspective,
-// but would fail comparison here
-func (e *CommitEntry) IsSameAs(b interfaces.IECBlockEntry) bool {
-	if e == nil || b == nil {
-		if e == nil && b == nil {
+//which is functionally identical in come cases from the protocol perspective,
+//but would fail comparison here
+func (c *CommitEntry) IsSameAs(b interfaces.IECBlockEntry) bool {
+	if c == nil || b == nil {
+		if c == nil && b == nil {
 			return true
 		}
 		return false
 	}
-	if e.ECID() != b.ECID() {
+	if c.ECID() != b.ECID() {
 		return false
 	}
 
@@ -78,30 +78,29 @@ func (e *CommitEntry) IsSameAs(b interfaces.IECBlockEntry) bool {
 		return false
 	}
 
-	if e.Version != bb.Version {
+	if c.Version != bb.Version {
 		return false
 	}
-	if e.MilliTime.IsSameAs(bb.MilliTime) == false {
+	if c.MilliTime.IsSameAs(bb.MilliTime) == false {
 		return false
 	}
-	if e.EntryHash.IsSameAs(bb.EntryHash) == false {
+	if c.EntryHash.IsSameAs(bb.EntryHash) == false {
 		return false
 	}
-	if e.Credits != bb.Credits {
+	if c.Credits != bb.Credits {
 		return false
 	}
-	if e.ECPubKey.IsSameAs(bb.ECPubKey) == false {
+	if c.ECPubKey.IsSameAs(bb.ECPubKey) == false {
 		return false
 	}
-	if e.Sig.IsSameAs(bb.Sig) == false {
+	if c.Sig.IsSameAs(bb.Sig) == false {
 		return false
 	}
 
 	return true
 }
 
-// String returns this object as a string
-func (e *CommitEntry) String() string {
+func (c *CommitEntry) String() string {
 	//var out primitives.Buffer
 	//out.WriteString(fmt.Sprintf(" %s\n", "CommitEntry"))
 	//out.WriteString(fmt.Sprintf("   %-20s %d\n", "Version", e.Version))
@@ -112,7 +111,7 @@ func (e *CommitEntry) String() string {
 	//out.WriteString(fmt.Sprintf("   %-20s %x\n", "Sig", e.Sig[:3]))
 	//
 	//return (string)(out.DeepCopyBytes())
-	return fmt.Sprintf("ehash[%x] Credits[%d] PublicKey[%x] Sig[%x]", e.EntryHash.Bytes()[:3], e.Credits, e.ECPubKey[:3], e.Sig[:3])
+	return fmt.Sprintf("ehash[%x] Credits[%d] PublicKey[%x] Sig[%x]", c.EntryHash.Bytes()[:3], c.Credits, c.ECPubKey[:3], c.Sig[:3])
 }
 
 // GetEntryHash returns the entry's hash
@@ -133,7 +132,12 @@ func NewCommitEntry() *CommitEntry {
 
 // Hash marshals the object and computes the sha
 func (e *CommitEntry) Hash() (rval interfaces.IHash) {
-	defer func() { rval = primitives.CheckNil(rval, "CommitEntry.Hash") }()
+	defer func() {
+		if rval != nil && reflect.ValueOf(rval).IsNil() {
+			rval = nil // convert an interface that is nil to a nil interface
+			primitives.LogNilHashBug("CommitEntry.Hash() saw an interface that was nil")
+		}
+	}()
 
 	bin, err := e.MarshalBinary()
 	if err != nil {

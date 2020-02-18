@@ -71,7 +71,6 @@ type FactomdConfig struct {
 		// Timout and Limit for outstanding missing DBState requests
 		RequestTimeout int // timeout in seconds
 		RequestLimit   int
-
 		CorsDomains string
 
 		ChangeAcksHeight uint32
@@ -187,8 +186,9 @@ FactomdRpcPass                        = ""
 
 ; RequestTimeout is the amount of time in seconds before a pending request for a
 ; missing DBState is considered too old and the state is put back into the
-; missing states list. 
-RequestTimeout						= 30
+; missing states list. If RequestTimout is not set or is set to 0 it will become
+; 1/10th of DirectoryBlockInSeconds
+;RequestTimeout						= 30
 ; RequestLimit is the maximum number of pending requests for missing states.
 ; factomd will stop making DBStateMissing requests until current requests are
 ; moved out of the waiting list
@@ -249,7 +249,7 @@ EventReceiverPort                     = 8040
 EventFormat                           = protobuf
 EventReplayDuringStartup              = false
 EventSendStateChange                  = false
-EventBroadcastContent                 = once 
+EventBroadcastContent                 = once
 `
 
 func (s *FactomdConfig) String() string {

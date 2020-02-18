@@ -96,7 +96,6 @@ func init() {
 	flag.BoolVar(&p.EventSendStateChange, "eventsendstatechange", false, "Send only StateChange events when the state of an entity changes instead of the full entity; default false")
 	flag.StringVar(&p.EventBroadcastContent, "eventbroadcastcontent", "", "Settings for including content in the event messages always|once|never; default once")
 	flag.BoolVar(&p.EventReplayDuringStartup, "eventreplayduringstartup", false, "Replay events since the last save state during startup; default false")
-
 }
 
 func ParseCmdLine(args []string) *FactomParams {

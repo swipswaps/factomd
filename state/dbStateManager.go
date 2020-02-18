@@ -1676,6 +1676,7 @@ func (list *DBStateList) UpdateState() (progress bool) {
 		p = list.SignDB(d)
 		progress = p || progress
 
+		wasSavedBefore := d.Saved
 		p = list.SaveDBStateToDB(d)
 		progress = p || progress
 
@@ -1685,6 +1686,14 @@ func (list *DBStateList) UpdateState() (progress bool) {
 		// remember the last saved block
 		if d.Saved {
 			saved = i
+		}
+
+		if progress && d.Saved && d.Signed && !wasSavedBefore {
+			dbStateCommitEvent := &event.DBStateCommit{
+				DBHeight: d.DirectoryBlock.GetDatabaseHeight(),
+				DBState:  d,
+			}
+			s.Pub.CommitDBState.Write(dbStateCommitEvent)
 		}
 
 		// only process one block past the last saved block

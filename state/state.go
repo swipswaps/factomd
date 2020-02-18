@@ -10,6 +10,8 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"github.com/FactomProject/factomd/pubsub"
+	"github.com/FactomProject/factomd/pubsub/pubregistry"
 	"os"
 	"reflect"
 	"regexp"
@@ -20,6 +22,7 @@ import (
 
 	"github.com/FactomProject/factomd/common"
 	"github.com/FactomProject/factomd/common/constants/runstate"
+	"github.com/FactomProject/factomd/modules/logging"
 	"github.com/FactomProject/factomd/queue"
 
 	"github.com/FactomProject/factomd/activations"
@@ -111,6 +114,8 @@ type StateConfig struct {
 type State struct {
 	common.Name
 	StateConfig
+	logging           *logging.LayerLogger
+	Pub               *pubregistry.PubRegistry // Publisher hooks for this vm
 	RunState          runstate.RunState
 	NetworkController *p2p.Controller
 	Salt              interfaces.IHash
@@ -197,9 +202,6 @@ type State struct {
 	ackQueue               chan interfaces.IMsg
 	msgQueue               chan interfaces.IMsg
 	dataQueue              chan interfaces.IMsg
-	// prioritizedMsgQueue contains messages we know we need for consensus. (missing from processlist)
-	//		Currently messages from MMR handling can be put in here to fast track
-	//		them to the front.
 	prioritizedMsgQueue chan interfaces.IMsg
 
 	ShutdownChan chan int // For gracefully halting Factom
@@ -380,7 +382,6 @@ type State struct {
 	WaitForEntries  bool
 	UpdateEntryHash chan *EntryUpdate // Channel for updating entry Hashes tracking (repeats and such)
 	WriteEntry      chan interfaces.IEBEntry
-
 	// MessageTally causes the node to keep track of (and display) running totals of each
 	// type of message received during the tally interval
 	MessageTally           bool
