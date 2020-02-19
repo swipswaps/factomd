@@ -121,19 +121,12 @@ runLoop:
 			}
 		case v := <-h.MovedToHeight.Updates:
 			evt := v.(*event.DBHT)
-
-			if evt.Minute == 10 {
-				continue // skip min 10
+			if ! h.DBHT.MinuteChanged(evt) {
+				continue runLoop
 			}
-
-			if h.DBHT.Minute == evt.Minute && h.DBHT.DBHeight == evt.DBHeight {
-				continue // skip duplicates
-			}
-
-			h.DBHT = evt
-
+			h.DBHT = evt // save the new dbht
 			// TODO: send UnAcked messages to leader
-			continue runLoop
+
 		case <-h.ctx.Done():
 			return
 		}

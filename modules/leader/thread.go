@@ -156,10 +156,7 @@ func (l *Leader) waitForNextMinute() (min int, ok bool) {
 			evt := v.(*event.DBHT)
 			log.LogPrintf(l.logfile, "DBHT: %v", evt)
 
-			if evt.Minute == 10 {
-				continue
-			}
-			if l.DBHT.Minute == evt.Minute && l.DBHT.DBHeight == evt.DBHeight {
+			if ! l.DBHT.MinuteChanged(evt) {
 				continue
 			}
 
