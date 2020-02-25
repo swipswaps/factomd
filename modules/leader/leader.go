@@ -24,15 +24,15 @@ type Leader struct {
 }
 
 // initialize the leader event aggregate
-func New(s *state.State) *Leader {
+func New(s state.LeaderConfig) *Leader {
 	l := new(Leader)
 	l.VMIndex = s.LeaderVMIndex
-	l.logfile = strings.ToLower(s.GetFactomNodeName()) + "_leader"
+	l.logfile = strings.ToLower(s.FactomNodeName) + "_leader"
 	l.eomTicker = make(chan interface{})
 
 	l.Events = &Events{
 		Config: &event.LeaderConfig{
-			NodeName:           s.GetFactomNodeName(),
+			NodeName:           s.FactomNodeName,
 			Salt:               s.Salt,
 			IdentityChainID:    s.IdentityChainID,
 			ServerPrivKey:      s.ServerPrivKey,

@@ -1,145 +1,83 @@
 package msgorder
 
 import (
-	"context"
 	"github.com/FactomProject/factomd/common"
 	"github.com/FactomProject/factomd/common/constants"
 	"github.com/FactomProject/factomd/common/interfaces"
-	"github.com/FactomProject/factomd/modules/event"
-	"github.com/FactomProject/factomd/modules/logging"
-	"github.com/FactomProject/factomd/pubsub"
-	"github.com/FactomProject/factomd/state"
-	"github.com/FactomProject/factomd/worker"
+	"github.com/FactomProject/factomd/common/messages"
 )
 
-var GetFedServerIndexHash = state.GetFedServerIndexHash
-
-type LogData = logging.LogData
-
-type Handler struct {
-	Pub
-	Sub
-	*Events
-	ctx    context.Context         // manage thread context
-	cancel context.CancelFunc      // thread cancel
-	log    func(data LogData) bool //logger hook
+type ackPair struct {
+	msg interfaces.IMsg
+	ack interfaces.IMsg
 }
 
-func newLogger(nodeName string) *logging.ModuleLogger {
-	log := logging.NewModuleLoggerLogger(
-		logging.NewLayerLogger(
-			logging.NewSequenceLogger(
-				logging.NewFileLogger(".")),
-			map[string]string{"thread": nodeName},
-		), "msgorder.txt")
-
-	log.AddNameField("logname", logging.Formatter("%s"), "unknown_log")
-	log.AddPrintField("msg", logging.Formatter("%s"), "MSG")
-	return log
+type OrderedMessageList struct {
+	common.Name
+	PairList []*ackPair
+	AckList  map[[32]byte]interfaces.IMsg
+	MsgList  map[[32]byte]interfaces.IMsg
 }
 
-func New(nodeName string) *Handler {
-	v := new(Handler)
-	v.log = newLogger(nodeName).Log
-
-	v.Events = &Events{
-		DBHT: &event.DBHT{
-			DBHeight: 0,
-			Minute:   0,
-		},
-		Ack: nil,
-		Config: &event.LeaderConfig{
-			NodeName: nodeName,
-		}, // FIXME should use pubsub.Config
-	}
-	return v
+func NewOrderedMessageList() *OrderedMessageList {
+	l := new(OrderedMessageList)
+	// TODO: we likely want this data structure to show up in the Global Object Hierarchy
+	// so eventually will need to accept a parent NamedObject
+	//l.NameInit(parent, "OrderedMessageList", reflect.TypeOf(l).String())
+	l.AckList = make(map[[32]byte]interfaces.IMsg)
+	l.MsgList = make(map[[32]byte]interfaces.IMsg)
+	l.PairList = make([]*ackPair,0)
+	return l
 }
 
-type Pub struct {
-	UnAck pubsub.IPublisher
-}
+// match msg/ack pairs as they arrive
+func (ml *OrderedMessageList) Add(msg interfaces.IMsg) (matchedPair *ackPair) {
+	var h [32]byte
 
-// create and start all publishers
-func (p *Pub) Init(nodeName string) {
-	p.UnAck = pubsub.PubFactory.Threaded(100).Publish(
-		pubsub.GetPath(nodeName, event.Path.UnAckMsgs),
-	)
-	go p.UnAck.Start()
-}
-
-type Sub struct {
-	MsgInput      *pubsub.SubChannel
-	MovedToHeight *pubsub.SubChannel
-}
-
-// Create all subscribers
-func (s *Sub) Init() {
-	s.MovedToHeight = pubsub.SubFactory.Channel(1000)
-	s.MsgInput = pubsub.SubFactory.Channel(1000)
-}
-
-// start subscriptions
-func (s *Sub) Start(nodeName string) {
-	s.MovedToHeight.Subscribe(pubsub.GetPath(nodeName, event.Path.DBHT))
-	s.MsgInput.Subscribe(pubsub.GetPath(nodeName, event.Path.BMV))
-}
-
-type Events struct {
-	*event.DBHT                     // from move-to-ht
-	*event.Ack                      // record of last sent ack by leader
-	Config      *event.LeaderConfig // FIXME: use pubsub.Config obj
-}
-
-func (h *Handler) Start(w *worker.Thread) {
-	w.Spawn("MsgOrderThread", func(w *worker.Thread) {
-		w.OnReady(func() {
-			h.Sub.Start(h.Config.NodeName)
-		})
-		w.OnRun(h.Run)
-		w.OnExit(func() {
-			h.Pub.UnAck.Close()
-			h.cancel()
-		})
-		h.Pub.Init(h.Config.NodeName)
-		h.Sub.Init()
-	})
-}
-
-func (h *Handler) Run() {
-	h.ctx, h.cancel = context.WithCancel(context.Background())
-
-runLoop:
-	for {
-		select {
-		case v := <-h.MsgInput.Updates:
-			m := v.(interfaces.IMsg)
-			switch {
-			case constants.NeedsAck(m.Type()):
-				h.log(LogData{"msg": m}) // track commit reveal
-			case m.Type() == constants.ACK_MSG:
-				h.log(LogData{"msg": m}) // track matches
+	// REVIEW: do we need to account for duplicates here?
+	// or is that covered as part of BSV - basic message validation
+	if msg.Type() == constants.ACK_MSG {
+		h = msg.(*messages.Ack).MessageHash.Fixed()
+		_, foundAck := ml.AckList[h]
+		targetMsg, foundMsg := ml.MsgList[h]
+		if !foundAck {
+			ml.AckList[h] = msg
+			if foundMsg {
+				matchedPair = &ackPair{msg: targetMsg, ack: msg}
+				ml.PairList = append(ml.PairList, matchedPair)
 			}
-		case v := <-h.MovedToHeight.Updates:
-			evt := v.(*event.DBHT)
-			if ! h.DBHT.MinuteChanged(evt) {
-				continue runLoop
+		}
+	} else if constants.NeedsAck(msg.Type()) {
+		h = msg.GetMsgHash().Fixed()
+		targetAck, foundAck := ml.AckList[h]
+		_, foundMsg := ml.MsgList[h]
+		if ! foundMsg {
+			ml.MsgList[h] = msg
+			if foundAck {
+				matchedPair = &ackPair{msg: msg, ack: targetAck}
+				ml.PairList = append(ml.PairList, matchedPair)
 			}
-			h.DBHT = evt // save the new dbht
-			// TODO: send UnAcked messages to leader
-
-		case <-h.ctx.Done():
-			return
 		}
 	}
+	return matchedPair
 }
 
-type heldMessage struct {
-	dependentHash [32]byte
-	offset        int
-}
+/*
+// get and remove the list of dependent message for a hash
+func (ml *OrderedMessageList) Get(h [32]byte) []interfaces.IMsg {
+	rval := ml.list[h]
+	delete(ml.list, h)
 
-type HoldingList struct {
-	common.Name
-	holding    map[[32]byte][]interfaces.IMsg
-	dependents map[[32]byte]heldMessage // used to avoid duplicate entries & track position in holding
+	// delete all the individual inMessages from the list
+	for _, msg := range rval {
+		if msg == nil {
+			continue
+		} else {
+			//ml.s.LogMessage("DependentHolding", fmt.Sprintf("delete[%x]", h[:6]), msg)
+			//ml.metric(msg).Dec()
+			delete(ml.dependents, msg.GetMsgHash().Fixed())
+		}
+	}
+	return rval
 }
+ */

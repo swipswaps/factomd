@@ -339,7 +339,7 @@ func makeServer(w *worker.Thread, p *globals.FactomParams) (node *fnode.FactomNo
 	})
 
 	if state.EnableLeaderThread {
-		leader.New(node.State).Start(w)
+		leader.New(node.State.StateConfig.LeaderConfig).Start(w)
 		msgorder.New(node.State.GetFactomNodeName()).Start(w)
 	}
 

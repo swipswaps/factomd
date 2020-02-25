@@ -10,13 +10,13 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"github.com/FactomProject/factomd/common"
 	"os"
 	"reflect"
 	"regexp"
 	"sync"
 	"time"
 
-	"github.com/FactomProject/factomd/common"
 	"github.com/FactomProject/factomd/common/constants/runstate"
 	"github.com/FactomProject/factomd/modules/logging"
 	"github.com/FactomProject/factomd/queue"
@@ -37,8 +37,22 @@ import (
 	"github.com/FactomProject/factomd/util/atomic"
 )
 
+// parameters used to initialize leader thread
+type LeaderConfig struct {
+	FactomNodeName          string
+	Salt              interfaces.IHash
+	IdentityChainID interfaces.IHash // If this node has an identity, this is it
+	ServerPrivKey         *primitives.PrivateKey
+	ServerPubKey          *primitives.PublicKey
+	DirectoryBlockInSeconds int
+	DBHeightAtBoot uint32
+	LLeaderHeight   uint32
+	LeaderVMIndex   int
+}
+
 // loaded directly from factomParams
 type StateConfig struct {
+	LeaderConfig
 	CheckChainHeads struct {
 		CheckChainHeads bool
 		Fix             bool
@@ -47,13 +61,11 @@ type StateConfig struct {
 	ControlPanelPort        int
 	ControlPanelSetting     int
 	DBType                  string
-	DirectoryBlockInSeconds int
 	DropRate                int
 	FactomdLocations        string
 	FactomdTLSCertFile      string
 	FactomdTLSEnable        bool
 	FactomdTLSKeyFile       string
-	FactomNodeName          string
 	FastSaveRate            int
 	FaultTimeout            int
 	LeaderTimestamp         interfaces.Timestamp
@@ -107,7 +119,6 @@ type State struct {
 	Pub               // Publisher hooks
 	RunState          runstate.RunState
 	NetworkController *p2p.Controller
-	Salt              interfaces.IHash
 	Cfg               interfaces.IFactomConfig
 	ConfigFilePath    string // $HOME/.factom/m2/factomd.conf by default
 
@@ -127,7 +138,6 @@ type State struct {
 	CrossReplay          *CrossReplayFilter
 	Delay                int64 // Simulation delays sending inMessages this many milliseconds
 
-	IdentityChainID interfaces.IHash // If this node has an identity, this is it
 	//Identities      []*Identity      // Identities of all servers in management chain
 	// Authorities          []*Authority     // Identities of all servers in management chain
 	AuthorityServerCount int // number of federated or audit servers allowed
@@ -196,8 +206,6 @@ type State struct {
 
 	ShutdownChan chan int // For gracefully halting Factom
 
-	ServerPrivKey         *primitives.PrivateKey
-	ServerPubKey          *primitives.PublicKey
 	serverPendingPrivKeys []*primitives.PrivateKey
 	serverPendingPubKeys  []*primitives.PublicKey
 
@@ -216,13 +224,10 @@ type State struct {
 	IgnoreDone    bool
 	IgnoreMissing bool
 
-	LLeaderHeight   uint32
 	Leader          bool
-	LeaderVMIndex   int
 	LeaderPL        *ProcessList
 	PLProcessHeight uint32
 	// Height cutoff where no missing inMessages below this height
-	DBHeightAtBoot uint32
 	CurrentMinute  int
 
 	// These are the start times for blocks and minutes
