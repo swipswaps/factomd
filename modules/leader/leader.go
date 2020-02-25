@@ -7,7 +7,7 @@ import (
 	"github.com/FactomProject/factomd/common/messages"
 	"github.com/FactomProject/factomd/common/primitives"
 	"github.com/FactomProject/factomd/log"
-	"github.com/FactomProject/factomd/modules/events"
+	"github.com/FactomProject/factomd/modules/event"
 	"github.com/FactomProject/factomd/state"
 	"strings"
 )
@@ -24,15 +24,15 @@ type Leader struct {
 }
 
 // initialize the leader event aggregate
-func New(s *state.State) *Leader {
+func New(s state.LeaderConfig) *Leader {
 	l := new(Leader)
 	l.VMIndex = s.LeaderVMIndex
-	l.logfile = strings.ToLower(s.GetFactomNodeName()) + "_leader"
+	l.logfile = strings.ToLower(s.FactomNodeName) + "_leader"
 	l.eomTicker = make(chan interface{})
 
 	l.Events = &Events{
 		Config: &events.LeaderConfig{
-			NodeName:           s.GetFactomNodeName(),
+			NodeName:           s.FactomNodeName,
 			Salt:               s.Salt,
 			IdentityChainID:    s.IdentityChainID,
 			ServerPrivKey:      s.ServerPrivKey,
