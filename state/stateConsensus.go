@@ -13,8 +13,6 @@ import (
 	"sort"
 	"time"
 
-	"github.com/FactomProject/factomd/modules/event"
-
 	"github.com/FactomProject/factomd/common/constants"
 	"github.com/FactomProject/factomd/common/entryBlock"
 	"github.com/FactomProject/factomd/common/entryCreditBlock"
@@ -25,7 +23,6 @@ import (
 	"github.com/FactomProject/factomd/common/primitives"
 	"github.com/FactomProject/factomd/log"
 	"github.com/FactomProject/factomd/modules/event"
-	"github.com/FactomProject/factomd/modules/logging"
 	"github.com/FactomProject/factomd/util"
 	"github.com/FactomProject/factomd/util/atomic"
 
@@ -35,7 +32,6 @@ import (
 
 // consenLogger is the general logger for all consensus related logs. You can add additional fields,
 // or create more context loggers off of this
-var consenLogger = packageLogger.WithFields(log.Fields{"subpack": "consensus"})
 
 var _ = fmt.Print
 var _ = (*hash.Hash32)(nil)

@@ -7,6 +7,7 @@ package state
 import (
 	"fmt"
 	"github.com/FactomProject/factomd/common/messages"
+	"github.com/FactomProject/factomd/modules/events"
 	"time"
 
 	"github.com/FactomProject/factomd/modules/event"
@@ -17,7 +18,6 @@ import (
 	"github.com/FactomProject/factomd/common/interfaces"
 	"github.com/FactomProject/factomd/common/messages"
 	llog "github.com/FactomProject/factomd/log"
-	"github.com/FactomProject/factomd/modules/event"
 	"github.com/FactomProject/factomd/pubsub"
 	"github.com/FactomProject/factomd/util/atomic"
 	"github.com/FactomProject/factomd/worker"
