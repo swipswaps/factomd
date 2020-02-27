@@ -13,6 +13,14 @@ import (
 	"github.com/FactomProject/factomd/worker"
 )
 
+type Handler struct {
+	Pub
+	Sub
+	*Leader
+	ctx    context.Context    // manage thread context
+	cancel context.CancelFunc // thread cancel
+}
+
 type Pub struct {
 	MsgOut pubsub.IPublisher
 }
@@ -106,110 +114,115 @@ type Events struct {
 	*events.AuthoritySet                     //
 }
 
-func (l *Leader) Start(w *worker.Thread) {
+func (h *Handler) sendOut(msg interfaces.IMsg) {
+	log.LogMessage(h.logfile, "sendout", msg)
+	h.Pub.MsgOut.Write(msg)
+}
+
+func (h *Handler) Start(w *worker.Thread) {
 	if !state.EnableLeaderThread {
 		panic("LeaderThreadDisabled")
 	}
 
 	w.Spawn("LeaderThread", func(w *worker.Thread) {
-		l.ctx, l.cancel = context.WithCancel(context.Background())
+		h.ctx, h.cancel = context.WithCancel(context.Background())
 		w.OnReady(func() {
-			l.Sub.Start(l.Config.NodeName)
+			h.Sub.Start(h.Config.NodeName)
 		})
-		w.OnRun(l.Run)
+		w.OnRun(h.Run)
 		w.OnExit(func() {
-			l.Pub.MsgOut.Close()
-			l.cancel()
+			h.Pub.MsgOut.Close()
+			h.cancel()
 		})
-		l.Pub.Init(l.Config.NodeName)
-		l.Sub.Init()
+		h.Pub.Init(h.Config.NodeName)
+		h.Sub.Init()
 	})
 }
 
-func (l *Leader) processMin() (ok bool) {
+func (h *Handler) processMin() (ok bool) {
 	go func() {
-		time.Sleep(time.Second * time.Duration(l.Config.BlocktimeInSeconds/10))
-		l.eomTicker <- true
+		time.Sleep(time.Second * time.Duration(h.Config.BlocktimeInSeconds/10))
+		h.eomTicker <- true
 	}()
 
 	for {
 		select {
-		case v := <-l.Sub.LeaderConfig.Updates:
+		case v := <-h.Sub.LeaderConfig.Updates:
 			l.Config = v.(*events.LeaderConfig)
-		case v := <-l.MsgInput.Updates:
+		case v := <-h.MsgInput.Updates:
 			m := v.(interfaces.IMsg)
 			if constants.NeedsAck(m.Type()) {
-				log.LogMessage(l.logfile, "msgIn ", m)
-				l.sendAck(m)
+				log.LogMessage(h.logfile, "msgIn ", m)
+				h.sendAck(m)
 			}
-		case <-l.eomTicker:
-			log.LogPrintf(l.logfile, "Ticker:")
+		case <-h.eomTicker:
+			log.LogPrintf(h.logfile, "Ticker:")
 			return true
-		case <-l.ctx.Done():
+		case <-h.ctx.Done():
 			return false
 		}
 	}
 }
 
-func (l *Leader) waitForNextMinute() (min int, ok bool) {
+func (h *Handler) waitForNextMinute() (min int, ok bool) {
 	for {
 		select {
-		case v := <-l.MovedToHeight.Updates:
+		case v := <-h.MovedToHeight.Updates:
 			evt := v.(*events.DBHT)
-			log.LogPrintf(l.logfile, "DBHT: %v", evt)
+			log.LogPrintf(h.logfile, "DBHT: %v", evt)
 
-			if ! l.DBHT.MinuteChanged(evt) {
+			if !h.DBHT.MinuteChanged(evt) {
 				continue
 			}
 
-			l.DBHT = evt
-			return l.DBHT.Minute, true
-		case <-l.ctx.Done():
+			h.DBHT = evt
+			return h.DBHT.Minute, true
+		case <-h.ctx.Done():
 			return -1, false
 		}
 	}
 }
 
 // TODO: refactor to only get a single Directory event
-func (l *Leader) WaitForDBlockCreated() (ok bool) {
+func (h *Handler) WaitForDBlockCreated() (ok bool) {
 	for { // wait on a new (unique) directory event
 		select {
-		case v := <-l.Sub.DBlockCreated.Updates:
-			evt := v.(*events.Directory)
-			if l.Directory != nil && evt.DBHeight == l.Directory.DBHeight {
-				log.LogPrintf(l.logfile, "DUP Directory: %v", v)
+		case v := <-h.Sub.DBlockCreated.Updates:
+			evt := v.(*event.Directory)
+			if h.Directory != nil && evt.DBHeight == h.Directory.DBHeight {
+				log.LogPrintf(h.logfile, "DUP Directory: %v", v)
 				continue
 			} else {
-				log.LogPrintf(l.logfile, "Directory: %v", v)
+				log.LogPrintf(h.logfile, "Directory: %v", v)
 			}
-			l.Directory = v.(*events.Directory)
+			h.Directory = v.(*events.Directory)
 			return true
-		case <-l.ctx.Done():
+		case <-h.ctx.Done():
 			return false
 		}
 	}
 }
 
-func (l *Leader) WaitForBalanceChanged() (ok bool) {
+func (h *Handler) WaitForBalanceChanged() (ok bool) {
 	select {
-	case v := <-l.Sub.BalanceChanged.Updates:
-		l.Balance = v.(*event.Balance)
-		log.LogPrintf(l.logfile, "BalChange: %v", v)
+	case v := <-h.Sub.BalanceChanged.Updates:
+		h.Balance = v.(*event.Balance)
+		log.LogPrintf(h.logfile, "BalChange: %v", v)
 		return true
-	case <-l.exit:
+	case <-h.ctx.Done():
 		return false
 	}
 }
 
 // get latest AuthoritySet event data
 // and compare w/ leader config
-func (l *Leader) currentAuthority() (isLeader bool, index int) {
-	evt := l.Events.AuthoritySet
+func (h *Handler) currentAuthority() (isLeader bool, index int) {
+	evt := h.Events.AuthoritySet
 
 readLatestAuthSet:
 	for {
 		select {
-		case v := <-l.Sub.AuthoritySet.Updates:
+		case v := <-h.Sub.AuthoritySet.Updates:
 			{
 				evt = v.(*events.AuthoritySet)
 			}
@@ -221,74 +234,75 @@ readLatestAuthSet:
 		}
 	}
 
-	return GetFedServerIndexHash(l.Events.AuthoritySet.FedServers, l.Config.IdentityChainID)
+	return GetFedServerIndexHash(h.Events.AuthoritySet.FedServers, h.Config.IdentityChainID)
 }
 
 // wait to become leader (possibly forever for followers)
-func (l *Leader) WaitForAuthority() (isLeader bool) {
+func (h *Handler) WaitForAuthority() (isLeader bool) {
 	// REVIEW: do we need to check block ht?
-	log.LogPrintf(l.logfile, "WaitForAuthority %v ", l.Events.AuthoritySet.LeaderHeight)
+	log.LogPrintf(h.logfile, "WaitForAuthority %v ", h.Events.AuthoritySet.LeaderHeight)
 
 	defer func() {
 		if isLeader {
-			l.Sub.SetLeaderMode(l.Config.NodeName)
-			log.LogPrintf(l.logfile, "GotAuthority %v ", l.Events.AuthoritySet.LeaderHeight)
+			h.Sub.SetLeaderMode(h.Config.NodeName)
+			log.LogPrintf(h.logfile, "GotAuthority %v ", h.Events.AuthoritySet.LeaderHeight)
 		}
 	}()
 
 	for {
 		select {
-		case v := <-l.Sub.LeaderConfig.Updates:
-			l.Config = v.(*events.LeaderConfig)
-		case v := <-l.Sub.AuthoritySet.Updates:
-			l.Events.AuthoritySet = v.(*events.AuthoritySet)
-		case <-l.ctx.Done():
+		case v := <-h.Sub.LeaderConfig.Updates:
+			h.Config = v.(*event.LeaderConfig)
+		case v := <-h.Sub.AuthoritySet.Updates:
+			h.Events.AuthoritySet = v.(*event.AuthoritySet)
+		case <-h.ctx.Done():
 			return false
 		}
-		if isAuthority, index := l.currentAuthority(); isAuthority {
-			l.VMIndex = index
+		if isAuthority, index := h.currentAuthority(); isAuthority {
+			h.VMIndex = index
 			return true
 		}
 	}
 }
 
-func (l *Leader) waitForNewBlock() (stillWaiting bool) {
-	if min, ok := l.waitForNextMinute(); !ok {
+func (h *Handler) waitForNewBlock() (ok bool) {
+	if min, done := h.waitForNextMinute(); !done {
 		return false
 	} else {
 		return min != 0
 	}
 }
 
-func (l *Leader) Run() {
+func (h *Handler) Run() {
 	// TODO: wait until after boot height
 	// ignore these events during DB loading
 	l.waitForNextMinute()
+	l.ctx, l.cancel = context.WithCancel(context.Background())
 
 blockLoop:
 	for { //blockLoop
 		ok := worker.RunSteps(
-			l.WaitForAuthority,
-			l.WaitForBalanceChanged,
-			l.WaitForDBlockCreated,
+			h.WaitForAuthority,
+			h.WaitForBalanceChanged,
+			h.WaitForDBlockCreated,
 		)
 		if !ok {
 			break blockLoop
 		} else {
-			l.sendDBSig()
+			h.sendDBSig()
 		}
-		log.LogPrintf(l.logfile, "MinLoopStart: %v", true)
+		log.LogPrintf(h.logfile, "MinLoopStart: %v", true)
 	minLoop:
 		for { // could be counted 1..9 to account for min
 			ok := worker.RunSteps(
-				l.processMin,
-				l.sendEOM,
-				l.waitForNewBlock,
+				h.processMin,
+				h.sendEOM,
+				h.waitForNewBlock,
 			)
 			if !ok {
 				break minLoop
 			}
 		}
-		log.LogPrintf(l.logfile, "MinLoopEnd: %v", true)
+		log.LogPrintf(h.logfile, "MinLoopEnd: %v", true)
 	}
 }

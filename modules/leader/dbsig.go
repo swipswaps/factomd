@@ -5,8 +5,8 @@ import (
 	"github.com/FactomProject/factomd/common/messages"
 )
 
+// create new DBsig and Ack
 func (l *Leader) createDBSig() (interfaces.IMsg, interfaces.IMsg) {
-
 	dbs := new(messages.DirectoryBlockSignature)
 	dbs.DirectoryBlockHeader = l.Directory.DirectoryBlockHeader
 	dbs.ServerIdentityChainID = l.Config.IdentityChainID
@@ -25,6 +25,7 @@ func (l *Leader) createDBSig() (interfaces.IMsg, interfaces.IMsg) {
 	return dbs, ack
 }
 
+// send out new DBsig and Ack
 func (l *Leader) sendDBSig() {
 	l.Ack = nil // reset last known Ack
 	dbs, ack := l.createDBSig()

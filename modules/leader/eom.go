@@ -35,6 +35,7 @@ func (l *Leader) createEOM() (eom *messages.EOM, ack interfaces.IMsg) {
 	return eom, ack
 }
 
+// send new EOM
 func (l *Leader) sendEOM() bool {
 	ack, eom := l.createEOM()
 	l.sendOut(ack)
