@@ -8,8 +8,12 @@ import (
 )
 
 type ackPair struct {
-	msg interfaces.IMsg
-	ack interfaces.IMsg
+	Msg interfaces.IMsg
+	Ack interfaces.IMsg
+}
+
+func (ap *ackPair) Complete() bool {
+	return ap.Ack != nil && ap.Msg != nil
 }
 
 type OrderedMessageList struct {
@@ -26,58 +30,55 @@ func NewOrderedMessageList() *OrderedMessageList {
 	//l.NameInit(parent, "OrderedMessageList", reflect.TypeOf(l).String())
 	l.AckList = make(map[[32]byte]interfaces.IMsg)
 	l.MsgList = make(map[[32]byte]interfaces.IMsg)
-	l.PairList = make([]*ackPair,0)
+	l.PairList = make([]*ackPair, 0)
 	return l
 }
 
-// match msg/ack pairs as they arrive
-func (ml *OrderedMessageList) Add(msg interfaces.IMsg) (matchedPair *ackPair) {
-	var h [32]byte
+func (ml *OrderedMessageList) addPair(hash [32]byte, pair *ackPair) {
+	ml.PairList = append(ml.PairList, pair)
+	// TODO add prometheus metric
+	delete(ml.AckList, hash)
+	delete(ml.MsgList, hash)
+}
 
-	// REVIEW: do we need to account for duplicates here?
-	// or is that covered as part of BSV - basic message validation
+func (ml *OrderedMessageList) lookup(h [32]byte) (pair *ackPair, foundAck bool, foundMsg bool) {
+	pair = new(ackPair)
+	pair.Ack, foundAck = ml.AckList[h]
+	pair.Msg, foundMsg = ml.MsgList[h]
+	return pair, foundAck, foundMsg
+}
+
+// match Msg/Ack pairs as they arrive
+func (ml *OrderedMessageList) Add(msg interfaces.IMsg) (matchedPair *ackPair, ok bool) {
+	var h [32]byte
+	var foundAck bool
+	var foundMsg bool
+
 	if msg.Type() == constants.ACK_MSG {
 		h = msg.(*messages.Ack).MessageHash.Fixed()
-		_, foundAck := ml.AckList[h]
-		targetMsg, foundMsg := ml.MsgList[h]
+		matchedPair, foundAck, foundMsg = ml.lookup(h)
 		if !foundAck {
-			ml.AckList[h] = msg
+			matchedPair.Ack = msg
 			if foundMsg {
-				matchedPair = &ackPair{msg: targetMsg, ack: msg}
-				ml.PairList = append(ml.PairList, matchedPair)
+				ml.addPair(h, matchedPair)
+			} else {
+				ml.AckList[h] = msg
 			}
 		}
+		ok = true
 	} else if constants.NeedsAck(msg.Type()) {
 		h = msg.GetMsgHash().Fixed()
-		targetAck, foundAck := ml.AckList[h]
-		_, foundMsg := ml.MsgList[h]
-		if ! foundMsg {
-			ml.MsgList[h] = msg
+		matchedPair, foundAck, foundMsg = ml.lookup(h)
+		if !foundMsg {
+			matchedPair.Msg = msg
 			if foundAck {
-				matchedPair = &ackPair{msg: msg, ack: targetAck}
-				ml.PairList = append(ml.PairList, matchedPair)
+				ml.addPair(h, matchedPair)
+			} else {
+				ml.MsgList[h] = msg
 			}
 		}
+		ok = true
 	}
-	return matchedPair
-}
 
-/*
-// get and remove the list of dependent message for a hash
-func (ml *OrderedMessageList) Get(h [32]byte) []interfaces.IMsg {
-	rval := ml.list[h]
-	delete(ml.list, h)
-
-	// delete all the individual inMessages from the list
-	for _, msg := range rval {
-		if msg == nil {
-			continue
-		} else {
-			//ml.s.LogMessage("DependentHolding", fmt.Sprintf("delete[%x]", h[:6]), msg)
-			//ml.metric(msg).Dec()
-			delete(ml.dependents, msg.GetMsgHash().Fixed())
-		}
-	}
-	return rval
+	return matchedPair, ok
 }
- */
