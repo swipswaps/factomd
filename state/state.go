@@ -40,14 +40,14 @@ import (
 // parameters used to initialize leader thread
 type LeaderConfig struct {
 	FactomNodeName          string
-	Salt              interfaces.IHash
-	IdentityChainID interfaces.IHash // If this node has an identity, this is it
-	ServerPrivKey         *primitives.PrivateKey
-	ServerPubKey          *primitives.PublicKey
+	Salt                    interfaces.IHash
+	IdentityChainID         interfaces.IHash // If this node has an identity, this is it
+	ServerPrivKey           *primitives.PrivateKey
+	ServerPubKey            *primitives.PublicKey
 	DirectoryBlockInSeconds int
-	DBHeightAtBoot uint32
-	LLeaderHeight   uint32
-	LeaderVMIndex   int
+	DBHeightAtBoot          uint32
+	LLeaderHeight           uint32
+	LeaderVMIndex           int
 }
 
 // loaded directly from factomParams
@@ -57,33 +57,33 @@ type StateConfig struct {
 		CheckChainHeads bool
 		Fix             bool
 	}
-	CloneDBType             string
-	ControlPanelPort        int
-	ControlPanelSetting     int
-	DBType                  string
-	DropRate                int
-	FactomdLocations        string
-	FactomdTLSCertFile      string
-	FactomdTLSEnable        bool
-	FactomdTLSKeyFile       string
-	FastSaveRate            int
-	FaultTimeout            int
-	LeaderTimestamp         interfaces.Timestamp
-	OutputAllowed           bool
-	PortNumber              int
-	preBootTime             *primitives.Timestamp
-	Prefix                  string
-	RpcAuthHash             []byte
-	RpcPass                 string
-	RpcUser                 string
-	StartDelayLimit         int64
-	TimeOffset              interfaces.Timestamp
-	TimestampAtBoot         interfaces.Timestamp
-	WaitForEntries          bool
-	FactomdVersion          string
-	LogLevel                string
-	ConsoleLogLevel         string
-	ExportData              bool
+	CloneDBType         string
+	ControlPanelPort    int
+	ControlPanelSetting int
+	DBType              string
+	DropRate            int
+	FactomdLocations    string
+	FactomdTLSCertFile  string
+	FactomdTLSEnable    bool
+	FactomdTLSKeyFile   string
+	FastSaveRate        int
+	FaultTimeout        int
+	LeaderTimestamp     interfaces.Timestamp
+	OutputAllowed       bool
+	PortNumber          int
+	preBootTime         *primitives.Timestamp
+	Prefix              string
+	RpcAuthHash         []byte
+	RpcPass             string
+	RpcUser             string
+	StartDelayLimit     int64
+	TimeOffset          interfaces.Timestamp
+	TimestampAtBoot     interfaces.Timestamp
+	WaitForEntries      bool
+	FactomdVersion      string
+	LogLevel            string
+	ConsoleLogLevel     string
+	ExportData          bool
 	// Network Configuration
 	Network                 string
 	MainNetworkPort         string
@@ -228,7 +228,7 @@ type State struct {
 	LeaderPL        *ProcessList
 	PLProcessHeight uint32
 	// Height cutoff where no missing inMessages below this height
-	CurrentMinute  int
+	CurrentMinute int
 
 	// These are the start times for blocks and minutes
 	PreviousMinuteStartTime int64
