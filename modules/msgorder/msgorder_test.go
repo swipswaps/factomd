@@ -13,9 +13,8 @@ import (
 )
 
 func TestMsgOrderList(t *testing.T) {
-
 	state := CreateEmptyTestState()
-	ml := msgorder.NewOrderedMessageList(state)
+	ml := msgorder.NewOrderedMessageList()
 
 	extIDs := [][]byte{[]byte("foo"), []byte("bar")}
 
@@ -31,7 +30,7 @@ func TestMsgOrderList(t *testing.T) {
 	reveal, _ := ComposeRevealEntryMsg(b.Priv, chain.FirstEntry)
 
 	// generate some Acks
-	leader := leader.New(state.StateConfig.LeaderConfig)
+	leader := leader.New(state.StateConfig.LeaderConfig).Leader
 	commitAck := leader.NewAck(commit, nil).(*messages.Ack)
 	revealAck := leader.NewAck(reveal, nil).(*messages.Ack)
 
@@ -43,18 +42,11 @@ func TestMsgOrderList(t *testing.T) {
 	// load up 2 matched messages & 1 missing Ack
 	ml.Add(commit)
 	ml.Add(commitAck)
+
 	ml.Add(reveal)
-	_ = revealAck // leave out reveal
+	ml.Add(revealAck)
 
-	assert.Equal(t, 1, len(ml.PairList) )
-	assert.Equal(t, 2, len(ml.MsgList) )
-	assert.Equal(t, 1, len(ml.AckList) )
-
-	/*
-		ml.Add(commit.GetMsgHash().Fixed(), commit)
-		ml.Add(reveal.GetMsgHash().Fixed(), reveal)
-
-		ml.Add(commitAck.MessageHash.Fixed(), commitAck)
-		ml.Add(revealAck.MessageHash.Fixed(), revealAck)
-	*/
+	assert.Equal(t, 2, len(ml.PairList))
+	assert.Equal(t, 0, len(ml.MsgList))
+	assert.Equal(t, 0, len(ml.AckList))
 }

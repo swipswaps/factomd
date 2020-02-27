@@ -1,5 +1,5 @@
-// Keeps a map of messages without acks, a map of acks without messages and a list of msg/ack pairs,
-// forwarding the msg/ack pairs to the VM in order.
+// Keeps a map of messages without acks, a map of acks without messages and a list of Msg/Ack pairs,
+// forwarding the Msg/Ack pairs to the VM in order.
 //
 // Also notifies the MissingMessage Request module about any missing messages.
 // On minute change send the unack’d messages to the leader module if it is now leader for the VM
@@ -7,8 +7,6 @@ package msgorder
 
 import (
 	"context"
-	"github.com/FactomProject/factomd/common/constants"
-
 	"github.com/FactomProject/factomd/common/interfaces"
 	"github.com/FactomProject/factomd/modules/event"
 	"github.com/FactomProject/factomd/modules/logging"
@@ -37,7 +35,7 @@ func newLogger(nodeName string) *logging.ModuleLogger {
 		), "msgorder.txt")
 
 	log.AddNameField("logname", logging.Formatter("%s"), "unknown_log")
-	log.AddPrintField("msg", logging.Formatter("%s"), "MSG")
+	log.AddPrintField("Msg", logging.Formatter("%s"), "MSG")
 	return log
 }
 
@@ -59,7 +57,8 @@ func New(nodeName string) *Handler {
 }
 
 type Pub struct {
-	UnAck pubsub.IPublisher
+	UnAck  pubsub.IPublisher
+	Leader pubsub.IPublisher
 }
 
 // create and start all publishers
@@ -107,6 +106,15 @@ func (h *Handler) Start(w *worker.Thread) {
 	})
 }
 
+// Detect minute changes on receiving new DBHT event
+func (h *Handler) minuteChanged(evt *event.DBHT) bool {
+	if !h.DBHT.MinuteChanged(evt) {
+		return false
+	}
+	h.DBHT = evt // save the new db height event
+	return true
+}
+
 func (h *Handler) Run() {
 	h.ctx, h.cancel = context.WithCancel(context.Background())
 
@@ -116,14 +124,10 @@ runLoop:
 		case v := <-h.MsgInput.Updates:
 			h.HandleMsg(v.(interfaces.IMsg))
 		case v := <-h.MovedToHeight.Updates:
-			evt := v.(*event.DBHT)
-			if !h.DBHT.MinuteChanged(evt) {
+			if !h.minuteChanged(v.(*event.DBHT)) {
 				continue runLoop
 			}
-			h.DBHT = evt // save the new db height event
-			h.SendAckedMessages()
-			h.SendMissingMessageRequests()
-
+			h.sendUnAckedMessages()
 		case <-h.ctx.Done():
 			return
 		}
@@ -131,21 +135,26 @@ runLoop:
 }
 
 func (h *Handler) HandleMsg(m interfaces.IMsg) {
-	match := h.holding.Add(m)
-	if match != nil {
-		// TODO: Forward to VM
-		_ = match.ack
-		_ = match.msg
-	} else if constants.NeedsAck(m.Type()) || m.Type() == constants.ACK_MSG {
-			// Send to MMR
+	pair, ok := h.holding.Add(m)
+	if !ok {
+		return
 	}
-	h.log(LogData{"msg": m}) // track commit reveal
+
+	if pair.Complete() {
+		h.log(LogData{"Msg": pair.Msg})
+		h.log(LogData{"Msg": pair.Ack})
+		// FIXME Send both to VM
+	}
+	// REVIEW: do we want to report to MMR module right away?
+	// or perhaps just out-of-sequence Ack without Msg?
+
 }
 
-func (h *Handler) SendMissingMessageRequests() {
-	// query Holding and dispatch missing messages to MMR
-}
-
-func (h *Handler) SendAckedMessages() {
-	// send matched messages to the leader for processing
+// send unmatched messages to the leader for processing
+func (h *Handler) sendUnAckedMessages() {
+	// FIXME: send to Leader
+	for h, msg := range h.holding.MsgList {
+		_ = h
+		_ = msg
+	}
 }
