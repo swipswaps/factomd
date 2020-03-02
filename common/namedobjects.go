@@ -1,6 +1,7 @@
 package common
 
 import (
+	"bytes"
 	"fmt"
 
 	"github.com/FactomProject/factomd/util/atomic"
@@ -93,13 +94,19 @@ func (n *Name) NameInit(p NamedObject, name string, t string) {
 var NilName *Name                // This is a nil of name type Do NOT write it!
 var _ NamedObject = (*Name)(nil) // Check that the interface is met
 
-func PrintNames(i int, n NamedObject) {
-	fmt.Printf("%*s %s-%s\n", 3*i, "", n.GetPath(), n.GetType())
+func PrintNames(i int, n NamedObject, out *bytes.Buffer) {
+	fmt.Fprintf(out, "%*s %s-%s\n", 3*i, "", n.GetPath(), n.GetType())
 	for _, kid := range n.GetChildren() {
-		PrintNames(i+1, kid)
+		PrintNames(i+1, kid, out)
 	}
 }
 
+func SPrintAllNames() string {
+	buf := new(bytes.Buffer)
+	PrintNames(0, &root, buf)
+	return buf.String()
+}
+
 func PrintAllNames() {
-	PrintNames(0, &root)
+	fmt.Print(SPrintAllNames())
 }

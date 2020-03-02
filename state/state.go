@@ -440,10 +440,11 @@ type State struct {
 }
 
 func (s *State) Publish() {
-	s.leaderTimestampPub = generated.Publish_PubBase_Timestamp(pubsub.PubFactory.Base().Publish(pubsub.GetPath(s.GetParentName(), "leadertimestamp")))
-	s.addMsg = generated.Publish_PubBase_CommitRequest(pubsub.PubFactory.Base().Publish(pubsub.GetPath(s.GetParentName(), "vms", "commits"))) // Add commits/reveals to commit map
+	parentName := s.GetParentName()
+	s.leaderTimestampPub = generated.Publish_PubBase_Timestamp(pubsub.PubFactory.Base().Publish(pubsub.GetPath(parentName, "leadertimestamp")))
+	s.addMsg = generated.Publish_PubBase_CommitRequest(pubsub.PubFactory.Base().Publish(pubsub.GetPath(parentName, "vms", "commits"))) // Add commits/reveals to commit map
 	//	s.checkHash = generated.Publish_PubBase_CommitRequest(pubsub.PubFactory.Base().Publish(pubsub.GetPath(s.GetParentName(), "commitmap", "checks"))) // check commits/reveals against commit map
-	s.metDependency = generated.Publish_PubBase_Hash(pubsub.PubFactory.Base().Publish("FNode0/leader/metDependency")) // check commits/reveals against commit map
+	s.metDependency = generated.Publish_PubBase_Hash(pubsub.PubFactory.Base().Publish(pubsub.GetPath(parentName, "leader", "metDependency"))) // check commits/reveals against commit map
 
 }
 
