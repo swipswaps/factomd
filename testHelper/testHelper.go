@@ -14,6 +14,7 @@ import (
 	"github.com/FactomProject/factomd/registry"
 	"github.com/FactomProject/factomd/worker"
 
+	"github.com/FactomProject/factom"
 	"github.com/FactomProject/factomd/common/adminBlock"
 	"github.com/FactomProject/factomd/common/constants"
 	"github.com/FactomProject/factomd/common/directoryBlock"
@@ -82,6 +83,46 @@ func CreatePopulateAndExecuteTestState() *state.State {
 	})
 	go p.Run()
 	time.Sleep(30 * time.Millisecond)
+
+	return s
+}
+
+func CreateAndPopulateStaleHolding() *state.State {
+	s := CreateAndPopulateTestState()
+
+	// TODO: refactor into test helpers
+	a := AccountFromFctSecret("Fs2zQ3egq2j99j37aYzaCddPq9AF3mgh64uG9gRaDAnrkjRx3eHs")
+
+	encode := func(s string) []byte {
+		b := bytes.Buffer{}
+		b.WriteString(s)
+		return b.Bytes()
+	}
+
+	id := "92475004e70f41b94750f4a77bf7b430551113b25d3d57169eadca5692bb043d"
+	extids := [][]byte{encode(fmt.Sprintf("makeStaleMessages"))}
+
+	e := factom.Entry{
+		ChainID: id,
+		ExtIDs:  extids,
+		Content: encode(fmt.Sprintf("this is a stale message")),
+	}
+
+	// create stale MilliTime
+	mockTime := func() (r []byte) {
+		buf := new(bytes.Buffer)
+		t := time.Now().UnixNano()
+		m := t/1e6 - state.FilterTimeLimit // make msg too old
+		binary.Write(buf, binary.BigEndian, m)
+		return buf.Bytes()[2:]
+	}
+
+	// adding a commit w/ no REVEAL
+	m, _ := ComposeCommitEntryMsg(a.Priv, e)
+	copy(m.CommitEntry.MilliTime[:], mockTime())
+
+	// add commit to holding
+	s.Hold.Add(m.GetMsgHash().Fixed(), m)
 
 	return s
 }

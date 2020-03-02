@@ -21,7 +21,9 @@ import (
 
 	"github.com/FactomProject/factomd/common"
 	"github.com/FactomProject/factomd/common/constants/runstate"
+	"github.com/FactomProject/factomd/generated"
 	"github.com/FactomProject/factomd/modules/logging"
+	"github.com/FactomProject/factomd/pubsub"
 	"github.com/FactomProject/factomd/queue"
 	"github.com/FactomProject/factomd/activations"
 	"github.com/FactomProject/factomd/common/adminBlock"
@@ -428,6 +430,29 @@ type State struct {
 	MissingMessageResponseHandler *MissingMessageResponseCache
 	ChainCommits                  Last100
 	Reveals                       Last100
+
+	// publish subscribe hooks for new modules
+	leaderTimestampPub *generated.Publish_PubBase_Timestamp_type     // Current Leader Timestamp
+	addMsg             *generated.Publish_PubBase_CommitRequest_type // Add Comits/reveals to commit map
+	metDependency      *generated.Publish_PubBase_Hash_type          // hash of met dependencies
+	//	checkHash          *generated.Publish_PubBase_CommitRequest_type // check commits/reveals against commitmap
+
+}
+
+func (s *State) Publish() {
+	s.leaderTimestampPub = generated.Publish_PubBase_Timestamp(pubsub.PubFactory.Base().Publish(pubsub.GetPath(s.GetParentName(), "leadertimestamp")))
+	s.addMsg = generated.Publish_PubBase_CommitRequest(pubsub.PubFactory.Base().Publish(pubsub.GetPath(s.GetParentName(), "vms", "commits"))) // Add commits/reveals to commit map
+	//	s.checkHash = generated.Publish_PubBase_CommitRequest(pubsub.PubFactory.Base().Publish(pubsub.GetPath(s.GetParentName(), "commitmap", "checks"))) // check commits/reveals against commit map
+	s.metDependency = generated.Publish_PubBase_Hash(pubsub.PubFactory.Base().Publish("FNode0/leader/metDependency")) // check commits/reveals against commit map
+
+}
+
+func (s *State) Subscribe() {
+
+}
+
+func (s *State) ClosePublishing() {
+	_ = s.leaderTimestampPub.Close()
 }
 
 var _ interfaces.IState = (*State)(nil)
@@ -1685,6 +1710,10 @@ func (s *State) SetLeaderTimestamp(ts interfaces.Timestamp) {
 
 	s.LeaderTimestamp = primitives.NewTimestampFromMilliseconds(ts.GetTimeMilliUInt64())
 	s.SetMessageFilterTimestamp(primitives.NewTimestampFromMilliseconds(ts.GetTimeMilliUInt64() - 60*60*1000)) // set message filter to one hour before this block started.
+
+	if s.leaderTimestampPub != nil {
+		s.leaderTimestampPub.Write(s.LeaderTimestamp)
+	}
 }
 
 func (s *State) SetFaultTimeout(timeout int) {

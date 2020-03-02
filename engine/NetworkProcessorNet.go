@@ -31,7 +31,9 @@ func NetworkProcessorNet(w *worker.Thread, fnode *fnode.FactomNode) {
 	//Peers(w, fnode)
 	FromPeerToPeer(w, fnode)
 	stubs(w, fnode)
-	BasicMessageValidation(w, fnode)
+
+	startBasicMessageValidation(w, fnode) // create instances of basic message validation
+
 	sort(w, fnode.State) // TODO: Replace this service entirely
 	w.Run("NetworkOutputs", func() { NetworkOutputs(fnode) })
 	w.Run("InvalidOutputs", func() { InvalidOutputs(fnode.State) })
@@ -240,29 +242,31 @@ func FromPeerToPeer(parent *worker.Thread, fnode *fnode.FactomNode) {
 	})
 }
 
-func BasicMessageValidation(parent *worker.Thread, fnode *fnode.FactomNode) {
+func startBasicMessageValidation(parent *worker.Thread, fnode *fnode.FactomNode) {
 	for i := 0; i < 2; i++ { // 2 Basic message validators
 		parent.Spawn(fmt.Sprintf("BMV%d", i), func(w *worker.Thread) {
 			ctx, cancel := context.WithCancel(context.Background())
-			msgIn := bmv.NewBasicMessageValidator(fnode.State.GetFactomNodeName()) // Run init conditions. Setup publishers
+			// w.Name is my parent?
+			// Init my name object?
+			//w.Init(&parent.Name, "bmv")
+
+			// Run init conditions. Setup publishers
+			basicMessageValidator := bmv.NewBasicMessageValidator(&fnode.Name, i) // TODO: review change to include number
+
 			w.OnReady(func() {
+				basicMessageValidator.Publish() // REVIEW: new publish functionality
 				// Subscribe to publishers
-				msgIn.Subscribe()
+				basicMessageValidator.Subscribe()
 			})
+
 			w.OnRun(func() {
-				// TODO: Temporary print all messages out of bmv. We need to actually use them...
-				//go func() {
-				//	sub := pubsub.SubFactory.Channel(100).Subscribe(pubsub.GetPath(fnode.State.GetFactomNodeName(), event.Path.BMV))
-				//	for v := range sub.Channel() {
-				//		fmt.Println("MESSAGE -> ", v)
-				//	}
-				//}()
-				msgIn.Run(ctx) // do work
-				cancel()       // If run is over, we can end the ctx
+				// do work
+				basicMessageValidator.Run(ctx)
+				cancel() // If run is over, we can end the ctx
 			})
 
 			w.OnExit(cancel)
-			w.OnComplete(msgIn.ClosePublishing)
+			w.OnComplete(basicMessageValidator.ClosePublishing)
 		})
 	}
 }

@@ -4,17 +4,19 @@ import (
 	"context"
 	"fmt"
 	"github.com/FactomProject/factomd/modules/event"
+	"reflect"
 	"regexp"
 	"time"
 
+	"github.com/FactomProject/factomd/common"
+	"github.com/FactomProject/factomd/common/interfaces"
 	"github.com/FactomProject/factomd/common/messages"
 	"github.com/FactomProject/factomd/modules/debugsettings"
-
-	"github.com/FactomProject/factomd/common/interfaces"
 	"github.com/FactomProject/factomd/pubsub"
 )
 
 type BasicMessageValidator struct {
+	common.Name
 	// bootTime is used to set the
 	bootTime time.Time
 	// Anything before this timestamp is ignored
@@ -35,8 +37,6 @@ type BasicMessageValidator struct {
 
 	replay *MsgReplay
 
-	NodeName string
-
 	// Settings
 	// Updates to regex filter
 	inputRegexUpdates <-chan interface{}
@@ -49,9 +49,9 @@ type msgPub struct {
 	Types []byte
 }
 
-func NewBasicMessageValidator(nodeName string) *BasicMessageValidator {
+func NewBasicMessageValidator(parent common.NamedObject, instance int) *BasicMessageValidator {
 	b := new(BasicMessageValidator)
-	b.NodeName = nodeName
+	b.NameInit(parent, fmt.Sprintf("bmv%d", instance), reflect.TypeOf(b).String())
 
 	b.msgs = pubsub.SubFactory.Channel(100)  //.Subscribe("path?")
 	b.times = pubsub.SubFactory.Channel(100) //.Subscribe("path?")
@@ -59,21 +59,25 @@ func NewBasicMessageValidator(nodeName string) *BasicMessageValidator {
 	// 20min grace period
 	b.preBootFilter = b.bootTime.Add(-20 * time.Minute)
 
-	b.rest = pubsub.PubFactory.Threaded(100).Publish(pubsub.GetPath(b.NodeName, event.Path.BMV), pubsub.PubMultiWrap())
+	b.rest = pubsub.PubFactory.Threaded(100).Publish(pubsub.GetPath(b.GetParentName(), event.Path.BMV), pubsub.PubMultiWrap())
 
 	b.replay = NewMsgReplay(6)
 	return b
 }
 
+func (b *BasicMessageValidator) Publish() {
+	go b.rest.Start()
+}
+
 func (b *BasicMessageValidator) Subscribe() {
 	// TODO: Find actual paths
-	b.msgs = b.msgs.Subscribe(pubsub.GetPath(b.NodeName, "msgs"))
-	b.times = b.times.Subscribe(pubsub.GetPath(b.NodeName, "blocktime"))
+	b.msgs = b.msgs.Subscribe(pubsub.GetPath(b.GetParentName(), "msgs"))
+	b.times = b.times.Subscribe(pubsub.GetPath(b.GetParentName(), "blocktime"))
 
-	sub := debugsettings.GetSettings(b.NodeName).InputRegexC()
+	sub := debugsettings.GetSettings(b.GetParentName()).InputRegexC()
 	b.inputRegexUpdates = sub.Channel()
 
-	b.netState = debugsettings.GetSettings(b.NodeName).NetStatOffV()
+	b.netState = debugsettings.GetSettings(b.GetParentName()).NetStatOffV()
 }
 
 func (b *BasicMessageValidator) ClosePublishing() {
@@ -81,7 +85,6 @@ func (b *BasicMessageValidator) ClosePublishing() {
 }
 
 func (b *BasicMessageValidator) Run(ctx context.Context) {
-	go b.rest.Start()
 	for {
 		select {
 		case <-ctx.Done():

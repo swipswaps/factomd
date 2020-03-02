@@ -384,7 +384,12 @@ func startFnodes(w *worker.Thread) {
 	state.CheckGrants() // check the grants table hard coded into the build is well formed.
 	for i, _ := range fnode.GetFnodes() {
 		node := fnode.Get(i)
-		w.Spawn(node.GetName()+"Thread", func(w *worker.Thread) { startServer(w, node) })
+
+		w.Spawn(node.GetName()+"Thread", func(w *worker.Thread) {
+			startServer(w, node)
+			w.OnReady(node.State.Subscribe)
+			w.OnExit(func() { node.State.ClosePublishing() }) // should cause your thread loops to exit
+		})
 	}
 	time.Sleep(10 * time.Second)
 	common.PrintAllNames()
@@ -394,6 +399,9 @@ func startFnodes(w *worker.Thread) {
 func startServer(w *worker.Thread, node *fnode.FactomNode) {
 	NetworkProcessorNet(w, node)
 	s := node.State
+	// REVIEW: is this a better spot to setup publishers?
+	//s.BindPublishers()
+
 	w.Run("MsgSort", s.MsgSort)
 
 	w.Run("MsgExecute", s.MsgExecute)
