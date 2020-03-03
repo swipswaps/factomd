@@ -103,7 +103,7 @@ func (s *State) MsgSort() {
 			nodeMessageEvent := &events.NodeMessage{
 				MessageCode: events.NodeMessageCode_GENERAL,
 				Level:       events.Level_ERROR,
-				MessageText: fmt.Sprintf("A panic state occurred in ValidatorLoop.", r),
+				MessageText: fmt.Sprintf("A panic state occurred in ValidatorLoop. %v", r),
 			}
 			s.Pub.GetNodeMessage().Write(nodeMessageEvent)
 			shutdown(s)
