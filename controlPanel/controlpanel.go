@@ -112,7 +112,7 @@ func New(config *Config) {
 	controlPanel.MsgInputSubscription.Subscribe(pubsub.GetPath(config.NodeName, "bmv", "rest"))
 
 	// internal events
-	controlPanel.MovedToHeightSubscription.Subscribe(pubsub.GetPath(config.NodeName, events.Path.Seq))
+	controlPanel.MovedToHeightSubscription.Subscribe(pubsub.GetPath(config.NodeName, events.Path.DBHT))
 	controlPanel.BalanceChangedSubscription.Subscribe(pubsub.GetPath(config.NodeName, events.Path.Bank))
 	controlPanel.DBlockCreatedSubscription.Subscribe(pubsub.GetPath(config.NodeName, events.Path.Directory))
 	//controlPanel.EomTickerSubscription.Subscribe(pubsub.GetPath(config.NodeName, event.Path.EOM))

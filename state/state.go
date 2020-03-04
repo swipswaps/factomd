@@ -23,7 +23,6 @@ import (
 	"github.com/FactomProject/factomd/common/constants/runstate"
 	"github.com/FactomProject/factomd/generated"
 	"github.com/FactomProject/factomd/modules/logging"
-	"github.com/FactomProject/factomd/pubsub"
 	"github.com/FactomProject/factomd/queue"
 	"github.com/FactomProject/factomd/activations"
 	"github.com/FactomProject/factomd/common/adminBlock"

@@ -1,8 +1,8 @@
 package leader
 
 import (
-	"fmt"
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/FactomProject/factomd/common/constants"
@@ -11,7 +11,7 @@ import (
 	"github.com/FactomProject/factomd/generated"
 	"github.com/FactomProject/factomd/log"
 	"github.com/FactomProject/factomd/modules/dependentholding"
-	"github.com/FactomProject/factomd/modules/event"
+	"github.com/FactomProject/factomd/modules/events"
 	"github.com/FactomProject/factomd/pubsub"
 	"github.com/FactomProject/factomd/state"
 	"github.com/FactomProject/factomd/worker"
@@ -85,8 +85,8 @@ func (s *Sub) Init() {
 
 // start subscriptions
 func (s *Sub) Start(nodeName string) {
-	s.LeaderConfig.Subscribe(pubsub.GetPath(nodeName, event.Path.LeaderConfig))
-	s.AuthoritySet.Subscribe(pubsub.GetPath(nodeName, event.Path.AuthoritySet))
+	s.LeaderConfig.Subscribe(pubsub.GetPath(nodeName, events.Path.LeaderConfig))
+	s.AuthoritySet.Subscribe(pubsub.GetPath(nodeName, events.Path.AuthoritySet))
 	{
 		s.SetLeaderMode(nodeName) //  create initial subscriptions
 	}
@@ -117,12 +117,12 @@ func (s *Sub) SetFollowerMode() {
 }
 
 type Events struct {
-	Config              *events.LeaderConfig //
-	*events.DBHT                             // from move-to-ht
-	*events.Balance                          // REVIEW: does this relate to a specific VM
-	*events.Directory                        //
-	*events.Ack                              // record of last sent ack by leader
-	*events.AuthoritySet                     //
+	Config               *events.LeaderConfig //
+	*events.DBHT                              // from move-to-ht
+	*events.Balance                           // REVIEW: does this relate to a specific VM
+	*events.Directory                         //
+	*events.Ack                               // record of last sent ack by leader
+	*events.AuthoritySet                      //
 }
 
 func (h *Handler) sendOut(msg interfaces.IMsg) {
@@ -160,7 +160,7 @@ func (h *Handler) processMin() (ok bool) {
 	for {
 		select {
 		case v := <-h.Sub.LeaderConfig.Updates:
-			l.Config = v.(*events.LeaderConfig)
+			h.Config = v.(*events.LeaderConfig)
 		case v := <-h.MsgInput.Updates:
 			m := v.(interfaces.IMsg)
 			if !h.execute(m) {
@@ -203,7 +203,7 @@ func (h *Handler) WaitForDBlockCreated() (ok bool) {
 	for { // wait on a new (unique) directory event
 		select {
 		case v := <-h.Sub.DBlockCreated.Updates:
-			evt := v.(*event.Directory)
+			evt := v.(*events.Directory)
 			if h.Directory != nil && evt.DBHeight == h.Directory.DBHeight {
 				log.LogPrintf(h.logfile, "DUP Directory: %v", v)
 				continue
@@ -221,7 +221,7 @@ func (h *Handler) WaitForDBlockCreated() (ok bool) {
 func (h *Handler) WaitForBalanceChanged() (ok bool) {
 	select {
 	case v := <-h.Sub.BalanceChanged.Updates:
-		h.Balance = v.(*event.Balance)
+		h.Balance = v.(*events.Balance)
 		log.LogPrintf(h.logfile, "BalChange: %v", v)
 		return true
 	case <-h.ctx.Done():
@@ -267,9 +267,9 @@ func (h *Handler) WaitForAuthority() (isLeader bool) {
 	for {
 		select {
 		case v := <-h.Sub.LeaderConfig.Updates:
-			h.Config = v.(*event.LeaderConfig)
+			h.Config = v.(*events.LeaderConfig)
 		case v := <-h.Sub.AuthoritySet.Updates:
-			h.Events.AuthoritySet = v.(*event.AuthoritySet)
+			h.Events.AuthoritySet = v.(*events.AuthoritySet)
 		case <-h.ctx.Done():
 			return false
 		}
@@ -334,11 +334,11 @@ func (l *Leader) execute(msg interfaces.IMsg) bool {
 		if <-check.Channel != nil {
 			// FIXME
 			/*
-			hold := pubsubtypes.HoldRequest{
-				Hash: msg.GetHash(),
-				Msg:  msg,
-			}
-			 */
+				hold := pubsubtypes.HoldRequest{
+					Hash: msg.GetHash(),
+					Msg:  msg,
+				}
+			*/
 			//l.toDependentHolding.Write(hold)
 			return false
 		}

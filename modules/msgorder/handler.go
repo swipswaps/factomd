@@ -8,7 +8,7 @@ package msgorder
 import (
 	"context"
 	"github.com/FactomProject/factomd/common/interfaces"
-	"github.com/FactomProject/factomd/modules/event"
+	"github.com/FactomProject/factomd/modules/events"
 	"github.com/FactomProject/factomd/modules/logging"
 	"github.com/FactomProject/factomd/pubsub"
 	"github.com/FactomProject/factomd/worker"
@@ -45,11 +45,11 @@ func New(nodeName string) *Handler {
 	h.holding = NewOrderedMessageList()
 
 	h.Events = &Events{
-		DBHT: &event.DBHT{
+		DBHT: &events.DBHT{
 			DBHeight: 0,
 			Minute:   0,
 		},
-		Config: &event.LeaderConfig{
+		Config: &events.LeaderConfig{
 			NodeName: nodeName,
 		}, // FIXME should use pubsub.Config
 	}
@@ -64,7 +64,7 @@ type Pub struct {
 // create and start all publishers
 func (p *Pub) Init(nodeName string) {
 	p.UnAck = pubsub.PubFactory.Threaded(100).Publish(
-		pubsub.GetPath(nodeName, event.Path.UnAckMsgs),
+		pubsub.GetPath(nodeName, events.Path.UnAckMsgs),
 	)
 	go p.UnAck.Start()
 }
@@ -82,13 +82,13 @@ func (s *Sub) Init() {
 
 // start subscriptions
 func (s *Sub) Start(nodeName string) {
-	s.MovedToHeight.Subscribe(pubsub.GetPath(nodeName, event.Path.DBHT))
-	s.MsgInput.Subscribe(pubsub.GetPath(nodeName, event.Path.BMV))
+	s.MovedToHeight.Subscribe(pubsub.GetPath(nodeName, events.Path.DBHT))
+	s.MsgInput.Subscribe(pubsub.GetPath(nodeName, events.Path.BMV))
 }
 
 type Events struct {
-	*event.DBHT                     // from move-to-ht
-	Config      *event.LeaderConfig // FIXME: use pubsub.Config obj
+	*events.DBHT                      // from move-to-ht
+	Config       *events.LeaderConfig // FIXME: use pubsub.Config obj
 }
 
 func (h *Handler) Start(w *worker.Thread) {
@@ -107,7 +107,7 @@ func (h *Handler) Start(w *worker.Thread) {
 }
 
 // Detect minute changes on receiving new DBHT event
-func (h *Handler) minuteChanged(evt *event.DBHT) bool {
+func (h *Handler) minuteChanged(evt *events.DBHT) bool {
 	if !h.DBHT.MinuteChanged(evt) {
 		return false
 	}
@@ -124,7 +124,7 @@ runLoop:
 		case v := <-h.MsgInput.Updates:
 			h.HandleMsg(v.(interfaces.IMsg))
 		case v := <-h.MovedToHeight.Updates:
-			if !h.minuteChanged(v.(*event.DBHT)) {
+			if !h.minuteChanged(v.(*events.DBHT)) {
 				continue runLoop
 			}
 			h.sendUnAckedMessages()

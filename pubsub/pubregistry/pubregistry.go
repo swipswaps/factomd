@@ -42,7 +42,7 @@ func (p *PubRegistry) newPublisher(name string) pubsub.IPublisher {
 }
 
 func (p *PubRegistry) bindPublishers() {
-	p.BlkSeq = p.newPublisher(events.Path.Seq)
+	p.BlkSeq = p.newPublisher(events.Path.DBHT)
 	p.Bank = p.newPublisher(events.Path.Bank)
 	p.Directory = p.newPublisher(events.Path.Directory)
 	p.LeaderConfig = p.newPublisher(events.Path.LeaderConfig)

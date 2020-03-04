@@ -7,7 +7,7 @@ package engine
 import (
 	"context"
 	"fmt"
-	"github.com/FactomProject/factomd/modules/event"
+	"github.com/FactomProject/factomd/modules/events"
 	"math/rand"
 	"time"
 
@@ -48,7 +48,7 @@ func sort(parent *worker.Thread, s *state.State) {
 		sub := pubsub.SubFactory.Channel(50)
 
 		w.OnReady(func() {
-			sub.Subscribe(pubsub.GetPath(s.GetFactomNodeName(), event.Path.BMV))
+			sub.Subscribe(pubsub.GetPath(s.GetFactomNodeName(), events.Path.BMV))
 		})
 
 		w.OnRun(func() {

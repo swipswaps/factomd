@@ -8,7 +8,7 @@ import (
 
 type pubSubPaths struct {
 	EOM               string
-	Seq               string
+	DBHT              string
 	Directory         string
 	Bank              string
 	LeaderConfig      string
@@ -24,11 +24,13 @@ type pubSubPaths struct {
 	ConnectionMetrics string
 	ProcessListInfo   string
 	StateUpdate       string
+	BMV               string
+	UnAckMsgs         string
 }
 
 var Path = pubSubPaths{
 	EOM:               "EOM",
-	Seq:               "seq",
+	DBHT:              "DBHT",
 	Directory:         "directory",
 	Bank:              "bank",
 	LeaderConfig:      "leader-config",
@@ -42,7 +44,9 @@ var Path = pubSubPaths{
 	RevealEntry:       "reveal-entry",
 	CommitDBState:     "commit-dbstate",
 	NodeMessage:       "node-message",
-	AuthoritySet: "authority-set",
+	AuthoritySet:      "authority-set",
+	BMV:               path.Join("bmv", "rest"),
+	UnAckMsgs:         "unack-msg",
 }
 
 type Balance struct {
@@ -60,6 +64,20 @@ type Directory struct {
 type DBHT struct {
 	DBHeight uint32
 	Minute   int
+}
+
+// Detect minute change excluding minute 10 boundary
+func (evt *DBHT) MinuteChanged(newEvt *DBHT) bool {
+
+	if newEvt.Minute == 10 { // ignore min 10 - we want to trigger on move from 9->0 instead
+		return false
+	}
+
+	if newEvt.Minute == evt.Minute && newEvt.DBHeight == evt.DBHeight {
+		return false // no change
+	} else {
+		return true
+	}
 }
 
 // event created when Ack is actually sent out
@@ -85,7 +103,6 @@ type AuthoritySet struct {
 	FedServers   []interfaces.IServer
 	AuditServers []interfaces.IServer
 }
-
 
 type ProcessListInfo struct {
 	ProcessTime interfaces.Timestamp

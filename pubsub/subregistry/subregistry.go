@@ -25,7 +25,7 @@ func (p *SubRegistry) newChannel(name string) *pubsub.SubChannel {
 }
 
 func (p *SubRegistry) BlkSeqChannel() *pubsub.SubChannel {
-	return p.newChannel(events.Path.Seq)
+	return p.newChannel(events.Path.DBHT)
 }
 
 func (p *SubRegistry) BankChannel() *pubsub.SubChannel {
