@@ -3,7 +3,6 @@ package bmv
 import (
 	"context"
 	"fmt"
-	"github.com/FactomProject/factomd/modules/events"
 	"reflect"
 	"regexp"
 	"time"
@@ -12,6 +11,7 @@ import (
 	"github.com/FactomProject/factomd/common/interfaces"
 	"github.com/FactomProject/factomd/common/messages"
 	"github.com/FactomProject/factomd/modules/debugsettings"
+	"github.com/FactomProject/factomd/modules/events"
 	"github.com/FactomProject/factomd/pubsub"
 )
 
@@ -49,6 +49,8 @@ type msgPub struct {
 	Types []byte
 }
 
+// spawns instances of message validator
+// design allows for 'scale out' of this type of thread
 func NewBasicMessageValidator(parent common.NamedObject, instance int) *BasicMessageValidator {
 	b := new(BasicMessageValidator)
 	b.NameInit(parent, fmt.Sprintf("bmv%d", instance), reflect.TypeOf(b).String())
@@ -59,6 +61,7 @@ func NewBasicMessageValidator(parent common.NamedObject, instance int) *BasicMes
 	// 20min grace period
 	b.preBootFilter = b.bootTime.Add(-20 * time.Minute)
 
+	// TODO: verify correct paths are being created
 	b.rest = pubsub.PubFactory.Threaded(100).Publish(pubsub.GetPath(b.GetParentName(), events.Path.BMV), pubsub.PubMultiWrap())
 
 	b.replay = NewMsgReplay(6)
@@ -66,7 +69,8 @@ func NewBasicMessageValidator(parent common.NamedObject, instance int) *BasicMes
 }
 
 func (b *BasicMessageValidator) Publish() {
-	go b.rest.Start()
+	// REVIEW: consider using this pattern for all modules
+	//go b.rest.Start()
 }
 
 func (b *BasicMessageValidator) Subscribe() {
@@ -85,6 +89,7 @@ func (b *BasicMessageValidator) ClosePublishing() {
 }
 
 func (b *BasicMessageValidator) Run(ctx context.Context) {
+	go b.rest.Start()
 	for {
 		select {
 		case <-ctx.Done():

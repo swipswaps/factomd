@@ -15,8 +15,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/FactomProject/factomd/modules/query"
-
 	"github.com/FactomProject/factomd/anchor"
 	"github.com/FactomProject/factomd/common/constants"
 	"github.com/FactomProject/factomd/common/directoryBlock/dbInfo"
@@ -27,6 +25,7 @@ import (
 	"github.com/FactomProject/factomd/common/interfaces"
 	"github.com/FactomProject/factomd/common/messages"
 	"github.com/FactomProject/factomd/common/primitives"
+	"github.com/FactomProject/factomd/modules/query"
 	"github.com/FactomProject/factomd/receipts"
 )
 

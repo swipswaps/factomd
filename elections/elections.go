@@ -5,16 +5,15 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/FactomProject/factomd/modules/query"
-	"github.com/FactomProject/factomd/queue"
-	"github.com/FactomProject/factomd/worker"
-
 	"github.com/FactomProject/factomd/common"
 	"github.com/FactomProject/factomd/common/globals"
 	"github.com/FactomProject/factomd/common/interfaces"
 	"github.com/FactomProject/factomd/common/primitives"
+	"github.com/FactomProject/factomd/modules/query"
+	"github.com/FactomProject/factomd/queue"
 	"github.com/FactomProject/factomd/state"
 	"github.com/FactomProject/factomd/util/atomic"
+	"github.com/FactomProject/factomd/worker"
 )
 
 var _ = fmt.Print

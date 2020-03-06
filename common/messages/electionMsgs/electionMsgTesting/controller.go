@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/FactomProject/factomd/testHelper"
-
 	"github.com/FactomProject/factomd/common/interfaces"
 	"github.com/FactomProject/factomd/common/messages"
 	"github.com/FactomProject/factomd/common/messages/electionMsgs"
@@ -14,6 +12,7 @@ import (
 	"github.com/FactomProject/factomd/electionsCore/election"
 	priminterpreter "github.com/FactomProject/factomd/electionsCore/interpreter/primitives"
 	"github.com/FactomProject/factomd/state"
+	"github.com/FactomProject/factomd/testHelper"
 )
 
 var _ = fmt.Println

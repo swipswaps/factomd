@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/DiSiqueira/GoTree"
+	gotree "github.com/DiSiqueira/GoTree"
 )
 
 var globalReg *Registry
@@ -136,7 +136,6 @@ func globalPublishWith(path string, p IPublisher, wrappers ...IPublisherWrapper)
 }
 
 func globalPublish(path string, p IPublisher) IPublisher {
-	fmt.Printf("globalPublish  : %v\n", path)
 	err := globalReg.Register(path, p)
 	if err != nil {
 		tree := globalReg.PrintTree()

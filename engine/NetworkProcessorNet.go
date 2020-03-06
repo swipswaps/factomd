@@ -7,22 +7,20 @@ package engine
 import (
 	"context"
 	"fmt"
-	"github.com/FactomProject/factomd/modules/events"
 	"math/rand"
 	"time"
-
-	"github.com/FactomProject/factomd/modules/bmv"
-	"github.com/FactomProject/factomd/pubsub"
-	"github.com/FactomProject/factomd/state"
-
-	"github.com/FactomProject/factomd/fnode"
-	"github.com/FactomProject/factomd/worker"
 
 	"github.com/FactomProject/factomd/common/constants"
 	"github.com/FactomProject/factomd/common/globals"
 	"github.com/FactomProject/factomd/common/interfaces"
 	"github.com/FactomProject/factomd/common/messages"
 	"github.com/FactomProject/factomd/common/primitives"
+	"github.com/FactomProject/factomd/fnode"
+	"github.com/FactomProject/factomd/modules/bmv"
+	"github.com/FactomProject/factomd/modules/events"
+	"github.com/FactomProject/factomd/pubsub"
+	"github.com/FactomProject/factomd/state"
+	"github.com/FactomProject/factomd/worker"
 )
 
 var _ = fmt.Print
@@ -31,10 +29,8 @@ func NetworkProcessorNet(w *worker.Thread, fnode *fnode.FactomNode) {
 	//Peers(w, fnode)
 	FromPeerToPeer(w, fnode)
 	stubs(w, fnode)
-
 	startBasicMessageValidation(w, fnode) // create instances of basic message validation
-
-	sort(w, fnode.State) // TODO: Replace this service entirely
+	sort(w, fnode.State)                  // TODO: Replace this service entirely
 	w.Run("NetworkOutputs", func() { NetworkOutputs(fnode) })
 	w.Run("InvalidOutputs", func() { InvalidOutputs(fnode.State) })
 }

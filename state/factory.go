@@ -3,11 +3,12 @@ package state
 import (
 	"crypto/rand"
 	"fmt"
-	"github.com/FactomProject/factomd/modules/livefeed"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/FactomProject/factomd/modules/livefeed"
 
 	"github.com/FactomProject/factomd/Utilities/CorrectChainHeads/correctChainHeads"
 	"github.com/FactomProject/factomd/common"
@@ -346,9 +347,6 @@ func NewState(p *globals.FactomParams, FactomdVersion string) *State {
 	s.AddPrefix(p.Prefix)
 	s.SetOut(false)
 	s.SetDropRate(p.DropRate)
-
-	// publishing hooks for new modules
-
 	return s
 }
 

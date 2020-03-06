@@ -15,24 +15,6 @@ import (
 
 // Start publisher generated go code
 
-// Publish_PubBase_CommitRequest publisher has the basic necessary function implementations.
-type Publish_PubBase_CommitRequest_type struct {
-	IPublisher
-}
-
-// Read the object of type and call the generic so the compiler can check the passed in type
-func (p *Publish_PubBase_CommitRequest_type) Write(o CommitRequest) {
-	p.IPublisher.Write(o)
-}
-
-func Publish_PubBase_CommitRequest(p IPublisher) *Publish_PubBase_CommitRequest_type {
-	return &Publish_PubBase_CommitRequest_type{p}
-}
-
-// End publisher generated go code
-//
-// Start publisher generated go code
-
 // Publish_PubBase_HoldRequest publisher has the basic necessary function implementations.
 type Publish_PubBase_HoldRequest_type struct {
 	IPublisher
@@ -99,6 +81,24 @@ func (p *Publish_PubBase_IMsg_type) Write(o IMsg) {
 
 func Publish_PubBase_IMsg(p IPublisher) *Publish_PubBase_IMsg_type {
 	return &Publish_PubBase_IMsg_type{p}
+}
+
+// End publisher generated go code
+//
+// Start publisher generated go code
+
+// Publish_PubBase_CommitRequest publisher has the basic necessary function implementations.
+type Publish_PubBase_CommitRequest_type struct {
+	IPublisher
+}
+
+// Read the object of type and call the generic so the compiler can check the passed in type
+func (p *Publish_PubBase_CommitRequest_type) Write(o CommitRequest) {
+	p.IPublisher.Write(o)
+}
+
+func Publish_PubBase_CommitRequest(p IPublisher) *Publish_PubBase_CommitRequest_type {
+	return &Publish_PubBase_CommitRequest_type{p}
 }
 
 // End publisher generated go code

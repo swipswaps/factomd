@@ -7,12 +7,13 @@ package state
 import (
 	"errors"
 	"fmt"
-	"github.com/FactomProject/factomd/modules/events"
 	"hash"
 	"os"
 	"reflect"
 	"sort"
 	"time"
+
+	"github.com/FactomProject/factomd/modules/events"
 
 	"github.com/FactomProject/factomd/common/constants"
 	"github.com/FactomProject/factomd/common/entryBlock"
@@ -928,7 +929,7 @@ func (s *State) MoveStateToHeight(dbheight uint32, newMinute int) {
 	s.LeaderPL.SortFedServers()
 
 	s.Leader, s.LeaderVMIndex = s.LeaderPL.GetVirtualServers(newMinute, s.IdentityChainID) // MoveStateToHeight minute
-	s.LogPrintf("executeMsg", "MoveStateToHeight leader=%v, vmIndex = %v", s.Leader, s.LeaderVMIndex)
+	s.LogPrintf("executeMsg", "MoveStateToHeight new minute set leader=%v, vmIndex = %v", s.Leader, s.LeaderVMIndex)
 
 	{ // debug
 		vmSync := false
@@ -1815,22 +1816,21 @@ func (s *State) ProcessCommitChain(dbheight uint32, commitChain interfaces.IMsg)
 	return false
 }
 
-func (s *State) ProcessCommitEntry(dbheight uint32, msg interfaces.IMsg) bool {
-	commitEntry, _ := msg.(*messages.CommitEntryMsg)
+func (s *State) ProcessCommitEntry(dbheight uint32, commitEntry interfaces.IMsg) bool {
+	c, _ := commitEntry.(*messages.CommitEntryMsg)
 
 	pl := s.ProcessLists.Get(dbheight)
-	if e := s.GetFactoidState().UpdateECTransaction(true, commitEntry.CommitEntry); e == nil {
+	if e := s.GetFactoidState().UpdateECTransaction(true, c.CommitEntry); e == nil {
 		// save the Commit to match against the Reveal later
-		h := commitEntry.GetHash()
-		s.PutCommit(h, commitEntry)
-		pl.EntryCreditBlock.GetBody().AddEntry(commitEntry.CommitEntry)
+		h := c.GetHash()
+		s.PutCommit(h, c)
+		pl.EntryCreditBlock.GetBody().AddEntry(c.CommitEntry)
 		entry := s.Holding[h.Fixed()]
 		if entry != nil {
 			s.repost(entry, 0) // Try and execute the reveal for this commit
 		}
-		//		s.LogMessage("dependentHolding", "process", msg)
-		s.addMsg.Write(pubsubtypes.CommitRequest{commitEntry, nil})
-		s.ExecuteFromHolding(msg.GetHash().Fixed()) // process CommitEntry
+		//		s.LogMessage("dependentHolding", "process", commitEntry)
+		s.ExecuteFromHolding(commitEntry.GetHash().Fixed()) // process CommitEntry
 		return true
 	}
 	//s.AddStatus("Cannot Process Commit Entry")
@@ -1838,21 +1838,21 @@ func (s *State) ProcessCommitEntry(dbheight uint32, msg interfaces.IMsg) bool {
 	return false
 }
 
-func (s *State) ProcessRevealEntry(dbheight uint32, msg interfaces.IMsg) (worked bool) {
+func (s *State) ProcessRevealEntry(dbheight uint32, m interfaces.IMsg) (worked bool) {
 	pl := s.ProcessLists.Get(dbheight)
 	if pl == nil {
-		s.LogMessage("process", "Hold, no processlist", msg)
+		s.LogMessage("process", "Hold, no processlist", m)
 		return false
 	}
 
-	reveal := msg.(*messages.RevealEntryMsg)
-	myhash := reveal.Entry.GetHash()
-	chainID := reveal.Entry.GetChainID()
+	msg := m.(*messages.RevealEntryMsg)
+	myhash := msg.Entry.GetHash()
+	chainID := msg.Entry.GetChainID()
 
 	// Removed because all dependencies are met prior to adding to the process list
-	//commit := s.NextCommit(reveal.Entry.GetHash())
+	//commit := s.NextCommit(msg.Entry.GetHash())
 	//if commit == nil {
-	//	s.LogMessage("process", "Hold, no commit", msg)
+	//	s.LogMessage("process", "Hold, no commit", m)
 	//	return false // hold for a commit
 	//}
 
@@ -1862,10 +1862,10 @@ func (s *State) ProcessRevealEntry(dbheight uint32, msg interfaces.IMsg) (worked
 			TotalCommitsOutputs.Inc()
 			// This is so the api can determine if a chainhead is about to be updated. It fixes a race condition
 			// on the api. MUST BE BEFORE THE REPLAY FILTER ADD
-			pl.PendingChainHeads.Put(reveal.Entry.GetChainID().Fixed(), reveal)
+			pl.PendingChainHeads.Put(msg.Entry.GetChainID().Fixed(), msg)
 			// Okay the Reveal has been recorded.  Record this as an entry that cannot be duplicated.
-			s.Replay.IsTSValidAndUpdateState(constants.REVEAL_REPLAY, reveal.Entry.GetHash().Fixed(), reveal.Timestamp, s.GetTimestamp())
-			s.Commits.Delete(reveal.Entry.GetHash().Fixed()) // delete(s.Commits, reveal.Entry.GetHash().Fixed())
+			s.Replay.IsTSValidAndUpdateState(constants.REVEAL_REPLAY, msg.Entry.GetHash().Fixed(), msg.Timestamp, s.GetTimestamp())
+			s.Commits.Delete(msg.Entry.GetHash().Fixed()) // delete(s.Commits, msg.Entry.GetHash().Fixed())
 		}
 	}()
 
@@ -1877,9 +1877,9 @@ func (s *State) ProcessRevealEntry(dbheight uint32, msg interfaces.IMsg) (worked
 		eb_db, _ = s.DB.FetchEBlockHead(chainID)
 	}
 	// Handle the case that this is a Entry Chain create
-	// Must be built with CommitChain (i.e. !reveal.IsEntry).  Also
+	// Must be built with CommitChain (i.e. !msg.IsEntry).  Also
 	// cannot have an existing chain (eb and eb_db == nil)
-	if !reveal.IsEntry && eb == nil && eb_db == nil {
+	if !msg.IsEntry && eb == nil && eb_db == nil {
 		// Create a new Entry Block for a new Entry Block Chain
 		eb = entryBlock.NewEBlock()
 		// Set the Chain ID
@@ -1887,15 +1887,15 @@ func (s *State) ProcessRevealEntry(dbheight uint32, msg interfaces.IMsg) (worked
 		// Set the Directory Block Height for this Entry Block
 		eb.GetHeader().SetDBHeight(dbheight)
 		// Add our new entry
-		eb.AddEBEntry(reveal.Entry)
+		eb.AddEBEntry(msg.Entry)
 		// Put it in our list of new Entry Blocks for this Directory Block
 		s.PutNewEBlocks(dbheight, chainID, eb)
-		s.PutNewEntries(dbheight, myhash, reveal.Entry)
-		s.WriteEntry <- reveal.Entry
+		s.PutNewEntries(dbheight, myhash, msg.Entry)
+		s.WriteEntry <- msg.Entry
 		s.IncEntryChains()
 		s.IncEntries()
 		//		s.LogMessage("dependentHolding", "process", msg)
-		s.addMsg.Write(pubsubtypes.CommitRequest{reveal, nil})
+		s.addMsg.Write(pubsubtypes.CommitRequest{msg, nil})
 		s.ExecuteFromHolding(chainID.Fixed()) // Process Reveal for Chain
 
 		return true
@@ -1920,17 +1920,13 @@ func (s *State) ProcessRevealEntry(dbheight uint32, msg interfaces.IMsg) (worked
 		eb.GetHeader().SetPrevKeyMR(key)
 	}
 	// Add our new entry
-	eb.AddEBEntry(reveal.Entry)
+	eb.AddEBEntry(msg.Entry)
 	// Put it in our list of new Entry Blocks for this Directory Block
 	s.PutNewEBlocks(dbheight, chainID, eb)
-	s.PutNewEntries(dbheight, myhash, reveal.Entry)
-	s.WriteEntry <- reveal.Entry
+	s.PutNewEntries(dbheight, myhash, msg.Entry)
+	s.WriteEntry <- msg.Entry
 
 	s.IncEntries()
-	//		s.LogMessage("dependentHolding", "process", msg)
-	s.addMsg.Write(pubsubtypes.CommitRequest{reveal, nil})
-
-	s.ExecuteFromHolding(chainID.Fixed()) // Process Reveal for Chain
 	return true
 }
 
