@@ -11,10 +11,6 @@ type IDirBlockInfo interface {
 	GetBTCConfirmed() bool
 	GetDBMerkleRoot() IHash
 	GetBTCTxHash() IHash
-	GetBTCTxOffset() int32
 	GetTimestamp() Timestamp
 	GetBTCBlockHeight() int32
-	GetBTCBlockHash() IHash
-	GetEthereumAnchorRecordEntryHash() IHash
-	GetEthereumConfirmed() bool
 }

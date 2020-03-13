@@ -14,8 +14,6 @@ import (
 	"os"
 	"sync"
 
-	"github.com/FactomProject/factomd/events"
-
 	"github.com/FactomProject/factomd/common/constants"
 	"github.com/FactomProject/factomd/common/interfaces"
 	"github.com/FactomProject/factomd/common/primitives"
@@ -126,9 +124,6 @@ type Overlay struct {
 
 	BitcoinAnchorRecordPublicKeys  []interfaces.Verifier
 	EthereumAnchorRecordPublicKeys []interfaces.Verifier
-
-	// We need access to the state to be able emit anchor events
-	parentState events.StateEventServices
 }
 
 var _ interfaces.IDatabase = (*Overlay)(nil)
@@ -204,12 +199,6 @@ func (db *Overlay) Delete(bucket, key []byte) error {
 func NewOverlay(db interfaces.IDatabase) *Overlay {
 	answer := new(Overlay)
 	answer.DB = db
-	return answer
-}
-
-func NewOverlayWithState(db interfaces.IDatabase, parentState events.StateEventServices) *Overlay {
-	answer := NewOverlay(db)
-	answer.parentState = parentState
 	return answer
 }
 

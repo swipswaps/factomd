@@ -22,8 +22,6 @@ func CreateTestDirBlockInfo(prev *dbInfo.DirBlockInfo) *dbInfo.DirBlockInfo {
 	dbi.DBMerkleRoot.UnmarshalBinary(IntToByteSlice(255 - int(height)))
 	dbi.BTCConfirmed = height%2 == 1
 
-	dbi.EthereumAnchorRecordEntryHash.UnmarshalBinary(IntToByteSlice(255 - int(height)))
-	dbi.EthereumConfirmed = height%2 == 1
 	return dbi
 }
 

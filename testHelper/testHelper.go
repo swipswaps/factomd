@@ -12,8 +12,6 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/FactomProject/factomd/events"
-
 	"github.com/FactomProject/factom"
 	"github.com/FactomProject/factomd/common/adminBlock"
 	"github.com/FactomProject/factomd/common/constants"
@@ -35,7 +33,6 @@ func CreateEmptyTestState() *state.State {
 	s := new(state.State)
 	s.TimestampAtBoot = new(primitives.Timestamp)
 	s.TimestampAtBoot.SetTime(0)
-	s.EventService = events.NewEventService()
 	s.EFactory = new(electionMsgs.ElectionsFactory)
 	s.LoadConfig("", "")
 	s.Network = "LOCAL"
@@ -108,7 +105,6 @@ func CreateAndPopulateStaleHolding() *state.State {
 
 func CreateAndPopulateTestState() *state.State {
 	s := new(state.State)
-	s.EventService = events.NewEventService()
 	s.TimestampAtBoot = new(primitives.Timestamp)
 	s.TimestampAtBoot.SetTime(0)
 	s.EFactory = new(electionMsgs.ElectionsFactory)

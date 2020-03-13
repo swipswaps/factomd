@@ -5,29 +5,25 @@
 package engine
 
 import (
-	"fmt"
-	"runtime"
-
-	"github.com/FactomProject/factomd/events"
-
-	"github.com/FactomProject/factomd/common/constants"
-	"github.com/FactomProject/factomd/common/constants/runstate"
-	. "github.com/FactomProject/factomd/common/globals"
-	"github.com/FactomProject/factomd/common/interfaces"
-	"github.com/FactomProject/factomd/common/primitives"
-	"github.com/FactomProject/factomd/state"
-
 	"bufio"
+	"fmt"
 	"io"
 	"net"
 	"os"
 	"os/exec"
+	"runtime"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/FactomProject/factomd/common/constants"
+	"github.com/FactomProject/factomd/common/constants/runstate"
+	. "github.com/FactomProject/factomd/common/globals"
+	"github.com/FactomProject/factomd/common/interfaces"
 	"github.com/FactomProject/factomd/common/messages/electionMsgs"
+	"github.com/FactomProject/factomd/common/primitives"
+	"github.com/FactomProject/factomd/state"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -60,7 +56,6 @@ func Factomd(params *FactomParams, listenToStdin bool) interfaces.IState {
 	preBootTime.SetTimeMilli(state0.TimestampAtBoot.GetTimeMilli() - constants.PreBootWindow*60*1000)
 	state0.SetMessageFilterTimestamp(preBootTime)
 	state0.EFactory = new(electionMsgs.ElectionsFactory)
-	state0.EventService = events.NewEventService()
 
 	NetStart(state0, params, listenToStdin)
 	return state0

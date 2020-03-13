@@ -12,8 +12,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/FactomProject/factomd/events/eventmessages/generated/eventmessages"
-
 	"github.com/FactomProject/factomd/common/adminBlock"
 	"github.com/FactomProject/factomd/common/constants"
 	"github.com/FactomProject/factomd/common/directoryBlock"
@@ -22,8 +20,6 @@ import (
 	"github.com/FactomProject/factomd/common/messages"
 	"github.com/FactomProject/factomd/common/primitives"
 	"github.com/FactomProject/factomd/util/atomic"
-
-	//"github.com/FactomProject/factomd/database/databaseOverlay"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -1167,8 +1163,6 @@ func (p *ProcessList) AddToProcessList(s *State, ack *messages.Ack, m interfaces
 
 	// also add the msg and ack to our missing msg request handler
 	s.MissingMessageResponseHandler.NotifyNewMsgPair(ack, m)
-
-	s.EventService.EmitStateChangeEvent(m, eventmessages.EntityState_ACCEPTED)
 }
 
 func (p *ProcessList) ContainsDBSig(serverID interfaces.IHash) bool {

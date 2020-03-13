@@ -20,8 +20,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/FactomProject/factomd/events"
-
 	"github.com/FactomProject/factomd/common/constants/runstate"
 
 	"github.com/FactomProject/factomd/activations"
@@ -442,7 +440,6 @@ type State struct {
 	InputRegExString          string
 	executeRecursionDetection map[[32]byte]interfaces.IMsg
 	Hold                      HoldingList
-	EventService              events.EventService
 
 	// MissingMessageResponse is a cache of the last 1000 msgs we receive such that when
 	// we send out a missing message, we can find that message locally before we ask the net
@@ -539,7 +536,6 @@ func (s *State) Clone(cloneNumber int) interfaces.IState {
 
 	newState.ControlPanelPort = s.ControlPanelPort
 	newState.ControlPanelSetting = s.ControlPanelSetting
-	newState.EventService = s.EventService
 
 	//newState.Identities = s.Identities
 	//newState.Authorities = s.Authorities
@@ -603,10 +599,6 @@ func (s *State) Clone(cloneNumber int) interfaces.IState {
 	return newState
 }
 
-func (s *State) GetEventService() events.EventService {
-	return s.EventService
-}
-
 func (s *State) EmitDirectoryBlockEventsFromHeight(height uint32, end uint32) {
 	i := height
 	msgCount := 0
@@ -646,11 +638,9 @@ func (s *State) EmitDirectoryBlockEventsFromHeight(height uint32, end uint32) {
 			}
 		}
 
-		msg := messages.NewDBStateMsg(d.GetTimestamp(), d, a, f, ec, eblocks, entries, nil)
 		i++
 		msgCount++
 
-		s.EventService.EmitReplayDirectoryBlockCommit(msg)
 	}
 }
 
@@ -1334,7 +1324,7 @@ func (s *State) GetEBlockKeyMRFromEntryHash(entryHash interfaces.IHash) (rval in
 	defer func() {
 		if rval != nil && reflect.ValueOf(rval).IsNil() {
 			rval = nil // convert an interface that is nil to a nil interface
-			primitives.LogNilHashBug("State.GetEBlockKeyMRFromEntryHash() returned a nil for IHash")
+			primitives.LogNilHashBug("State.GetEBlockKeyMRFromEntryHash() saw an interface that was nil")
 		}
 	}()
 	entry, err := s.DB.FetchEntry(entryHash)
@@ -2183,7 +2173,12 @@ func (s *State) SetFactoshisPerEC(factoshisPerEC uint64) {
 }
 
 func (s *State) GetIdentityChainID() (rval interfaces.IHash) {
-	defer func() { rval = primitives.CheckNil(rval, "State.GetIdentityChainID") }()
+	defer func() {
+		if rval != nil && reflect.ValueOf(rval).IsNil() {
+			rval = nil // convert an interface that is nil to a nil interface
+			primitives.LogNilHashBug("State.GetIdentityChainID() saw an interface that was nil")
+		}
+	}()
 	return s.IdentityChainID
 }
 
@@ -2540,7 +2535,12 @@ func (s *State) GetNetworkID() uint32 {
 
 // The initial public key that can sign the first block
 func (s *State) GetNetworkBootStrapKey() (rval interfaces.IHash) {
-	defer func() { rval = primitives.CheckNil(rval, "State.GetNetworkBootStrapKey") }()
+	defer func() {
+		if rval != nil && reflect.ValueOf(rval).IsNil() {
+			rval = nil // convert an interface that is nil to a nil interface
+			primitives.LogNilHashBug("State.GetNetworkBootStrapKey() saw an interface that was nil")
+		}
+	}()
 	switch s.NetworkNumber {
 	case constants.NETWORK_MAIN:
 		key, _ := primitives.HexToHash("0426a802617848d4d16d87830fc521f4d136bb2d0c352850919c2679f189613a")
@@ -2563,7 +2563,12 @@ func (s *State) GetNetworkBootStrapKey() (rval interfaces.IHash) {
 
 // The initial identity that can sign the first block
 func (s *State) GetNetworkBootStrapIdentity() (rval interfaces.IHash) {
-	defer func() { rval = primitives.CheckNil(rval, "State.GetNetworkBootStrapIdentity") }()
+	defer func() {
+		if rval != nil && reflect.ValueOf(rval).IsNil() {
+			rval = nil // convert an interface that is nil to a nil interface
+			primitives.LogNilHashBug("State.GetNetworkBootStrapIdentity() saw an interface that was nil")
+		}
+	}()
 	switch s.NetworkNumber {
 	case constants.NETWORK_MAIN:
 		return primitives.NewZeroHash()
@@ -2584,7 +2589,12 @@ func (s *State) GetNetworkBootStrapIdentity() (rval interfaces.IHash) {
 
 // The identity for validating messages
 func (s *State) GetNetworkSkeletonIdentity() (rval interfaces.IHash) {
-	defer func() { rval = primitives.CheckNil(rval, "State.GetNetworkSkeletonIdentity") }()
+	defer func() {
+		if rval != nil && reflect.ValueOf(rval).IsNil() {
+			rval = nil // convert an interface that is nil to a nil interface
+			primitives.LogNilHashBug("State.GetNetworkSkeletonIdentity() saw an interface that was nil")
+		}
+	}()
 	switch s.NetworkNumber {
 	case constants.NETWORK_MAIN:
 		id, _ := primitives.HexToHash("8888882690706d0d45d49538e64e7c76571d9a9b331256b5b69d9fd2d7f1f14a")
@@ -2604,7 +2614,12 @@ func (s *State) GetNetworkSkeletonIdentity() (rval interfaces.IHash) {
 }
 
 func (s *State) GetNetworkIdentityRegistrationChain() (rval interfaces.IHash) {
-	defer func() { rval = primitives.CheckNil(rval, "State.GetNetworkIdentityRegistrationChain") }()
+	defer func() {
+		if rval != nil && reflect.ValueOf(rval).IsNil() {
+			rval = nil // convert an interface that is nil to a nil interface
+			primitives.LogNilHashBug("State.GetNetworkIdentityRegistrationChain() saw an interface that was nil")
+		}
+	}()
 	id, _ := primitives.HexToHash("888888001750ede0eff4b05f0c3f557890b256450cabbb84cada937f9c258327")
 	return id
 }
@@ -2638,7 +2653,7 @@ func (s *State) InitLevelDB() error {
 		}
 	}
 
-	s.DB = databaseOverlay.NewOverlayWithState(dbase, s)
+	s.DB = databaseOverlay.NewOverlay(dbase)
 	return nil
 }
 
@@ -2654,7 +2669,7 @@ func (s *State) InitBoltDB() error {
 
 	dbase := new(boltdb.BoltDB)
 	dbase.Init(nil, path+"FactomBolt.db")
-	s.DB = databaseOverlay.NewOverlayWithState(dbase, s)
+	s.DB = databaseOverlay.NewOverlay(dbase)
 	return nil
 }
 
@@ -2665,7 +2680,7 @@ func (s *State) InitMapDB() error {
 
 	dbase := new(mapdb.MapDB)
 	dbase.Init(nil)
-	s.DB = databaseOverlay.NewOverlayWithState(dbase, s)
+	s.DB = databaseOverlay.NewOverlay(dbase)
 	return nil
 }
 

@@ -23,9 +23,8 @@ import (
 	"github.com/FactomProject/factomd/common/messages"
 	"github.com/FactomProject/factomd/common/primitives"
 	"github.com/FactomProject/factomd/database/databaseOverlay"
-	"github.com/FactomProject/factomd/util/atomic"
-
 	llog "github.com/FactomProject/factomd/log"
+	"github.com/FactomProject/factomd/util/atomic"
 )
 
 var _ = hex.EncodeToString
@@ -1675,7 +1674,6 @@ func (list *DBStateList) UpdateState() (progress bool) {
 		p = list.SignDB(d)
 		progress = p || progress
 
-		wasSaved := d.Saved
 		p = list.SaveDBStateToDB(d)
 		progress = p || progress
 
@@ -1685,10 +1683,6 @@ func (list *DBStateList) UpdateState() (progress bool) {
 		// remember the last saved block
 		if d.Saved {
 			saved = i
-		}
-
-		if progress && d.Saved && d.Signed && !wasSaved {
-			s.EventService.EmitDirectoryBlockCommitEvent(d)
 		}
 
 		// only process one block past the last saved block

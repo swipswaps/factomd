@@ -423,9 +423,6 @@ func NetStart(s *state.State, p *FactomParams, listenToStdin bool) {
 
 	// Start live feed service
 	config := s.Cfg.(*util.FactomdConfig)
-	if config.LiveFeedAPI.EnableLiveFeedAPI || p.EnableLiveFeedAPI {
-		s.EventService.ConfigService(s, config, p)
-	}
 
 	networkpattern = p.Net
 
