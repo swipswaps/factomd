@@ -12,7 +12,7 @@ import (
 // DB Signature Entry -------------------------
 type AddFederatedServerSigningKey struct {
 	AdminIDType     uint32               `json:"adminidtype"`
-	IdentityChainID interfaces.IHash     `json:"identitychainid"`
+	IdentityChainID interfaces.*HashS     `json:"identitychainid"`
 	KeyPriority     byte                 `json:"keypriority"`
 	PublicKey       primitives.PublicKey `json:"publickey"`
 	DBHeight        uint32               `json:"dbheight"`
@@ -34,7 +34,7 @@ func (c *AddFederatedServerSigningKey) UpdateState(state interfaces.IState) erro
 	return nil
 }
 
-func (e *AddFederatedServerSigningKey) SortedIdentity() (rval interfaces.IHash) {
+func (e *AddFederatedServerSigningKey) SortedIdentity() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "AddFederatedServerSigningKey.SortedIdentity") }()
 
 	return e.IdentityChainID
@@ -53,7 +53,7 @@ func (e *AddFederatedServerSigningKey) String() string {
 }
 
 // Create a new DB Signature Entry
-func NewAddFederatedServerSigningKey(identityChainID interfaces.IHash, keyPriority byte, publicKey primitives.PublicKey, height uint32) (e *AddFederatedServerSigningKey) {
+func NewAddFederatedServerSigningKey(identityChainID interfaces.*HashS, keyPriority byte, publicKey primitives.PublicKey, height uint32) (e *AddFederatedServerSigningKey) {
 	e = new(AddFederatedServerSigningKey)
 	e.IdentityChainID = identityChainID
 	e.KeyPriority = keyPriority
@@ -147,7 +147,7 @@ func (e *AddFederatedServerSigningKey) Interpret() string {
 	return ""
 }
 
-func (e *AddFederatedServerSigningKey) Hash() (rval interfaces.IHash) {
+func (e *AddFederatedServerSigningKey) Hash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "AddFederatedServerSigningKey.Hash") }()
 
 	bin, err := e.MarshalBinary()

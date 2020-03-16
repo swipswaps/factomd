@@ -13,25 +13,25 @@ type DBOverlaySimple interface {
 	Close() error
 	DoesKeyExist(bucket, key []byte) (bool, error)
 	ExecuteMultiBatch() error
-	FetchABlock(IHash) (IAdminBlock, error)
+	FetchABlock(*HashS) (IAdminBlock, error)
 	FetchABlockByHeight(blockHeight uint32) (IAdminBlock, error)
-	FetchDBKeyMRByHeight(dBlockHeight uint32) (dBlockKeyMR IHash, err error)
-	FetchDBlock(IHash) (IDirectoryBlock, error)
+	FetchDBKeyMRByHeight(dBlockHeight uint32) (dBlockKeyMR *HashS, err error)
+	FetchDBlock(*HashS) (IDirectoryBlock, error)
 	FetchDBlockByHeight(uint32) (IDirectoryBlock, error)
 	FetchDBlockHead() (IDirectoryBlock, error)
-	FetchEBlock(IHash) (IEntryBlock, error)
-	FetchEBlockHead(chainID IHash) (IEntryBlock, error)
-	FetchECBlock(IHash) (IEntryCreditBlock, error)
+	FetchEBlock(*HashS) (IEntryBlock, error)
+	FetchEBlockHead(chainID *HashS) (IEntryBlock, error)
+	FetchECBlock(*HashS) (IEntryCreditBlock, error)
 	FetchECBlockByHeight(blockHeight uint32) (IEntryCreditBlock, error)
-	FetchECTransaction(hash IHash) (IECBlockEntry, error)
-	FetchEntry(IHash) (IEBEntry, error)
-	FetchFBlock(IHash) (IFBlock, error)
+	FetchECTransaction(hash *HashS) (IECBlockEntry, error)
+	FetchEntry(*HashS) (IEBEntry, error)
+	FetchFBlock(*HashS) (IFBlock, error)
 	FetchFBlockByHeight(blockHeight uint32) (IFBlock, error)
-	FetchFactoidTransaction(hash IHash) (ITransaction, error)
-	FetchHeadIndexByChainID(chainID IHash) (IHash, error)
-	FetchIncludedIn(hash IHash) (IHash, error)
-	FetchPaidFor(hash IHash) (IHash, error)
-	FetchAllEBlocksByChain(IHash) ([]IEntryBlock, error)
+	FetchFactoidTransaction(hash *HashS) (ITransaction, error)
+	FetchHeadIndexByChainID(chainID *HashS) (*HashS, error)
+	FetchIncludedIn(hash *HashS) (*HashS, error)
+	FetchPaidFor(hash *HashS) (*HashS, error)
+	FetchAllEBlocksByChain(*HashS) ([]IEntryBlock, error)
 	InsertEntryMultiBatch(entry IEBEntry) error
 	InsertEntry(entry IEBEntry) error
 	ProcessABlockMultiBatch(block DatabaseBatchable) error
@@ -41,11 +41,11 @@ type DBOverlaySimple interface {
 	ProcessEBlockMultiBatchWithoutHead(eblock DatabaseBlockWithEntries, checkForDuplicateEntries bool) error
 	ProcessECBlockMultiBatch(IEntryCreditBlock, bool) (err error)
 	ProcessFBlockMultiBatch(DatabaseBlockWithEntries) error
-	FetchDirBlockInfoByKeyMR(hash IHash) (IDirBlockInfo, error)
+	FetchDirBlockInfoByKeyMR(hash *HashS) (IDirBlockInfo, error)
 	SetExportData(path string)
 	StartMultiBatch()
 	Trim()
-	FetchAllEntriesByChainID(chainID IHash) ([]IEBEntry, error)
+	FetchAllEntriesByChainID(chainID *HashS) ([]IEBEntry, error)
 	SaveKeyValueStore(kvs BinaryMarshallable, key []byte) error
 	FetchKeyValueStore(key []byte, dst BinaryMarshallable) (BinaryMarshallable, error)
 	SaveDatabaseEntryHeight(height uint32) error
@@ -57,13 +57,13 @@ type DBOverlay interface {
 	// We let Database method calls flow through.
 	IDatabase
 
-	FetchHeadIndexByChainID(chainID IHash) (IHash, error)
+	FetchHeadIndexByChainID(chainID *HashS) (*HashS, error)
 	SetExportData(path string)
 
 	StartMultiBatch()
 	PutInMultiBatch(records []Record)
 	ExecuteMultiBatch() error
-	GetEntryType(hash IHash) (IHash, error)
+	GetEntryType(hash *HashS) (*HashS, error)
 
 	//**********************************Entry**********************************//
 
@@ -72,13 +72,13 @@ type DBOverlay interface {
 	InsertEntryMultiBatch(entry IEBEntry) error
 
 	// FetchEntry gets an entry by hash from the database.
-	FetchEntry(IHash) (IEBEntry, error)
+	FetchEntry(*HashS) (IEBEntry, error)
 
-	FetchAllEntriesByChainID(chainID IHash) ([]IEBEntry, error)
+	FetchAllEntriesByChainID(chainID *HashS) ([]IEBEntry, error)
 
-	FetchAllEntryIDsByChainID(chainID IHash) ([]IHash, error)
+	FetchAllEntryIDsByChainID(chainID *HashS) ([]*HashS, error)
 
-	FetchAllEntryIDs() ([]IHash, error)
+	FetchAllEntryIDs() ([]*HashS, error)
 
 	//**********************************EBlock**********************************//
 
@@ -88,25 +88,25 @@ type DBOverlay interface {
 	ProcessEBlockMultiBatchWithoutHead(eblock DatabaseBlockWithEntries, checkForDuplicateEntries bool) error
 	ProcessEBlockMultiBatch(eblock DatabaseBlockWithEntries, checkForDuplicateEntries bool) error
 
-	FetchEBlock(IHash) (IEntryBlock, error)
+	FetchEBlock(*HashS) (IEntryBlock, error)
 
 	// FetchEBlockByHash gets an entry by hash from the database.
-	FetchEBlockByPrimary(IHash) (IEntryBlock, error)
+	FetchEBlockByPrimary(*HashS) (IEntryBlock, error)
 
 	// FetchEBlockByKeyMR gets an entry by hash from the database.
-	FetchEBlockBySecondary(hash IHash) (IEntryBlock, error)
+	FetchEBlockBySecondary(hash *HashS) (IEntryBlock, error)
 
 	// FetchEBKeyMRByHash gets an entry by hash from the database.
-	FetchEBKeyMRByHash(hash IHash) (IHash, error)
+	FetchEBKeyMRByHash(hash *HashS) (*HashS, error)
 
 	// FetchAllEBlocksByChain gets all of the blocks by chain id
-	FetchAllEBlocksByChain(IHash) ([]IEntryBlock, error)
+	FetchAllEBlocksByChain(*HashS) ([]IEntryBlock, error)
 
 	SaveEBlockHead(block DatabaseBlockWithEntries, checkForDuplicateEntries bool) error
 
-	FetchEBlockHead(chainID IHash) (IEntryBlock, error)
+	FetchEBlockHead(chainID *HashS) (IEntryBlock, error)
 
-	FetchAllEBlockChainIDs() ([]IHash, error)
+	FetchAllEBlockChainIDs() ([]*HashS, error)
 
 	//**********************************DBlock**********************************//
 
@@ -119,19 +119,19 @@ type DBOverlay interface {
 	// heights.  Fetch is inclusive of the start height and exclusive of the
 	// ending height. To fetch all hashes from the start height until no
 	// more are present, use -1 as endHeight.
-	FetchDBlockHeightRange(startHeight, endHeight int64) ([]IHash, error)
+	FetchDBlockHeightRange(startHeight, endHeight int64) ([]*HashS, error)
 
 	// FetchBlockHeightByKeyMR returns the block height for the given hash.  This is
 	// part of the database.Db interface implementation.
-	FetchDBlockHeightByKeyMR(IHash) (int64, error)
+	FetchDBlockHeightByKeyMR(*HashS) (int64, error)
 
-	FetchDBlock(IHash) (IDirectoryBlock, error)
-
-	// FetchDBlock gets an entry by hash from the database.
-	FetchDBlockByPrimary(IHash) (IDirectoryBlock, error)
+	FetchDBlock(*HashS) (IDirectoryBlock, error)
 
 	// FetchDBlock gets an entry by hash from the database.
-	FetchDBlockBySecondary(IHash) (IDirectoryBlock, error)
+	FetchDBlockByPrimary(*HashS) (IDirectoryBlock, error)
+
+	// FetchDBlock gets an entry by hash from the database.
+	FetchDBlockBySecondary(*HashS) (IDirectoryBlock, error)
 
 	// FetchDBlockByHeight gets an directory block by height from the database.
 	FetchDBlockByHeight(uint32) (IDirectoryBlock, error)
@@ -139,14 +139,14 @@ type DBOverlay interface {
 	FetchDBlockHead() (IDirectoryBlock, error)
 
 	// FetchDBKeyMRByHeight gets a dBlock KeyMR from the database.
-	FetchDBKeyMRByHeight(dBlockHeight uint32) (dBlockKeyMR IHash, err error)
+	FetchDBKeyMRByHeight(dBlockHeight uint32) (dBlockKeyMR *HashS, err error)
 
 	// FetchDBKeyMRByHash gets a DBlock KeyMR by hash.
-	FetchDBKeyMRByHash(hash IHash) (dBlockHash IHash, err error)
+	FetchDBKeyMRByHash(hash *HashS) (dBlockHash *HashS, err error)
 
 	// FetchAllFBInfo gets all of the fbInfo
 	FetchAllDBlocks() ([]IDirectoryBlock, error)
-	FetchAllDBlockKeys() ([]IHash, error)
+	FetchAllDBlockKeys() ([]*HashS, error)
 
 	SaveDirectoryBlockHead(DatabaseBlockWithEntries) error
 
@@ -159,18 +159,18 @@ type DBOverlay interface {
 	ProcessECBlockBatchWithoutHead(IEntryCreditBlock, bool) (err error)
 	ProcessECBlockMultiBatch(IEntryCreditBlock, bool) (err error)
 
-	FetchECBlock(IHash) (IEntryCreditBlock, error)
+	FetchECBlock(*HashS) (IEntryCreditBlock, error)
 
 	// FetchECBlockByHash gets an Entry Credit block by hash from the database.
-	FetchECBlockByPrimary(IHash) (IEntryCreditBlock, error)
+	FetchECBlockByPrimary(*HashS) (IEntryCreditBlock, error)
 
 	// FetchECBlockByKeyMR gets an Entry Credit block by hash from the database.
-	FetchECBlockBySecondary(hash IHash) (IEntryCreditBlock, error)
+	FetchECBlockBySecondary(hash *HashS) (IEntryCreditBlock, error)
 	FetchECBlockByHeight(blockHeight uint32) (IEntryCreditBlock, error)
 
 	// FetchAllECBlocks gets all of the entry credit blocks
 	FetchAllECBlocks() ([]IEntryCreditBlock, error)
-	FetchAllECBlockKeys() ([]IHash, error)
+	FetchAllECBlockKeys() ([]*HashS, error)
 
 	SaveECBlockHead(IEntryCreditBlock, bool) error
 
@@ -183,18 +183,18 @@ type DBOverlay interface {
 	ProcessABlockBatchWithoutHead(block DatabaseBatchable) error
 	ProcessABlockMultiBatch(block DatabaseBatchable) error
 
-	FetchABlock(IHash) (IAdminBlock, error)
+	FetchABlock(*HashS) (IAdminBlock, error)
 
 	// FetchABlockByHash gets an admin block by hash from the database.
-	FetchABlockByPrimary(hash IHash) (IAdminBlock, error)
+	FetchABlockByPrimary(hash *HashS) (IAdminBlock, error)
 
 	// FetchABlockByKeyMR gets an admin block by keyMR from the database.
-	FetchABlockBySecondary(hash IHash) (IAdminBlock, error)
+	FetchABlockBySecondary(hash *HashS) (IAdminBlock, error)
 	FetchABlockByHeight(blockHeight uint32) (IAdminBlock, error)
 
 	// FetchAllABlocks gets all of the admin blocks
 	FetchAllABlocks() ([]IAdminBlock, error)
-	FetchAllABlockKeys() ([]IHash, error)
+	FetchAllABlockKeys() ([]*HashS, error)
 
 	SaveABlockHead(DatabaseBatchable) error
 
@@ -207,16 +207,16 @@ type DBOverlay interface {
 	ProcessFBlockBatchWithoutHead(DatabaseBlockWithEntries) error
 	ProcessFBlockMultiBatch(DatabaseBlockWithEntries) error
 
-	FetchFBlock(IHash) (IFBlock, error)
+	FetchFBlock(*HashS) (IFBlock, error)
 
 	// FetchFBlockByHash gets a factoid block by hash from the database.
-	FetchFBlockByPrimary(IHash) (IFBlock, error)
-	FetchFBlockBySecondary(IHash) (IFBlock, error)
+	FetchFBlockByPrimary(*HashS) (IFBlock, error)
+	FetchFBlockBySecondary(*HashS) (IFBlock, error)
 	FetchFBlockByHeight(blockHeight uint32) (IFBlock, error)
 
 	// FetchAllFBlocks gets all of the factoid blocks
 	FetchAllFBlocks() ([]IFBlock, error)
-	FetchAllFBlockKeys() ([]IHash, error)
+	FetchAllFBlockKeys() ([]*HashS, error)
 
 	SaveFactoidBlockHead(fblock DatabaseBlockWithEntries) error
 
@@ -229,10 +229,10 @@ type DBOverlay interface {
 	ProcessDirBlockInfoBatch(block IDirBlockInfo) error
 
 	// FetchDirBlockInfoByHash gets a dirblock info block by hash from the database.
-	FetchDirBlockInfoByHash(hash IHash) (IDirBlockInfo, error)
+	FetchDirBlockInfoByHash(hash *HashS) (IDirBlockInfo, error)
 
 	// FetchDirBlockInfoByKeyMR gets a dirblock info block by keyMR from the database.
-	FetchDirBlockInfoByKeyMR(hash IHash) (IDirBlockInfo, error)
+	FetchDirBlockInfoByKeyMR(hash *HashS) (IDirBlockInfo, error)
 
 	// FetchAllConfirmedDirBlockInfos gets all of the confirmed dirblock info blocks
 	FetchAllConfirmedDirBlockInfos() ([]IDirBlockInfo, error)
@@ -247,19 +247,19 @@ type DBOverlay interface {
 
 	//******************************IncludedIn**********************************//
 
-	SaveIncludedIn(entry, block IHash) error
+	SaveIncludedIn(entry, block *HashS) error
 	SaveIncludedInMultiFromBlock(block DatabaseBlockWithEntries, checkForDuplicateEntries bool) error
-	SaveIncludedInMulti(entries []IHash, block IHash, checkForDuplicateEntries bool) error
-	FetchIncludedIn(hash IHash) (IHash, error)
+	SaveIncludedInMulti(entries []*HashS, block *HashS, checkForDuplicateEntries bool) error
+	FetchIncludedIn(hash *HashS) (*HashS, error)
 
 	ReparseAnchorChains() error
 	SetBitcoinAnchorRecordPublicKeysFromHex([]string) error
 	SetEthereumAnchorRecordPublicKeysFromHex([]string) error
 
-	FetchPaidFor(hash IHash) (IHash, error)
+	FetchPaidFor(hash *HashS) (*HashS, error)
 
-	FetchFactoidTransaction(hash IHash) (ITransaction, error)
-	FetchECTransaction(hash IHash) (IECBlockEntry, error)
+	FetchFactoidTransaction(hash *HashS) (ITransaction, error)
+	FetchECTransaction(hash *HashS) (IECBlockEntry, error)
 
 	//******************************KeyValueStore**********************************//
 	SaveKeyValueStore(kvs BinaryMarshallable, key []byte) error

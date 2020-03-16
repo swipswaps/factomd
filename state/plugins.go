@@ -181,7 +181,7 @@ func (s *State) uploadDBState(sequence uint32) error {
 			block.FBlock = d.FactoidBlock
 			block.ECBlock = d.EntryCreditBlock
 
-			eHashes := make([]interfaces.IHash, 0)
+			eHashes := make([]interfaces.*HashS, 0)
 			for _, e := range d.EBlocks {
 				block.AddEblock(e)
 				for _, eh := range e.GetEntryHashes() {

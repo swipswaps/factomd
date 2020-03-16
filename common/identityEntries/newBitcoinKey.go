@@ -22,7 +22,7 @@ type NewBitcoinKeyStructure struct {
 	//a text string saying "New Bitcoin Key"
 	FunctionName []byte //"New Bitcoin Key"
 	//It specifies the root identity chainID.
-	RootIdentityChainID interfaces.IHash
+	RootIdentityChainID interfaces.*HashS
 	//Next is a byte signifying the bitcoin key level.
 	//It is 0 origin indexed, so with only 1 key it would be 0x00.
 	BitcoinKeyLevel byte
@@ -59,7 +59,7 @@ func (nbks *NewBitcoinKeyStructure) MarshalForSig() []byte {
 	return answer
 }
 
-func (nbks *NewBitcoinKeyStructure) VerifySignature(key1 interfaces.IHash) error {
+func (nbks *NewBitcoinKeyStructure) VerifySignature(key1 interfaces.*HashS) error {
 	bin := nbks.MarshalForSig()
 	pk := new(primitives.PublicKey)
 	err := pk.UnmarshalBinary(nbks.PreimageIdentityKey[1:])
@@ -136,7 +136,7 @@ func (nbks *NewBitcoinKeyStructure) ToExternalIDs() [][]byte {
 	return extIDs
 }
 
-func (nbks *NewBitcoinKeyStructure) GetChainID() (rval interfaces.IHash) {
+func (nbks *NewBitcoinKeyStructure) GetChainID() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "NewBitcoinKeyStructure.GetChainID") }()
 
 	extIDs := nbks.ToExternalIDs()

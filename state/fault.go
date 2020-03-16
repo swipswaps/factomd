@@ -21,8 +21,8 @@ var faultLogger = packageLogger.WithFields(log.Fields{"subpack": "fault"})
 type FaultCore struct {
 	// The following 5 fields represent the "Core" of the message
 	// This should match the Core of FullServerFault messages
-	ServerID      interfaces.IHash
-	AuditServerID interfaces.IHash
+	ServerID      interfaces.*HashS
+	AuditServerID interfaces.*HashS
 	VMIndex       byte
 	DBHeight      uint32
 	Height        uint32
@@ -30,7 +30,7 @@ type FaultCore struct {
 	Timestamp     interfaces.Timestamp
 }
 
-func (fc *FaultCore) GetHash() (rval interfaces.IHash) {
+func (fc *FaultCore) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "FaultCore.GetHash") }()
 
 	data, err := fc.MarshalCore()

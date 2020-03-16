@@ -27,7 +27,7 @@ type CommitEntryMsg struct {
 	Signature interfaces.IFullSignature
 
 	//Not marshalled
-	hash interfaces.IHash
+	hash interfaces.*HashS
 
 	// Not marshalled... Just used by the leader
 	count        int
@@ -83,19 +83,19 @@ func (m *CommitEntryMsg) Process(dbheight uint32, state interfaces.IState) bool 
 	return state.ProcessCommitEntry(dbheight, m)
 }
 
-func (m *CommitEntryMsg) GetRepeatHash() (rval interfaces.IHash) {
+func (m *CommitEntryMsg) GetRepeatHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "CommitEntryMsg.GetRepeatHash") }()
 
 	return m.CommitEntry.GetSigHash()
 }
 
-func (m *CommitEntryMsg) GetHash() (rval interfaces.IHash) {
+func (m *CommitEntryMsg) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "CommitEntryMsg.GetHash") }()
 
 	return m.CommitEntry.EntryHash
 }
 
-func (m *CommitEntryMsg) GetMsgHash() (rval interfaces.IHash) {
+func (m *CommitEntryMsg) GetMsgHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "CommitEntryMsg.GetMsgHash") }()
 
 	if m.MsgHash == nil {

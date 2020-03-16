@@ -25,7 +25,7 @@ type LinkEntryCreditKeyStructure struct {
 	//The second is 21 bytes of ASCII text "Link Entry Credit Key".
 	FunctionName []byte //"Link Entry Credit Key"
 	//The third is the identity ChainID.
-	RootIdentityChainID interfaces.IHash
+	RootIdentityChainID interfaces.*HashS
 
 	//Some random byte goes here?! TODO: check!
 
@@ -74,11 +74,11 @@ func (leck *LinkEntryCreditKeyStructure) ToExternalIDs() [][]byte {
 	return extIDs
 }
 
-func (leck *LinkEntryCreditKeyStructure) GetChainID()(rval interfaces.IHash) {
+func (leck *LinkEntryCreditKeyStructure) GetChainID()(rval interfaces.*HashS) {
 defer func() {
 		if rval != nil && reflect.ValueOf(rval).IsNil() {
 		rval = nil // convert an interface that is nil to a nil interface
-			primitives.LogNilHashBug("LinkEntryCreditKeyStructure.GetChainID() returned a nil for IHash")
+			primitives.LogNilHashBug("LinkEntryCreditKeyStructure.GetChainID() returned a nil for *HashS")
 		}
 	}()
 

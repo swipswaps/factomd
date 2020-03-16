@@ -166,7 +166,7 @@ func HandleV2ACKWithChain(state interfaces.IState, params interface{}) (interfac
 }
 
 // handleAckByEntryHash assumes the hash given is an entryhash
-func handleAckByEntryHash(hash interfaces.IHash, state interfaces.IState) (interface{}, *primitives.JSONError) {
+func handleAckByEntryHash(hash interfaces.*HashS, state interfaces.IState) (interface{}, *primitives.JSONError) {
 	answer := new(EntryStatus)
 	// This is an entry
 	revStatus, revBlktime, commit := state.GetEntryRevealAckByEntryHash(hash)

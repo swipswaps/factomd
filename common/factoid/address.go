@@ -43,7 +43,7 @@ func NewAddress(b []byte) interfaces.IAddress {
 	return a
 }
 
-func CreateAddress(hash interfaces.IHash) interfaces.IAddress {
+func CreateAddress(hash interfaces.*HashS) interfaces.IAddress {
 	if hash == nil {
 		return NewAddress(nil)
 	}

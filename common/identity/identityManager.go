@@ -125,7 +125,7 @@ func RandomIdentityManager() *IdentityManager {
 	return im
 }
 
-func (im *IdentityManager) SetBootstrapIdentity(id interfaces.IHash, key interfaces.IHash) error {
+func (im *IdentityManager) SetBootstrapIdentity(id interfaces.*HashS, key interfaces.*HashS) error {
 	// Identity
 	i := NewIdentity()
 	i.IdentityChainID = id
@@ -147,7 +147,7 @@ func (im *IdentityManager) SetBootstrapIdentity(id interfaces.IHash, key interfa
 	return nil
 }
 
-func (im *IdentityManager) SetIdentityRegistration(chain interfaces.IHash) error {
+func (im *IdentityManager) SetIdentityRegistration(chain interfaces.*HashS) error {
 	id := NewIdentity()
 	id.IdentityChainID = chain
 	id.Status = constants.IDENTITY_REGISTRATION_CHAIN
@@ -156,7 +156,7 @@ func (im *IdentityManager) SetIdentityRegistration(chain interfaces.IHash) error
 	return nil
 }
 
-func (im *IdentityManager) SetSkeletonIdentity(chain interfaces.IHash) error {
+func (im *IdentityManager) SetSkeletonIdentity(chain interfaces.*HashS) error {
 	// Skeleton is in the identity list
 	//	The key comes from the blockchain, and must be parsed
 	id := NewIdentity()
@@ -240,14 +240,14 @@ func (im *IdentityManager) Init() {
 	}
 }
 
-func (im *IdentityManager) SetIdentity(chainID interfaces.IHash, id *Identity) {
+func (im *IdentityManager) SetIdentity(chainID interfaces.*HashS, id *Identity) {
 	im.Init()
 	im.Mutex.Lock()
 	defer im.Mutex.Unlock()
 	im.Identities[chainID.Fixed()] = id
 }
 
-func (im *IdentityManager) RemoveIdentity(chainID interfaces.IHash) bool {
+func (im *IdentityManager) RemoveIdentity(chainID interfaces.*HashS) bool {
 	im.Init()
 	im.Mutex.Lock()
 	defer im.Mutex.Unlock()
@@ -264,7 +264,7 @@ func (im *IdentityManager) RemoveIdentity(chainID interfaces.IHash) bool {
 	return true
 }
 
-func (im *IdentityManager) GetIdentity(chainID interfaces.IHash) *Identity {
+func (im *IdentityManager) GetIdentity(chainID interfaces.*HashS) *Identity {
 	im.Init()
 	im.Mutex.RLock()
 	defer im.Mutex.RUnlock()
@@ -325,14 +325,14 @@ func (im *IdentityManager) GetIdentities() []*Identity {
 	return ids
 }
 
-func (im *IdentityManager) SetAuthority(chainID interfaces.IHash, auth *Authority) {
+func (im *IdentityManager) SetAuthority(chainID interfaces.*HashS, auth *Authority) {
 	im.Init()
 	im.Mutex.Lock()
 	defer im.Mutex.Unlock()
 	im.Authorities[chainID.Fixed()] = auth
 }
 
-func (im *IdentityManager) RemoveAuthority(chainID interfaces.IHash) bool {
+func (im *IdentityManager) RemoveAuthority(chainID interfaces.*HashS) bool {
 	im.Init()
 	_, ok := im.Authorities[chainID.Fixed()]
 	if !ok {
@@ -355,7 +355,7 @@ func (im *IdentityManager) GetAuthorities() []interfaces.IAuthority {
 	return auths
 }
 
-func (im *IdentityManager) GetAuthority(chainID interfaces.IHash) *Authority {
+func (im *IdentityManager) GetAuthority(chainID interfaces.*HashS) *Authority {
 	im.Init()
 	im.Mutex.RLock()
 	defer im.Mutex.RUnlock()

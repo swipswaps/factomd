@@ -37,28 +37,28 @@ func (p IdentitySort) Less(i, j int) bool {
 
 //https://github.com/FactomProject/FactomDocs/blob/master/Identity.md
 type Identity struct {
-	IdentityChainID    interfaces.IHash `json:"identity_chainid"`
+	IdentityChainID    interfaces.*HashS `json:"identity_chainid"`
 	IdentityChainSync  EntryBlockSync   `json:"-"`
 	IdentityRegistered uint32           `json:"identity_registered`
 	IdentityCreated    uint32           `json:"identity_created`
 
-	ManagementChainID    interfaces.IHash `json:"management_chaind`
+	ManagementChainID    interfaces.*HashS `json:"management_chaind`
 	ManagementChainSync  EntryBlockSync   `json:"-"`
 	ManagementRegistered uint32           `json:"management_registered`
 	ManagementCreated    uint32           `json:"management_created`
-	MatryoshkaHash       interfaces.IHash `json:"matryoshka_hash`
+	MatryoshkaHash       interfaces.*HashS `json:"matryoshka_hash`
 
 	// All 4 levels keys, 0 indexed.
 	//		Keys[0] --> Key 1
 	//		Keys[1] --> Key 2
 	//		Keys[2] --> Key 3
 	//		Keys[3] --> Key 4
-	Keys            [4]interfaces.IHash `json:"identity_keys"`
-	SigningKey      interfaces.IHash    `json:"signing_key"`
+	Keys            [4]interfaces.*HashS `json:"identity_keys"`
+	SigningKey      interfaces.*HashS    `json:"signing_key"`
 	Status          uint8               `json:"status"`
 	AnchorKeys      []AnchorSigningKey  `json:"anchor_keys"`
 	Efficiency      uint16              `json:"efficiency"`
-	CoinbaseAddress interfaces.IHash    `json:"coinbase_address"`
+	CoinbaseAddress interfaces.*HashS    `json:"coinbase_address"`
 }
 
 var _ interfaces.Printable = (*Identity)(nil)
@@ -189,7 +189,7 @@ func (id *Identity) IsRegistrationValid() (bool, error) {
 // If the identity is not valid, a list of missing things will be
 // returned in the error
 func (id *Identity) IsComplete() (bool, error) {
-	isNil := func(hash interfaces.IHash) bool {
+	isNil := func(hash interfaces.*HashS) bool {
 		if hash == nil || hash.IsZero() {
 			return true
 		}
@@ -434,7 +434,7 @@ func (e *Identity) MarshalBinary() (rval []byte, err error) {
 		return nil, err
 	}
 
-	err = buf.PushIHash(e.CoinbaseAddress)
+	err = buf.Push*HashS(e.CoinbaseAddress)
 	if err != nil {
 		return nil, err
 	}
@@ -528,7 +528,7 @@ func (e *Identity) UnmarshalBinaryData(p []byte) (newData []byte, err error) {
 		return
 	}
 
-	e.CoinbaseAddress, err = buf.PopIHash()
+	e.CoinbaseAddress, err = buf.Pop*HashS()
 	if err != nil {
 		return
 	}

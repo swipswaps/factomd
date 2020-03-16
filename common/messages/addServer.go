@@ -24,7 +24,7 @@ import (
 type AddServerMsg struct {
 	msgbase.MessageBase
 	Timestamp     interfaces.Timestamp // Message Timestamp
-	ServerChainID interfaces.IHash     // ChainID of new server
+	ServerChainID interfaces.*HashS     // ChainID of new server
 	ServerType    int                  // 0 = Federated, 1 = Audit
 
 	Signature interfaces.IFullSignature
@@ -33,19 +33,19 @@ type AddServerMsg struct {
 var _ interfaces.IMsg = (*AddServerMsg)(nil)
 var _ interfaces.Signable = (*AddServerMsg)(nil)
 
-func (m *AddServerMsg) GetRepeatHash() (rval interfaces.IHash) {
+func (m *AddServerMsg) GetRepeatHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "AddServerMsg.GetRepeatHash") }()
 
 	return m.GetMsgHash()
 }
 
-func (m *AddServerMsg) GetHash() (rval interfaces.IHash) {
+func (m *AddServerMsg) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "AddServerMsg.GetHash") }()
 
 	return m.GetMsgHash()
 }
 
-func (m *AddServerMsg) GetMsgHash() (rval interfaces.IHash) {
+func (m *AddServerMsg) GetMsgHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "AddServerMsg.GetMsgHash") }()
 
 	if m.MsgHash == nil {
@@ -278,7 +278,7 @@ func NewAddServerMsg(state interfaces.IState, serverType int) interfaces.IMsg {
 
 }
 
-func NewAddServerByHashMsg(state interfaces.IState, serverType int, newServerHash interfaces.IHash) interfaces.IMsg {
+func NewAddServerByHashMsg(state interfaces.IState, serverType int, newServerHash interfaces.*HashS) interfaces.IMsg {
 	msg := new(AddServerMsg)
 	msg.ServerChainID = newServerHash
 	msg.ServerType = serverType

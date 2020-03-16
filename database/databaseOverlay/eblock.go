@@ -51,7 +51,7 @@ func (db *Overlay) ProcessEBlockMultiBatch(eblock interfaces.DatabaseBlockWithEn
 	return db.SaveIncludedInMultiFromBlockMultiBatch(eblock, checkForDuplicateEntries)
 }
 
-func (db *Overlay) FetchEBlock(hash interfaces.IHash) (interfaces.IEntryBlock, error) {
+func (db *Overlay) FetchEBlock(hash interfaces.*HashS) (interfaces.IEntryBlock, error) {
 	block, err := db.FetchEBlockByPrimary(hash)
 	if err != nil {
 		return nil, err
@@ -63,7 +63,7 @@ func (db *Overlay) FetchEBlock(hash interfaces.IHash) (interfaces.IEntryBlock, e
 }
 
 // FetchEBlockByHash gets an entry block by merkle root from the database.
-func (db *Overlay) FetchEBlockBySecondary(hash interfaces.IHash) (interfaces.IEntryBlock, error) {
+func (db *Overlay) FetchEBlockBySecondary(hash interfaces.*HashS) (interfaces.IEntryBlock, error) {
 	block, err := db.FetchBlockBySecondaryIndex(ENTRYBLOCK_SECONDARYINDEX, ENTRYBLOCK, hash, entryBlock.NewEBlock())
 	if err != nil {
 		return nil, err
@@ -75,7 +75,7 @@ func (db *Overlay) FetchEBlockBySecondary(hash interfaces.IHash) (interfaces.IEn
 }
 
 // FetchEBlockByKeyMR gets an entry by hash from the database.
-func (db *Overlay) FetchEBlockByPrimary(hash interfaces.IHash) (interfaces.IEntryBlock, error) {
+func (db *Overlay) FetchEBlockByPrimary(hash interfaces.*HashS) (interfaces.IEntryBlock, error) {
 	block, err := db.FetchBlock(ENTRYBLOCK, hash, entryBlock.NewEBlock())
 	if err != nil {
 		return nil, err
@@ -87,12 +87,12 @@ func (db *Overlay) FetchEBlockByPrimary(hash interfaces.IHash) (interfaces.IEntr
 }
 
 // FetchEBKeyMRByHash gets an entry by hash from the database.
-func (db *Overlay) FetchEBKeyMRByHash(hash interfaces.IHash) (interfaces.IHash, error) {
+func (db *Overlay) FetchEBKeyMRByHash(hash interfaces.*HashS) (interfaces.*HashS, error) {
 	return db.FetchPrimaryIndexBySecondaryIndex(ENTRYBLOCK_SECONDARYINDEX, hash)
 }
 
 // FetchAllEBlocksByChain gets all of the blocks by chain id
-func (db *Overlay) FetchAllEBlocksByChain(chainID interfaces.IHash) ([]interfaces.IEntryBlock, error) {
+func (db *Overlay) FetchAllEBlocksByChain(chainID interfaces.*HashS) ([]interfaces.IEntryBlock, error) {
 	bucket := append(ENTRYBLOCK_CHAIN_NUMBER, chainID.Bytes()...)
 	keyList, err := db.FetchAllBlocksFromBucket(bucket, new(primitives.Hash))
 	if err != nil {
@@ -102,7 +102,7 @@ func (db *Overlay) FetchAllEBlocksByChain(chainID interfaces.IHash) ([]interface
 	list := make([]interfaces.IEntryBlock, len(keyList))
 
 	for i, v := range keyList {
-		block, err := db.FetchEBlock(v.(interfaces.IHash))
+		block, err := db.FetchEBlock(v.(interfaces.*HashS))
 		if err != nil {
 			return nil, err
 		}
@@ -116,7 +116,7 @@ func (db *Overlay) SaveEBlockHead(block interfaces.DatabaseBlockWithEntries, che
 	return db.ProcessEBlockBatch(block, checkForDuplicateEntries)
 }
 
-func (db *Overlay) FetchEBlockHead(chainID interfaces.IHash) (interfaces.IEntryBlock, error) {
+func (db *Overlay) FetchEBlockHead(chainID interfaces.*HashS) (interfaces.IEntryBlock, error) {
 	block, err := db.FetchChainHeadByChainID(ENTRYBLOCK, chainID, entryBlock.NewEBlock())
 	if err != nil {
 		return nil, err
@@ -127,12 +127,12 @@ func (db *Overlay) FetchEBlockHead(chainID interfaces.IHash) (interfaces.IEntryB
 	return block.(*entryBlock.EBlock), nil
 }
 
-func (db *Overlay) FetchAllEBlockChainIDs() ([]interfaces.IHash, error) {
+func (db *Overlay) FetchAllEBlockChainIDs() ([]interfaces.*HashS, error) {
 	ids, err := db.FetchAllBlockKeysFromBucket(CHAIN_HEAD)
 	if err != nil {
 		return nil, err
 	}
-	entries := []interfaces.IHash{}
+	entries := []interfaces.*HashS{}
 	for _, h := range ids {
 		str := h.String()
 		if strings.Contains(str, "000000000000000000000000000000000000000000000000000000000000000") {

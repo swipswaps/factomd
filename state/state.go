@@ -56,7 +56,7 @@ type State struct {
 	Logger            *log.Entry
 	RunState          runstate.RunState
 	NetworkController *p2p.Controller
-	Salt              interfaces.IHash
+	Salt              interfaces.*HashS
 	Cfg               interfaces.IFactomConfig
 	ConfigFilePath    string // $HOME/.factom/m2/factomd.conf by default
 
@@ -118,7 +118,7 @@ type State struct {
 	CustomBootstrapIdentity string
 	CustomBootstrapKey      string
 
-	IdentityChainID interfaces.IHash // If this node has an identity, this is it
+	IdentityChainID interfaces.*HashS // If this node has an identity, this is it
 	//Identities      []*Identity      // Identities of all servers in management chain
 	// Authorities          []*Authority     // Identities of all servers in management chain
 	AuthorityServerCount int // number of federated or audit servers allowed
@@ -343,8 +343,8 @@ type State struct {
 	ECBalancesPapi        map[[32]byte]int64
 	ECBalancesP           map[[32]byte]int64
 	ECBalancesPMutex      sync.Mutex
-	TempBalanceHash       interfaces.IHash
-	Balancehash           interfaces.IHash
+	TempBalanceHash       interfaces.*HashS
+	Balancehash           interfaces.*HashS
 
 	// Web Services
 	Port int
@@ -458,7 +458,7 @@ type State struct {
 var _ interfaces.IState = (*State)(nil)
 
 type EntryUpdate struct {
-	Hash      interfaces.IHash
+	Hash      interfaces.*HashS
 	Timestamp interfaces.Timestamp
 }
 
@@ -1330,11 +1330,11 @@ func (s *State) GetMissingEntryCount() uint32 {
 	return uint32(len(s.MissingEntries))
 }
 
-func (s *State) GetEBlockKeyMRFromEntryHash(entryHash interfaces.IHash) (rval interfaces.IHash) {
+func (s *State) GetEBlockKeyMRFromEntryHash(entryHash interfaces.*HashS) (rval interfaces.*HashS) {
 	defer func() {
 		if rval != nil && reflect.ValueOf(rval).IsNil() {
 			rval = nil // convert an interface that is nil to a nil interface
-			primitives.LogNilHashBug("State.GetEBlockKeyMRFromEntryHash() returned a nil for IHash")
+			primitives.LogNilHashBug("State.GetEBlockKeyMRFromEntryHash() returned a nil for *HashS")
 		}
 	}()
 	entry, err := s.DB.FetchEntry(entryHash)
@@ -1531,7 +1531,7 @@ func (s *State) LoadDBState(dbheight uint32) (interfaces.IMsg, error) {
 	return msg, nil
 }
 
-func (s *State) LoadDataByHash(requestedHash interfaces.IHash) (interfaces.BinaryMarshallable, int, error) {
+func (s *State) LoadDataByHash(requestedHash interfaces.*HashS) (interfaces.BinaryMarshallable, int, error) {
 	if requestedHash == nil {
 		return nil, -1, fmt.Errorf("%s", "Requested hash must be non-empty")
 	}
@@ -1861,7 +1861,7 @@ func (s *State) GetPendingTransactions(params interface{}) []interfaces.IPending
 }
 
 // might want to make this search the database at some point to be more generic
-func (s *State) FetchEntryHashFromProcessListsByTxID(txID string) (interfaces.IHash, error) {
+func (s *State) FetchEntryHashFromProcessListsByTxID(txID string) (interfaces.*HashS, error) {
 	pls := s.ProcessLists.Lists
 	var cc messages.CommitChainMsg
 	var ce messages.CommitEntryMsg
@@ -1966,7 +1966,7 @@ func (s *State) IsStalled() bool {
 	return false
 }
 
-func (s *State) DatabaseContains(hash interfaces.IHash) bool {
+func (s *State) DatabaseContains(hash interfaces.*HashS) bool {
 	result, _, err := s.LoadDataByHash(hash)
 	if result != nil && err == nil {
 		return true
@@ -2100,16 +2100,16 @@ entryHashProcessing:
 
 // Returns true if this hash exists nowhere in the Replay structures.  Returns False if we
 // have already seen this hash before.  Replay is NOT updated yet.
-func (s *State) NoEntryYet(entryhash interfaces.IHash, ts interfaces.Timestamp) bool {
+func (s *State) NoEntryYet(entryhash interfaces.*HashS, ts interfaces.Timestamp) bool {
 	unique := s.Replay.IsHashUnique(constants.REVEAL_REPLAY, entryhash.Fixed())
 	return unique
 }
 
-func (s *State) AddDBSig(dbheight uint32, chainID interfaces.IHash, sig interfaces.IFullSignature) {
+func (s *State) AddDBSig(dbheight uint32, chainID interfaces.*HashS, sig interfaces.IFullSignature) {
 	s.ProcessLists.Get(dbheight).AddDBSig(chainID, sig)
 }
 
-func (s *State) AddFedServer(dbheight uint32, hash interfaces.IHash) int {
+func (s *State) AddFedServer(dbheight uint32, hash interfaces.*HashS) int {
 	//s.AddStatus(fmt.Sprintf("AddFedServer %x at dbht: %d", hash.Bytes()[2:6], dbheight))
 	s.LogPrintf("executeMsg", "AddServer (Federated): ChainID: %x at dbht: %d From %s", hash.Bytes()[3:6], dbheight, atomic.WhereAmIString(1))
 	return s.ProcessLists.Get(dbheight).AddFedServer(hash)
@@ -2119,19 +2119,19 @@ func (s *State) TrimVMList(dbheight uint32, height uint32, vmIndex int) {
 	s.ProcessLists.Get(dbheight).TrimVMList(height, vmIndex)
 }
 
-func (s *State) RemoveFedServer(dbheight uint32, hash interfaces.IHash) {
+func (s *State) RemoveFedServer(dbheight uint32, hash interfaces.*HashS) {
 	//s.AddStatus(fmt.Sprintf("RemoveFedServer %x at dbht: %d", hash.Bytes()[2:6], dbheight))
 	s.LogPrintf("executeMsg", "RemoveServer (Federated): ChainID: %x at dbht: %d", hash.Bytes()[3:6], dbheight)
 	s.ProcessLists.Get(dbheight).RemoveFedServerHash(hash)
 }
 
-func (s *State) AddAuditServer(dbheight uint32, hash interfaces.IHash) int {
+func (s *State) AddAuditServer(dbheight uint32, hash interfaces.*HashS) int {
 	//s.AddStatus(fmt.Sprintf("AddAuditServer %x at dbht: %d", hash.Bytes()[2:6], dbheight))
 	s.LogPrintf("executeMsg", "AddServer (Audit): ChainID: %x at dbht: %d", hash.Bytes()[3:6], dbheight)
 	return s.ProcessLists.Get(dbheight).AddAuditServer(hash)
 }
 
-func (s *State) RemoveAuditServer(dbheight uint32, hash interfaces.IHash) {
+func (s *State) RemoveAuditServer(dbheight uint32, hash interfaces.*HashS) {
 	//s.AddStatus(fmt.Sprintf("RemoveAuditServer %x at dbht: %d", hash.Bytes()[2:6], dbheight))
 	s.LogPrintf("executeMsg", "RemoveServer (Audit): ChainID: %x at dbht: %d", hash.Bytes()[3:6], dbheight)
 	s.ProcessLists.Get(dbheight).RemoveAuditServerHash(hash)
@@ -2169,7 +2169,7 @@ func (s *State) IsLeader() bool {
 	return s.Leader
 }
 
-func (s *State) GetVirtualServers(dbheight uint32, minute int, identityChainID interfaces.IHash) (bool, int) {
+func (s *State) GetVirtualServers(dbheight uint32, minute int, identityChainID interfaces.*HashS) (bool, int) {
 	pl := s.ProcessLists.Get(dbheight)
 	return pl.GetVirtualServers(minute, identityChainID)
 }
@@ -2182,12 +2182,12 @@ func (s *State) SetFactoshisPerEC(factoshisPerEC uint64) {
 	s.FactoshisPerEC = factoshisPerEC
 }
 
-func (s *State) GetIdentityChainID() (rval interfaces.IHash) {
+func (s *State) GetIdentityChainID() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "State.GetIdentityChainID") }()
 	return s.IdentityChainID
 }
 
-func (s *State) SetIdentityChainID(chainID interfaces.IHash) {
+func (s *State) SetIdentityChainID(chainID interfaces.*HashS) {
 	if !s.IdentityChainID.IsSameAs(chainID) {
 		s.LogPrintf("AckChange", "SetIdentityChainID %v", chainID.String())
 	}
@@ -2478,7 +2478,7 @@ func (s *State) GetAuthorities() []interfaces.IAuthority {
 
 // GetAuthorityInterface will the authority as an interface. Because of import issues
 // we cannot access IdentityControl Directly
-func (s *State) GetAuthorityInterface(chainid interfaces.IHash) interfaces.IAuthority {
+func (s *State) GetAuthorityInterface(chainid interfaces.*HashS) interfaces.IAuthority {
 	rval := s.IdentityControl.GetAuthority(chainid)
 	if rval == nil {
 		return nil
@@ -2539,7 +2539,7 @@ func (s *State) GetNetworkID() uint32 {
 }
 
 // The initial public key that can sign the first block
-func (s *State) GetNetworkBootStrapKey() (rval interfaces.IHash) {
+func (s *State) GetNetworkBootStrapKey() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "State.GetNetworkBootStrapKey") }()
 	switch s.NetworkNumber {
 	case constants.NETWORK_MAIN:
@@ -2562,7 +2562,7 @@ func (s *State) GetNetworkBootStrapKey() (rval interfaces.IHash) {
 }
 
 // The initial identity that can sign the first block
-func (s *State) GetNetworkBootStrapIdentity() (rval interfaces.IHash) {
+func (s *State) GetNetworkBootStrapIdentity() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "State.GetNetworkBootStrapIdentity") }()
 	switch s.NetworkNumber {
 	case constants.NETWORK_MAIN:
@@ -2583,7 +2583,7 @@ func (s *State) GetNetworkBootStrapIdentity() (rval interfaces.IHash) {
 }
 
 // The identity for validating messages
-func (s *State) GetNetworkSkeletonIdentity() (rval interfaces.IHash) {
+func (s *State) GetNetworkSkeletonIdentity() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "State.GetNetworkSkeletonIdentity") }()
 	switch s.NetworkNumber {
 	case constants.NETWORK_MAIN:
@@ -2603,13 +2603,13 @@ func (s *State) GetNetworkSkeletonIdentity() (rval interfaces.IHash) {
 	return id
 }
 
-func (s *State) GetNetworkIdentityRegistrationChain() (rval interfaces.IHash) {
+func (s *State) GetNetworkIdentityRegistrationChain() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "State.GetNetworkIdentityRegistrationChain") }()
 	id, _ := primitives.HexToHash("888888001750ede0eff4b05f0c3f557890b256450cabbb84cada937f9c258327")
 	return id
 }
 
-func (s *State) GetMatryoshka(dbheight uint32) (rval interfaces.IHash) {
+func (s *State) GetMatryoshka(dbheight uint32) (rval interfaces.*HashS) {
 	defer func() {
 		if rval != nil && reflect.ValueOf(rval).IsNil() {
 			rval = nil // convert an interface that is nil to a nil interface
@@ -3000,7 +3000,7 @@ func (s *State) GetSystemMsg(dbheight uint32, height uint32) interfaces.IMsg {
 	return pl.System.List[height]
 }
 
-func (s *State) GetInvalidMsg(hash interfaces.IHash) interfaces.IMsg {
+func (s *State) GetInvalidMsg(hash interfaces.*HashS) interfaces.IMsg {
 	if hash == nil {
 		return nil
 	}

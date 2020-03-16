@@ -17,15 +17,15 @@ type IAdminBlock interface {
 	DatabaseBatchable
 
 	IsSameAs(IAdminBlock) bool
-	BackReferenceHash() (IHash, error)
+	BackReferenceHash() (*HashS, error)
 	GetABEntries() []IABEntry
 	GetDBHeight() uint32
 	GetDBSignature() IABEntry
-	GetHash() IHash
+	GetHash() *HashS
 	GetHeader() IABlockHeader
-	GetKeyMR() (IHash, error)
-	LookupHash() (IHash, error)
-	RemoveFederatedServer(IHash) error
+	GetKeyMR() (*HashS, error)
+	LookupHash() (*HashS, error)
+	RemoveFederatedServer(*HashS) error
 	SetABEntries([]IABEntry)
 	SetHeader(IABlockHeader)
 	AddEntry(IABEntry) error
@@ -33,17 +33,17 @@ type IAdminBlock interface {
 
 	InsertIdentityABEntries() error
 	AddABEntry(e IABEntry) error
-	AddAuditServer(IHash) error
-	AddDBSig(serverIdentity IHash, sig IFullSignature) error
-	AddFedServer(IHash) error
-	AddFederatedServerBitcoinAnchorKey(IHash, byte, byte, [20]byte) error
-	AddFederatedServerSigningKey(IHash, [32]byte) error
+	AddAuditServer(*HashS) error
+	AddDBSig(serverIdentity *HashS, sig IFullSignature) error
+	AddFedServer(*HashS) error
+	AddFederatedServerBitcoinAnchorKey(*HashS, byte, byte, [20]byte) error
+	AddFederatedServerSigningKey(*HashS, [32]byte) error
 	AddFirstABEntry(e IABEntry) error
-	AddMatryoshkaHash(IHash, IHash) error
+	AddMatryoshkaHash(*HashS, *HashS) error
 	AddServerFault(IABEntry) error
 	AddCoinbaseDescriptor(outputs []ITransAddress) error
-	AddEfficiency(chain IHash, efficiency uint16) error
-	AddCoinbaseAddress(chain IHash, add IAddress) error
+	AddEfficiency(chain *HashS, efficiency uint16) error
+	AddCoinbaseAddress(chain *HashS, add IAddress) error
 	AddCancelCoinbaseDescriptor(descriptorHeight, index uint32) error
 
 	UpdateState(IState) error
@@ -55,11 +55,11 @@ type IABlockHeader interface {
 	BinaryMarshallable
 
 	IsSameAs(IABlockHeader) bool
-	GetAdminChainID() IHash
+	GetAdminChainID() *HashS
 	GetDBHeight() uint32
-	GetPrevBackRefHash() IHash
+	GetPrevBackRefHash() *HashS
 	SetDBHeight(uint32)
-	SetPrevBackRefHash(IHash)
+	SetPrevBackRefHash(*HashS)
 
 	GetHeaderExpansionArea() []byte
 	SetHeaderExpansionArea([]byte)
@@ -79,7 +79,7 @@ type IABEntry interface {
 	UpdateState(IState) error // When loading Admin Blocks,
 
 	Type() byte
-	Hash() IHash
+	Hash() *HashS
 }
 
 type IIdentityABEntrySort []IIdentityABEntry
@@ -108,5 +108,5 @@ func (p IIdentityABEntrySort) Less(i, j int) bool {
 type IIdentityABEntry interface {
 	IABEntry
 	// Identity to sort by
-	SortedIdentity() IHash
+	SortedIdentity() *HashS
 }

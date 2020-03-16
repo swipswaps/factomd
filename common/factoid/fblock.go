@@ -22,10 +22,10 @@ import (
 // https://github.com/FactomProject/FactomDocs/blob/master/factomDataStructureDetails.md#factoid-block
 //
 type FBlock struct {
-	//  ChainID         interfaces.IHash     // ChainID.  But since this is a constant, we need not actually use space to store it.
-	BodyMR          interfaces.IHash `json:"bodymr"`          // Merkle root of the Factoid transactions which accompany this block.
-	PrevKeyMR       interfaces.IHash `json:"prevkeymr"`       // Key Merkle root of previous block.
-	PrevLedgerKeyMR interfaces.IHash `json:"prevledgerkeymr"` // Sha3 of the previous Factoid Block
+	//  ChainID         interfaces.*HashS     // ChainID.  But since this is a constant, we need not actually use space to store it.
+	BodyMR          interfaces.*HashS `json:"bodymr"`          // Merkle root of the Factoid transactions which accompany this block.
+	PrevKeyMR       interfaces.*HashS `json:"prevkeymr"`       // Key Merkle root of previous block.
+	PrevLedgerKeyMR interfaces.*HashS `json:"prevledgerkeymr"` // Sha3 of the previous Factoid Block
 	ExchRate        uint64           `json:"exchrate"`        // Factoshis per Entry Credit
 	DBHeight        uint32           `json:"dbheight"`        // Directory Block height
 	// Header Expansion Size  varint
@@ -60,16 +60,16 @@ func (a *FBlock) IsSameAs(b interfaces.IFBlock) bool {
 	return true
 }
 
-func (c *FBlock) GetEntryHashes() []interfaces.IHash {
+func (c *FBlock) GetEntryHashes() []interfaces.*HashS {
 	entries := c.Transactions[:]
-	answer := make([]interfaces.IHash, len(entries))
+	answer := make([]interfaces.*HashS, len(entries))
 	for i, entry := range entries {
 		answer[i] = entry.GetHash()
 	}
 	return answer
 }
 
-func (c *FBlock) GetTransactionByHash(hash interfaces.IHash) interfaces.ITransaction {
+func (c *FBlock) GetTransactionByHash(hash interfaces.*HashS) interfaces.ITransaction {
 	if hash == nil {
 		return nil
 	}
@@ -86,9 +86,9 @@ func (c *FBlock) GetTransactionByHash(hash interfaces.IHash) interfaces.ITransac
 	return nil
 }
 
-func (c *FBlock) GetEntrySigHashes() []interfaces.IHash {
+func (c *FBlock) GetEntrySigHashes() []interfaces.*HashS {
 	entries := c.Transactions[:]
-	answer := make([]interfaces.IHash, len(entries))
+	answer := make([]interfaces.*HashS, len(entries))
 	for i, entry := range entries {
 		answer[i] = entry.GetSigHash()
 	}
@@ -99,13 +99,13 @@ func (c *FBlock) New() interfaces.BinaryMarshallableAndCopyable {
 	return new(FBlock)
 }
 
-func (c *FBlock) DatabasePrimaryIndex() (rval interfaces.IHash) {
+func (c *FBlock) DatabasePrimaryIndex() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "FBlock.DatabasePrimaryIndex") }()
 
 	return c.GetKeyMR()
 }
 
-func (c *FBlock) DatabaseSecondaryIndex() (rval interfaces.IHash) {
+func (c *FBlock) DatabaseSecondaryIndex() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "FBlock.DatabaseSecondaryIndex") }()
 
 	return c.GetLedgerKeyMR()
@@ -401,14 +401,14 @@ func (b *FBlock) UnmarshalBinary(data []byte) (err error) {
 	return err
 }
 
-func (b *FBlock) GetChainID() (rval interfaces.IHash) {
+func (b *FBlock) GetChainID() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "FBlock.GetChainID") }()
 
 	return primitives.NewHash(constants.FACTOID_CHAINID)
 }
 
 // Calculates the Key Merkle Root for this block and returns it.
-func (b *FBlock) GetKeyMR() (rval interfaces.IHash) {
+func (b *FBlock) GetKeyMR() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "FBlock.GetKeyMR") }()
 
 	bodyMR := b.GetBodyMR()
@@ -424,13 +424,13 @@ func (b *FBlock) GetKeyMR() (rval interfaces.IHash) {
 	return kmr
 }
 
-func (b *FBlock) GetHash() (rval interfaces.IHash) {
+func (b *FBlock) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "FBlock.GetHash") }()
 
 	return b.GetLedgerKeyMR()
 }
 
-func (b *FBlock) GetLedgerKeyMR() (rval interfaces.IHash) {
+func (b *FBlock) GetLedgerKeyMR() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "FBlock.GetLedgerKeyMR") }()
 
 	ledgerMR := b.GetLedgerMR()
@@ -447,10 +447,10 @@ func (b *FBlock) GetLedgerKeyMR() (rval interfaces.IHash) {
 }
 
 // Returns the LedgerMR for this block.
-func (b *FBlock) GetLedgerMR() (rval interfaces.IHash) {
+func (b *FBlock) GetLedgerMR() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "FBlock.GetLedgerMR") }()
 
-	hashes := make([]interfaces.IHash, 0, len(b.Transactions))
+	hashes := make([]interfaces.*HashS, 0, len(b.Transactions))
 	marker := 0
 	for i, trans := range b.Transactions {
 		for marker < len(b.endOfPeriod) && i != 0 && i == b.endOfPeriod[marker] {
@@ -469,10 +469,10 @@ func (b *FBlock) GetLedgerMR() (rval interfaces.IHash) {
 	return lmr
 }
 
-func (b *FBlock) GetBodyMR() (rval interfaces.IHash) {
+func (b *FBlock) GetBodyMR() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "FBlock.GetBodyMR") }()
 
-	hashes := make([]interfaces.IHash, 0, len(b.Transactions))
+	hashes := make([]interfaces.*HashS, 0, len(b.Transactions))
 	marker := 0
 	for i, trans := range b.Transactions {
 		for marker < len(b.endOfPeriod) && i != 0 && i == b.endOfPeriod[marker] {
@@ -492,23 +492,23 @@ func (b *FBlock) GetBodyMR() (rval interfaces.IHash) {
 	return b.BodyMR
 }
 
-func (b *FBlock) GetPrevKeyMR() (rval interfaces.IHash) {
+func (b *FBlock) GetPrevKeyMR() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "FBlock.GetPrevKeyMR") }()
 
 	return b.PrevKeyMR
 }
 
-func (b *FBlock) SetPrevKeyMR(hash interfaces.IHash) {
+func (b *FBlock) SetPrevKeyMR(hash interfaces.*HashS) {
 	b.PrevKeyMR = hash
 }
 
-func (b *FBlock) GetPrevLedgerKeyMR() (rval interfaces.IHash) {
+func (b *FBlock) GetPrevLedgerKeyMR() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "FBlock.GetPrevLedgerKeyMR") }()
 
 	return b.PrevLedgerKeyMR
 }
 
-func (b *FBlock) SetPrevLedgerKeyMR(hash interfaces.IHash) {
+func (b *FBlock) SetPrevLedgerKeyMR(hash interfaces.*HashS) {
 	b.PrevLedgerKeyMR = hash
 }
 

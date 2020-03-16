@@ -633,7 +633,7 @@ func AddFNode() {
 	Followers++
 }
 
-func WaitForEntry(s *state.State, hash interfaces.IHash) bool {
+func WaitForEntry(s *state.State, hash interfaces.*HashS) bool {
 	s.LogPrintf(logName, "WaitForEntry:  %s", hash.String())
 	//hash, _ := primitives.NewShaHashFromStr(entryhash)
 

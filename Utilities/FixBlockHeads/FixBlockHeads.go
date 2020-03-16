@@ -95,8 +95,8 @@ func FixBlockHeads(dbo *databaseOverlay.Overlay) error {
 		//Ensuring we stay far away from the corrupted block head
 		if len(prevs) > 50 {
 			bs = prevs[0]
-			chainIDs := []interfaces.IHash{}
-			keyMRs := []interfaces.IHash{}
+			chainIDs := []interfaces.*HashS{}
+			keyMRs := []interfaces.*HashS{}
 
 			chainIDs = append(chainIDs, bs.DBlock.GetChainID())
 			keyMRs = append(keyMRs, bs.DBlock.DatabasePrimaryIndex())

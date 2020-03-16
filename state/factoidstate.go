@@ -59,7 +59,7 @@ type element struct {
 	v   int64
 }
 
-func GetMapHash(bmap map[[32]byte]int64) interfaces.IHash {
+func GetMapHash(bmap map[[32]byte]int64) interfaces.*HashS {
 	list := make([]*element, 0, len(bmap))
 
 	for k, v := range bmap {
@@ -90,17 +90,17 @@ func GetMapHash(bmap map[[32]byte]int64) interfaces.IHash {
 
 // GetBalanceHash()
 // Compute either a Hash of the temporary balance hash map, or the Permanent Balance hash map
-func (fs *FactoidState) GetBalanceHash(TempBalanceHash bool) (rval interfaces.IHash) {
+func (fs *FactoidState) GetBalanceHash(TempBalanceHash bool) (rval interfaces.*HashS) {
 	defer func() {
 		if rval == nil {
-			primitives.LogNilHashBug("FactoidState.GetBalanceHash() returned a nil for IHash")
+			primitives.LogNilHashBug("FactoidState.GetBalanceHash() returned a nil for *HashS")
 		} else if reflect.ValueOf(rval).IsNil() {
 			primitives.LogNilHashBug("FactoidState.GetBalanceHash() returned an interface  nil")
 			rval = nil // convert an interface that is nil to a nil interface
 		}
 	}()
 
-	var h1, h2 interfaces.IHash
+	var h1, h2 interfaces.*HashS
 	if !TempBalanceHash {
 		fs.State.FactoidBalancesPMutex.Lock()
 		h1 = GetMapHash(fs.State.FactoidBalancesP)
@@ -571,7 +571,7 @@ func (fs *FactoidState) GetMultipleFactoidBalances(singleAdd [32]byte) (uint32, 
 //
 //	for k, _ := range name {
 //		y := primitives.Hash(k)
-//		z := interfaces.IAddress(interfaces.IHash(&y))
+//		z := interfaces.IAddress(interfaces.*HashS(&y))
 //		e := primitives.ConvertFctAddressToUserStr(z)
 //		list = append(list, e)
 //	}

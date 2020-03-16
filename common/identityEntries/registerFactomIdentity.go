@@ -35,7 +35,7 @@ type RegisterFactomIdentityStructure struct {
 	//The second ExtID has 24 ASCII bytes "Register Factom Identity".
 	FunctionName []byte //"Register Factom Identity"
 	//The third ExtID is the binary encoded ChainID of the identity. It will start with 888888.
-	IdentityChainID interfaces.IHash //888888...
+	IdentityChainID interfaces.*HashS //888888...
 	//The 4th ExtID is the preimage to the identity key. It includes the type prefix (0x01) and the raw ed25519 pubkey.
 	PreimageIdentityKey []byte
 	//The 5th ExtID is the signature of the first, second, and third ExtIDs serialized together.
@@ -72,7 +72,7 @@ func (e *RegisterFactomIdentityStructure) UnmarshalBinaryData(p []byte) (newData
 		return
 	}
 
-	e.IdentityChainID, err = buf.PopIHash()
+	e.IdentityChainID, err = buf.Pop*HashS()
 	if err != nil {
 		return
 	}
@@ -109,7 +109,7 @@ func (r *RegisterFactomIdentityStructure) MarshalBinary() (rval []byte, err erro
 		return nil, err
 	}
 
-	err = buf.PushIHash(r.IdentityChainID)
+	err = buf.Push*HashS(r.IdentityChainID)
 	if err != nil {
 		return nil, err
 	}
@@ -160,7 +160,7 @@ func (rfi *RegisterFactomIdentityStructure) MarshalForSig() []byte {
 	return answer
 }
 
-func (rfi *RegisterFactomIdentityStructure) VerifySignature(key1 interfaces.IHash) error {
+func (rfi *RegisterFactomIdentityStructure) VerifySignature(key1 interfaces.*HashS) error {
 	bin := rfi.MarshalForSig()
 	pk := new(primitives.PublicKey)
 	err := pk.UnmarshalBinary(rfi.PreimageIdentityKey[1:])
@@ -232,7 +232,7 @@ func (rfi *RegisterFactomIdentityStructure) ToExternalIDs() [][]byte {
 	return extIDs
 }
 
-func (rfi *RegisterFactomIdentityStructure) GetChainID() (rval interfaces.IHash) {
+func (rfi *RegisterFactomIdentityStructure) GetChainID() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "RegisterFactomIdentityStructure.GetChainID") }()
 
 	extIDs := rfi.ToExternalIDs()

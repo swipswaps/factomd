@@ -21,7 +21,7 @@ import (
 type RemoveAuditInternal struct {
 	msgbase.MessageBase
 	NName    string
-	ServerID interfaces.IHash // Hash of message acknowledged
+	ServerID interfaces.*HashS // Hash of message acknowledged
 	DBHeight uint32           // Directory Block Height that owns this ack
 	Height   uint32           // Height of this ack in this process list
 }
@@ -35,7 +35,7 @@ func (m *RemoveAuditInternal) MarshalBinary() (data []byte, err error) {
 	if err = buf.PushByte(constants.INTERNALREMOVEAUDIT); err != nil {
 		return nil, err
 	}
-	if e := buf.PushIHash(m.ServerID); e != nil {
+	if e := buf.Push*HashS(m.ServerID); e != nil {
 		return nil, e
 	}
 	if e := buf.PushInt(int(m.DBHeight)); e != nil {
@@ -51,7 +51,7 @@ func (m *RemoveAuditInternal) MarshalBinary() (data []byte, err error) {
 	return data, nil
 }
 
-func (m *RemoveAuditInternal) GetMsgHash() (rval interfaces.IHash) {
+func (m *RemoveAuditInternal) GetMsgHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "RemoveAuditInternal.GetMsgHash") }()
 
 	if m.MsgHash == nil {
@@ -81,7 +81,7 @@ func (m *RemoveAuditInternal) ElectionProcess(state interfaces.IState, elect int
 	}
 }
 
-func (m *RemoveAuditInternal) GetServerID() (rval interfaces.IHash) {
+func (m *RemoveAuditInternal) GetServerID() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "RemoveAuditInternal.GetServerID") }()
 
 	return m.ServerID
@@ -91,14 +91,14 @@ func (m *RemoveAuditInternal) LogFields() log.Fields {
 	return log.Fields{"category": "message", "messagetype": "RemoveAuditInternal", "dbheight": m.DBHeight, "newleader": m.ServerID.String()[4:12]}
 }
 
-func (m *RemoveAuditInternal) GetRepeatHash() (rval interfaces.IHash) {
+func (m *RemoveAuditInternal) GetRepeatHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "RemoveAuditInternal.GetRepeatHash") }()
 
 	return m.GetMsgHash()
 }
 
 // We have to return the hash of the underlying message.
-func (m *RemoveAuditInternal) GetHash() (rval interfaces.IHash) {
+func (m *RemoveAuditInternal) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "RemoveAuditInternal.GetHash") }()
 
 	return m.GetMsgHash()

@@ -11,8 +11,8 @@ import (
 
 type AddReplaceMatryoshkaHash struct {
 	AdminIDType     uint32           `json:"adminidtype"`
-	IdentityChainID interfaces.IHash `json:"identitychainid"`
-	MHash           interfaces.IHash `json:"mhash"`
+	IdentityChainID interfaces.*HashS `json:"identitychainid"`
+	MHash           interfaces.*HashS `json:"mhash"`
 }
 
 var _ interfaces.Printable = (*AddReplaceMatryoshkaHash)(nil)
@@ -49,14 +49,14 @@ func (c *AddReplaceMatryoshkaHash) UpdateState(state interfaces.IState) error {
 	return nil
 }
 
-func NewAddReplaceMatryoshkaHash(identityChainID interfaces.IHash, mHash interfaces.IHash) *AddReplaceMatryoshkaHash {
+func NewAddReplaceMatryoshkaHash(identityChainID interfaces.*HashS, mHash interfaces.*HashS) *AddReplaceMatryoshkaHash {
 	e := new(AddReplaceMatryoshkaHash)
 	e.IdentityChainID = identityChainID
 	e.MHash = mHash
 	return e
 }
 
-func (e *AddReplaceMatryoshkaHash) SortedIdentity() (rval interfaces.IHash) {
+func (e *AddReplaceMatryoshkaHash) SortedIdentity() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "AddReplaceMatryoshkaHash.SortedIdentity") }()
 
 	return e.IdentityChainID
@@ -134,7 +134,7 @@ func (e *AddReplaceMatryoshkaHash) Interpret() string {
 	return ""
 }
 
-func (e *AddReplaceMatryoshkaHash) Hash() (rval interfaces.IHash) {
+func (e *AddReplaceMatryoshkaHash) Hash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "AddReplaceMatryoshkaHash.Hash") }()
 
 	bin, err := e.MarshalBinary()

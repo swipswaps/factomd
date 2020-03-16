@@ -119,7 +119,7 @@ func (g *DBGenerator) loadGenesis() {
 	fmt.Println("******* New Database **************")
 	fmt.Println("***********************************")
 
-	var customIdentity interfaces.IHash
+	var customIdentity interfaces.*HashS
 	if g.FactomdState.Network == "CUSTOM" {
 		customIdentity, err = primitives.HexToHash(g.FactomdState.CustomBootstrapIdentity)
 		if err != nil {

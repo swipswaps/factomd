@@ -31,7 +31,7 @@ func NextPowerOfTwo(n int) int {
 // HashMerkleBranches takes two hashes, treated as the left and right tree
 // nodes, and returns the hash of their concatenation.  This is a helper
 // function used to aid in the generation of a merkle tree.
-func HashMerkleBranches(left interfaces.IHash, right interfaces.IHash) interfaces.IHash {
+func HashMerkleBranches(left interfaces.*HashS, right interfaces.*HashS) interfaces.*HashS {
 	// Concatenate the left and right nodes.
 	var barray []byte = make([]byte, constants.ADDRESS_LENGTH*2)
 	copy(barray[:constants.ADDRESS_LENGTH], left.Bytes())
@@ -42,22 +42,22 @@ func HashMerkleBranches(left interfaces.IHash, right interfaces.IHash) interface
 }
 
 // Give a list of hashes, return the root of the Merkle Tree
-func ComputeMerkleRoot(hashes []interfaces.IHash) interfaces.IHash {
+func ComputeMerkleRoot(hashes []interfaces.*HashS) interfaces.*HashS {
 	merkles := BuildMerkleTreeStore(hashes)
 	return merkles[len(merkles)-1]
 }
 
 // The root of the Merkle Tree is returned in merkles[len(merkles)-1]
-func BuildMerkleTreeStore(hashes []interfaces.IHash) (merkles []interfaces.IHash) {
+func BuildMerkleTreeStore(hashes []interfaces.*HashS) (merkles []interfaces.*HashS) {
 	if len(hashes) == 0 {
-		return append(make([]interfaces.IHash, 0, 1), new(Hash))
+		return append(make([]interfaces.*HashS, 0, 1), new(Hash))
 	}
 	if len(hashes) < 2 {
 		return hashes
 	}
-	nextLevel := []interfaces.IHash{}
+	nextLevel := []interfaces.*HashS{}
 	for i := 0; i < len(hashes); i += 2 {
-		var node interfaces.IHash
+		var node interfaces.*HashS
 		if i+1 == len(hashes) {
 			node = HashMerkleBranches(hashes[i], hashes[i])
 		} else {
@@ -75,7 +75,7 @@ type MerkleNode struct {
 	Top   *Hash `json:"top,omitempty"`
 }
 
-func BuildMerkleBranchForHash(hashes []interfaces.IHash, target interfaces.IHash, fullDetail bool) []*MerkleNode {
+func BuildMerkleBranchForHash(hashes []interfaces.*HashS, target interfaces.*HashS, fullDetail bool) []*MerkleNode {
 	for i, h := range hashes {
 		if h.IsSameAs(target) {
 			return BuildMerkleBranch(hashes, i, fullDetail)
@@ -84,7 +84,7 @@ func BuildMerkleBranchForHash(hashes []interfaces.IHash, target interfaces.IHash
 	return nil
 }
 
-func BuildMerkleBranch(hashes []interfaces.IHash, entryIndex int, fullDetail bool) []*MerkleNode {
+func BuildMerkleBranch(hashes []interfaces.*HashS, entryIndex int, fullDetail bool) []*MerkleNode {
 	if len(hashes) < entryIndex || len(hashes) == 0 {
 		return nil
 	}

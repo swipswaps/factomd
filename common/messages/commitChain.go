@@ -80,19 +80,19 @@ func (m *CommitChainMsg) Process(dbheight uint32, state interfaces.IState) bool 
 	return state.ProcessCommitChain(dbheight, m)
 }
 
-func (m *CommitChainMsg) GetRepeatHash() (rval interfaces.IHash) {
+func (m *CommitChainMsg) GetRepeatHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "CommitChainMsg.GetRepeatHash") }()
 
 	return m.CommitChain.GetSigHash()
 }
 
-func (m *CommitChainMsg) GetHash() (rval interfaces.IHash) {
+func (m *CommitChainMsg) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "CommitChainMsg.GetHash") }()
 
 	return m.CommitChain.EntryHash
 }
 
-func (m *CommitChainMsg) GetMsgHash() (rval interfaces.IHash) {
+func (m *CommitChainMsg) GetMsgHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "CommitChainMsg.GetMsgHash") }()
 
 	if m.MsgHash == nil {

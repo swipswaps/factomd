@@ -28,15 +28,15 @@ type DatabaseBatchable interface {
 	BinaryMarshallableAndCopyable
 	GetDatabaseHeight() uint32
 
-	DatabasePrimaryIndex() IHash   //block.KeyMR()
-	DatabaseSecondaryIndex() IHash //block.GetHash()
+	DatabasePrimaryIndex() *HashS   //block.KeyMR()
+	DatabaseSecondaryIndex() *HashS //block.GetHash()
 
-	GetChainID() IHash
+	GetChainID() *HashS
 }
 
 type DatabaseBlockWithEntries interface {
 	DatabaseBatchable
 
-	GetEntryHashes() []IHash
-	GetEntrySigHashes() []IHash
+	GetEntryHashes() []*HashS
+	GetEntrySigHashes() []*HashS
 }

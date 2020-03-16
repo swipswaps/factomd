@@ -101,7 +101,7 @@ func (e *EndOfMinuteEntry) Interpret() string {
 	return fmt.Sprintf("End of Minute %v", e.MinuteNumber)
 }
 
-func (e *EndOfMinuteEntry) Hash() (rval interfaces.IHash) {
+func (e *EndOfMinuteEntry) Hash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "EndOfMinuteEntry.Hash") }()
 
 	bin, err := e.MarshalBinary()

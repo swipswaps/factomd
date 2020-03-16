@@ -275,11 +275,11 @@ func TestPushPopBinaryMarshallable(t *testing.T) {
 		if h.IsSameAs(h2) == false {
 			t.Errorf("Received wrong hash - %v vs %v", h, h2)
 		}
-		err = b.PushIHash(h)
+		err = b.Push * HashS(h)
 		if err != nil {
 			t.Errorf("%v", err)
 		}
-		h3, err := b.PopIHash()
+		h3, err := b.Pop * HashS()
 		if err != nil {
 			t.Errorf("%v", err)
 		}

@@ -11,24 +11,24 @@ import (
 
 type DirBlockInfo struct {
 	// Serial hash for the directory block
-	DBHash    interfaces.IHash
+	DBHash    interfaces.*HashS
 	DBHeight  uint32 //directory block height
 	Timestamp int64  // time of this dir block info being created
 	// BTCTxHash is the Tx hash returned from rpcclient.SendRawTransaction
-	BTCTxHash interfaces.IHash // use string or *btcwire.ShaHash ???
+	BTCTxHash interfaces.*HashS // use string or *btcwire.ShaHash ???
 	// BTCTxOffset is the index of the TX in this BTC block
 	BTCTxOffset int32
 	// BTCBlockHeight is the height of the block where this TX is stored in BTC
 	BTCBlockHeight int32
 	//BTCBlockHash is the hash of the block where this TX is stored in BTC
-	BTCBlockHash interfaces.IHash // use string or *btcwire.ShaHash ???
+	BTCBlockHash interfaces.*HashS // use string or *btcwire.ShaHash ???
 	// DBMerkleRoot is the merkle root of the Directory Block
 	// and is written into BTC as OP_RETURN data
-	DBMerkleRoot interfaces.IHash
+	DBMerkleRoot interfaces.*HashS
 	// A flag to to show BTC anchor confirmation
 	BTCConfirmed bool
 
-	EthereumAnchorRecordEntryHash interfaces.IHash
+	EthereumAnchorRecordEntryHash interfaces.*HashS
 	EthereumConfirmed             bool
 }
 
@@ -94,7 +94,7 @@ func (c *DirBlockInfo) GetBTCConfirmed() bool {
 	return c.BTCConfirmed
 }
 
-func (c *DirBlockInfo) GetEthereumAnchorRecordEntryHash() interfaces.IHash {
+func (c *DirBlockInfo) GetEthereumAnchorRecordEntryHash() interfaces.*HashS {
 	return c.EthereumAnchorRecordEntryHash
 }
 
@@ -102,7 +102,7 @@ func (c *DirBlockInfo) GetEthereumConfirmed() bool {
 	return c.EthereumConfirmed
 }
 
-func (c *DirBlockInfo) GetChainID() (rval interfaces.IHash) {
+func (c *DirBlockInfo) GetChainID() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "DirBlockInfo.GetChainID") }()
 
 	id := make([]byte, 32)
@@ -110,28 +110,28 @@ func (c *DirBlockInfo) GetChainID() (rval interfaces.IHash) {
 	return primitives.NewHash(id)
 }
 
-func (c *DirBlockInfo) DatabasePrimaryIndex() (rval interfaces.IHash) {
+func (c *DirBlockInfo) DatabasePrimaryIndex() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "DirBlockInfo.DatabasePrimaryIndex") }()
 
 	c.Init()
 	return c.DBMerkleRoot
 }
 
-func (c *DirBlockInfo) DatabaseSecondaryIndex() (rval interfaces.IHash) {
+func (c *DirBlockInfo) DatabaseSecondaryIndex() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "DirBlockInfo.DatabaseSecondaryIndex") }()
 
 	c.Init()
 	return c.DBHash
 }
 
-func (e *DirBlockInfo) GetDBMerkleRoot() (rval interfaces.IHash) {
+func (e *DirBlockInfo) GetDBMerkleRoot() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "DirBlockInfo.GetDBMerkleRoot") }()
 
 	e.Init()
 	return e.DBMerkleRoot
 }
 
-func (e *DirBlockInfo) GetBTCTxHash() (rval interfaces.IHash) {
+func (e *DirBlockInfo) GetBTCTxHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "DirBlockInfo.GetBTCTxHash") }()
 
 	e.Init()
@@ -150,7 +150,7 @@ func (e *DirBlockInfo) GetBTCBlockHeight() int32 {
 	return e.BTCBlockHeight
 }
 
-func (e *DirBlockInfo) GetBTCBlockHash() interfaces.IHash {
+func (e *DirBlockInfo) GetBTCBlockHash() interfaces.*HashS {
 	return e.BTCBlockHash
 }
 
@@ -194,24 +194,24 @@ func (e *DirBlockInfo) SetTimestamp(timestamp interfaces.Timestamp) {
 
 type dirBlockInfoCopy struct {
 	// Serial hash for the directory block
-	DBHash    interfaces.IHash
+	DBHash    interfaces.*HashS
 	DBHeight  uint32 //directory block height
 	Timestamp int64  // time of this dir block info being created
 	// BTCTxHash is the Tx hash returned from rpcclient.SendRawTransaction
-	BTCTxHash interfaces.IHash // use string or *btcwire.ShaHash ???
+	BTCTxHash interfaces.*HashS // use string or *btcwire.ShaHash ???
 	// BTCTxOffset is the index of the TX in this BTC block
 	BTCTxOffset int32
 	// BTCBlockHeight is the height of the block where this TX is stored in BTC
 	BTCBlockHeight int32
 	//BTCBlockHash is the hash of the block where this TX is stored in BTC
-	BTCBlockHash interfaces.IHash // use string or *btcwire.ShaHash ???
+	BTCBlockHash interfaces.*HashS // use string or *btcwire.ShaHash ???
 	// DBMerkleRoot is the merkle root of the Directory Block
 	// and is written into BTC as OP_RETURN data
-	DBMerkleRoot interfaces.IHash
+	DBMerkleRoot interfaces.*HashS
 	// A flag to to show BTC anchor confirmation
 	BTCConfirmed bool
 
-	EthereumAnchorRecordEntryHash interfaces.IHash
+	EthereumAnchorRecordEntryHash interfaces.*HashS
 	EthereumConfirmed             bool
 }
 

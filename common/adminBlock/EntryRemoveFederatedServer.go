@@ -12,7 +12,7 @@ import (
 // DB Signature Entry -------------------------
 type RemoveFederatedServer struct {
 	AdminIDType     uint32           `json:"adminidtype"`
-	IdentityChainID interfaces.IHash `json:"identitychainid"`
+	IdentityChainID interfaces.*HashS `json:"identitychainid"`
 	DBHeight        uint32           `json:"dbheight"`
 }
 
@@ -54,7 +54,7 @@ func (c *RemoveFederatedServer) UpdateState(state interfaces.IState) error {
 }
 
 // Create a new DB Signature Entry
-func NewRemoveFederatedServer(identityChainID interfaces.IHash, dbheight uint32) (e *RemoveFederatedServer) {
+func NewRemoveFederatedServer(identityChainID interfaces.*HashS, dbheight uint32) (e *RemoveFederatedServer) {
 	if identityChainID == nil {
 		return nil
 	}
@@ -136,7 +136,7 @@ func (e *RemoveFederatedServer) Interpret() string {
 	return ""
 }
 
-func (e *RemoveFederatedServer) Hash() (rval interfaces.IHash) {
+func (e *RemoveFederatedServer) Hash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "RemoveFederatedServer.Hash") }()
 
 	bin, err := e.MarshalBinary()

@@ -179,7 +179,7 @@ func TestRevealEntry2ChainID(t *testing.T) {
 
 	type test struct {
 		ExternalIDs [][]byte
-		ChainID     interfaces.IHash
+		ChainID     interfaces.*HashS
 	}
 
 	var workingTests []*test

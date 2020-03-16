@@ -20,7 +20,7 @@ const (
 
 type ReCheck struct {
 	TimeToCheck int64            //Time in seconds to recheck
-	EntryHash   interfaces.IHash //Entry Hash to check
+	EntryHash   interfaces.*HashS //Entry Hash to check
 	DBHeight    int
 	NumEntries  int
 	Tries       int
@@ -51,7 +51,7 @@ func (es *EntrySync) Init() {
 } // we have to reprocess
 
 // todo: likely benefit if we cache the hash's last 1K written
-func has(s *State, entry interfaces.IHash) bool {
+func has(s *State, entry interfaces.*HashS) bool {
 	exists, err := s.DB.DoesKeyExist(databaseOverlay.ENTRY, entry.Bytes())
 	if exists {
 		if err != nil {
@@ -274,7 +274,7 @@ func (s *State) GoSyncEntries() {
 			// Run through all the entry blocks and entries in each directory block.
 			// If any entries are missing, collect them.  Then stuff them into the MissingDBlockEntries channel to
 			// collect from the network.
-			var entries []interfaces.IHash
+			var entries []interfaces.*HashS
 			for _, ebKeyMR := range db.GetEntryHashes()[3:] {
 				eBlock, err := s.DB.FetchEBlock(ebKeyMR)
 				if err != nil {

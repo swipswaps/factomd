@@ -110,7 +110,7 @@ func (c *AdminBlock) FetchCoinbaseDescriptor() interfaces.IABEntry {
 	return nil
 }
 
-func (c *AdminBlock) AddDBSig(serverIdentity interfaces.IHash, sig interfaces.IFullSignature) error {
+func (c *AdminBlock) AddDBSig(serverIdentity interfaces.*HashS, sig interfaces.IFullSignature) error {
 	if serverIdentity == nil {
 		return fmt.Errorf("No serverIdentity provided")
 	}
@@ -125,7 +125,7 @@ func (c *AdminBlock) AddDBSig(serverIdentity interfaces.IHash, sig interfaces.IF
 	return c.AddEntry(entry)
 }
 
-func (c *AdminBlock) AddFedServer(identityChainID interfaces.IHash) error {
+func (c *AdminBlock) AddFedServer(identityChainID interfaces.*HashS) error {
 	c.Init()
 	if identityChainID == nil {
 		return fmt.Errorf("No identityChainID provided")
@@ -135,7 +135,7 @@ func (c *AdminBlock) AddFedServer(identityChainID interfaces.IHash) error {
 	return c.AddEntry(entry)
 }
 
-func (c *AdminBlock) AddAuditServer(identityChainID interfaces.IHash) error {
+func (c *AdminBlock) AddAuditServer(identityChainID interfaces.*HashS) error {
 	c.Init()
 	if identityChainID == nil {
 		return fmt.Errorf("No identityChainID provided")
@@ -145,7 +145,7 @@ func (c *AdminBlock) AddAuditServer(identityChainID interfaces.IHash) error {
 	return c.AddEntry(entry)
 }
 
-func (c *AdminBlock) RemoveFederatedServer(identityChainID interfaces.IHash) error {
+func (c *AdminBlock) RemoveFederatedServer(identityChainID interfaces.*HashS) error {
 	c.Init()
 	if identityChainID == nil {
 		return fmt.Errorf("No identityChainID provided")
@@ -174,7 +174,7 @@ func (a *AdminBlock) InsertIdentityABEntries() error {
 	return nil
 }
 
-func (c *AdminBlock) AddMatryoshkaHash(identityChainID interfaces.IHash, mHash interfaces.IHash) error {
+func (c *AdminBlock) AddMatryoshkaHash(identityChainID interfaces.*HashS, mHash interfaces.*HashS) error {
 	if identityChainID == nil {
 		return fmt.Errorf("No identityChainID provided")
 	}
@@ -186,7 +186,7 @@ func (c *AdminBlock) AddMatryoshkaHash(identityChainID interfaces.IHash, mHash i
 	return c.AddIdentityEntry(entry)
 }
 
-func (c *AdminBlock) AddFederatedServerSigningKey(identityChainID interfaces.IHash, publicKey [32]byte) error {
+func (c *AdminBlock) AddFederatedServerSigningKey(identityChainID interfaces.*HashS, publicKey [32]byte) error {
 	c.Init()
 	if identityChainID == nil {
 		return fmt.Errorf("No identityChainID provided")
@@ -201,7 +201,7 @@ func (c *AdminBlock) AddFederatedServerSigningKey(identityChainID interfaces.IHa
 	return c.AddIdentityEntry(entry)
 }
 
-func (c *AdminBlock) AddFederatedServerBitcoinAnchorKey(identityChainID interfaces.IHash, keyPriority byte, keyType byte, ecdsaPublicKey [20]byte) error {
+func (c *AdminBlock) AddFederatedServerBitcoinAnchorKey(identityChainID interfaces.*HashS, keyPriority byte, keyType byte, ecdsaPublicKey [20]byte) error {
 	if identityChainID == nil {
 		return fmt.Errorf("No identityChainID provided")
 	}
@@ -225,7 +225,7 @@ func (c *AdminBlock) AddCoinbaseDescriptor(outputs []interfaces.ITransAddress) e
 	return c.AddEntry(entry)
 }
 
-func (c *AdminBlock) AddEfficiency(chain interfaces.IHash, efficiency uint16) error {
+func (c *AdminBlock) AddEfficiency(chain interfaces.*HashS, efficiency uint16) error {
 	c.Init()
 	if chain == nil {
 		return fmt.Errorf("No chainid provided")
@@ -235,7 +235,7 @@ func (c *AdminBlock) AddEfficiency(chain interfaces.IHash, efficiency uint16) er
 	return c.AddIdentityEntry(entry)
 }
 
-func (c *AdminBlock) AddCoinbaseAddress(chain interfaces.IHash, add interfaces.IAddress) error {
+func (c *AdminBlock) AddCoinbaseAddress(chain interfaces.*HashS, add interfaces.IAddress) error {
 	c.Init()
 	if chain == nil {
 		return fmt.Errorf("No chainid provided")
@@ -327,35 +327,35 @@ func (c *AdminBlock) GetDatabaseHeight() uint32 {
 	return c.GetHeader().GetDBHeight()
 }
 
-func (c *AdminBlock) GetChainID() (rval interfaces.IHash) {
+func (c *AdminBlock) GetChainID() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "AdminBlock.GetChainID") }()
 	return c.GetHeader().GetAdminChainID()
 }
 
-func (c *AdminBlock) DatabasePrimaryIndex() (rval interfaces.IHash) {
+func (c *AdminBlock) DatabasePrimaryIndex() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "AdminBlock.DatabasePrimaryIndex") }()
 	key, _ := c.LookupHash()
 	return key
 }
 
-func (c *AdminBlock) DatabaseSecondaryIndex() (rval interfaces.IHash) {
+func (c *AdminBlock) DatabaseSecondaryIndex() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "AdminBlock.DatabaseSecondaryIndex") }()
 	key, _ := c.BackReferenceHash()
 	return key
 }
 
-func (c *AdminBlock) GetHash() (rval interfaces.IHash) {
+func (c *AdminBlock) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "AdminBlock.GetHash") }()
 	h, _ := c.GetKeyMR()
 	return h
 }
 
-func (c *AdminBlock) GetKeyMR() (interfaces.IHash, error) {
+func (c *AdminBlock) GetKeyMR() (interfaces.*HashS, error) {
 	return c.BackReferenceHash()
 }
 
 // Returns the SHA512Half hash for the admin block
-func (b *AdminBlock) BackReferenceHash() (interfaces.IHash, error) {
+func (b *AdminBlock) BackReferenceHash() (interfaces.*HashS, error) {
 	var binaryAB []byte
 	binaryAB, err := b.MarshalBinary()
 	if err != nil {
@@ -365,7 +365,7 @@ func (b *AdminBlock) BackReferenceHash() (interfaces.IHash, error) {
 }
 
 // Returns the SHA256 hash for the admin block
-func (b *AdminBlock) LookupHash() (interfaces.IHash, error) {
+func (b *AdminBlock) LookupHash() (interfaces.*HashS, error) {
 	var binaryAB []byte
 	binaryAB, err := b.MarshalBinary()
 	if err != nil {

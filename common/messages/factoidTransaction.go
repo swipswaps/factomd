@@ -26,7 +26,7 @@ type FactoidTransaction struct {
 	//No signature!
 
 	//Not marshalled
-	hash         interfaces.IHash
+	hash         interfaces.*HashS
 	processed    bool
 	marshalCache []byte
 }
@@ -46,13 +46,13 @@ func (a *FactoidTransaction) IsSameAs(b *FactoidTransaction) bool {
 	return true
 }
 
-func (m *FactoidTransaction) GetRepeatHash() (rval interfaces.IHash) {
+func (m *FactoidTransaction) GetRepeatHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "FactoidTransaction.GetRepeatHash") }()
 
 	return m.Transaction.GetSigHash()
 }
 
-func (m *FactoidTransaction) GetHash() (rval interfaces.IHash) {
+func (m *FactoidTransaction) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "FactoidTransaction.GetHash") }()
 
 	if m.hash == nil {
@@ -68,7 +68,7 @@ func (m *FactoidTransaction) GetHash() (rval interfaces.IHash) {
 	return m.hash
 }
 
-func (m *FactoidTransaction) GetMsgHash() (rval interfaces.IHash) {
+func (m *FactoidTransaction) GetMsgHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "FactoidTransaction.GetMsgHash") }()
 
 	if m.MsgHash == nil {

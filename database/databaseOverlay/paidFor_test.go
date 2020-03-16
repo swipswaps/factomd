@@ -34,7 +34,7 @@ func TestPaidFor(t *testing.T) {
 			if entry.ECID() != constants.ECIDChainCommit && entry.ECID() != constants.ECIDEntryCommit {
 				continue
 			}
-			var entryHash interfaces.IHash
+			var entryHash interfaces.*HashS
 
 			if entry.ECID() == constants.ECIDChainCommit {
 				entryHash = entry.(*entryCreditBlock.CommitChain).EntryHash

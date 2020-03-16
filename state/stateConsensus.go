@@ -2227,7 +2227,7 @@ func (s *State) ProcessEOM(dbheight uint32, msg interfaces.IMsg) bool {
 
 // GetUnsyncedServers returns an array of the IDs for all unsynced VMs
 // when you are not in a sync phase, no VM is considered sync'd
-func (s *State) GetUnsyncedServers() (ids []interfaces.IHash, vms []int) {
+func (s *State) GetUnsyncedServers() (ids []interfaces.*HashS, vms []int) {
 	p := s.LeaderPL
 	c := s.CurrentMinute
 	if c == 10 {
@@ -2581,7 +2581,7 @@ func (s *State) UpdateECs(ec interfaces.IEntryCreditBlock) {
 	}
 }
 
-func (s *State) GetNewEBlocks(dbheight uint32, hash interfaces.IHash) interfaces.IEntryBlock {
+func (s *State) GetNewEBlocks(dbheight uint32, hash interfaces.*HashS) interfaces.IEntryBlock {
 	if dbheight <= s.GetHighestSavedBlk()+2 {
 		pl := s.ProcessLists.Get(dbheight)
 		if pl == nil {
@@ -2592,7 +2592,7 @@ func (s *State) GetNewEBlocks(dbheight uint32, hash interfaces.IHash) interfaces
 	return nil
 }
 
-func (s *State) IsNewOrPendingEBlocks(dbheight uint32, hash interfaces.IHash) bool {
+func (s *State) IsNewOrPendingEBlocks(dbheight uint32, hash interfaces.*HashS) bool {
 	if dbheight <= s.GetHighestSavedBlk()+2 {
 		pl := s.ProcessLists.Get(dbheight)
 		if pl == nil {
@@ -2608,27 +2608,27 @@ func (s *State) IsNewOrPendingEBlocks(dbheight uint32, hash interfaces.IHash) bo
 	return false
 }
 
-func (s *State) PutNewEBlocks(dbheight uint32, hash interfaces.IHash, eb interfaces.IEntryBlock) {
+func (s *State) PutNewEBlocks(dbheight uint32, hash interfaces.*HashS, eb interfaces.IEntryBlock) {
 	pl := s.ProcessLists.Get(dbheight)
 	pl.AddNewEBlocks(hash, eb)
 	// We no longer need them in this map, as they are in the other
 	pl.PendingChainHeads.Delete(hash.Fixed())
 }
 
-func (s *State) PutNewEntries(dbheight uint32, hash interfaces.IHash, e interfaces.IEntry) {
+func (s *State) PutNewEntries(dbheight uint32, hash interfaces.*HashS, e interfaces.IEntry) {
 	pl := s.ProcessLists.Get(dbheight)
 	pl.AddNewEntry(hash, e)
 }
 
 // Returns the oldest, not processed, Commit received
-func (s *State) NextCommit(hash interfaces.IHash) interfaces.IMsg {
+func (s *State) NextCommit(hash interfaces.*HashS) interfaces.IMsg {
 	c := s.Commits.Get(hash.Fixed()) //  s.Commits[hash.Fixed()]
 	return c
 }
 
 // IsHighestCommit will determine if the commit given has more entry credits than the current
 // commit in the commit hashmap. If there is no prior commit, this will also return true.
-func (s *State) IsHighestCommit(hash interfaces.IHash, msg interfaces.IMsg) bool {
+func (s *State) IsHighestCommit(hash interfaces.*HashS, msg interfaces.IMsg) bool {
 	e, ok1 := s.Commits.Get(hash.Fixed()).(*messages.CommitEntryMsg)
 	m, ok1b := msg.(*messages.CommitEntryMsg)
 	ec, ok2 := s.Commits.Get(hash.Fixed()).(*messages.CommitChainMsg)
@@ -2646,7 +2646,7 @@ func (s *State) IsHighestCommit(hash interfaces.IHash, msg interfaces.IMsg) bool
 	return false
 }
 
-func (s *State) PutCommit(hash interfaces.IHash, msg interfaces.IMsg) {
+func (s *State) PutCommit(hash interfaces.*HashS, msg interfaces.IMsg) {
 	if s.IsHighestCommit(hash, msg) {
 		s.Commits.Put(hash.Fixed(), msg)
 	}
@@ -2814,14 +2814,14 @@ func (s *State) GetDirectoryBlock() interfaces.IDirectoryBlock {
 	return s.DBStates.Last().DirectoryBlock
 }
 
-func (s *State) GetNewHash() (rval interfaces.IHash) {
+func (s *State) GetNewHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "State.GetNewHash") }()
 	return new(primitives.Hash)
 }
 
 // Create a new Acknowledgement.  Must be called by a leader.  This
 // call assumes all the pieces are in place to create a new acknowledgement
-func (s *State) NewAck(msg interfaces.IMsg, balanceHash interfaces.IHash) interfaces.IMsg {
+func (s *State) NewAck(msg interfaces.IMsg, balanceHash interfaces.*HashS) interfaces.IMsg {
 
 	vmIndex := msg.GetVMIndex()
 	leaderMinute := byte(s.ProcessLists.Get(s.LLeaderHeight).VMs[vmIndex].LeaderMinute)

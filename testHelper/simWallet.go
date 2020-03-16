@@ -49,25 +49,25 @@ func (d *testAccount) EcPriv() string {
 	return s
 }
 
-func (d *testAccount) FctPrivHash() interfaces.IHash {
+func (d *testAccount) FctPrivHash() interfaces.*HashS {
 	a := primitives.ConvertUserStrToAddress(d.FctPriv())
 	x, _ := primitives.HexToHash(hex.EncodeToString(a))
 	return x
 }
 
-func (d *testAccount) FctAddr() interfaces.IHash {
+func (d *testAccount) FctAddr() interfaces.*HashS {
 	a := primitives.ConvertUserStrToAddress(d.FctPub())
 	x, _ := primitives.HexToHash(hex.EncodeToString(a))
 	return x
 }
 
-func (d *testAccount) EcPrivHash() interfaces.IHash {
+func (d *testAccount) EcPrivHash() interfaces.*HashS {
 	a := primitives.ConvertUserStrToAddress(d.EcPriv())
 	x, _ := primitives.HexToHash(hex.EncodeToString(a))
 	return x
 }
 
-func (d *testAccount) EcAddr() interfaces.IHash {
+func (d *testAccount) EcAddr() interfaces.*HashS {
 	a := primitives.ConvertUserStrToAddress(d.EcPub())
 	x, _ := primitives.HexToHash(hex.EncodeToString(a))
 	return x

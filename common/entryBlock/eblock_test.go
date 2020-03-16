@@ -83,7 +83,7 @@ func TestEBlockMassiveUnmarshal(t *testing.T) {
 
 	e := primitives.NewZeroHash()
 	total := 10000
-	entries := make([]interfaces.IHash, total)
+	entries := make([]interfaces.*HashS, total)
 	for i := 0; i < total; i++ {
 		entries[i] = e
 	}

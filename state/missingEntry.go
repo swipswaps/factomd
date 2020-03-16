@@ -15,7 +15,7 @@ import (
 )
 
 type MissingEntryBlock struct {
-	EBHash   interfaces.IHash
+	EBHash   interfaces.*HashS
 	DBHeight uint32
 }
 
@@ -83,8 +83,8 @@ func (s *MissingEntryBlock) UnmarshalBinary(p []byte) error {
 type MissingEntry struct {
 	Cnt       int
 	LastTime  time.Time
-	EBHash    interfaces.IHash
-	EntryHash interfaces.IHash
+	EBHash    interfaces.*HashS
+	EntryHash interfaces.*HashS
 	DBHeight  uint32
 }
 

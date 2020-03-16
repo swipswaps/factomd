@@ -17,18 +17,18 @@ const level string = "level"
 const bolt string = "bolt"
 
 type Fetcher interface {
-	SetChainHeads(primaryIndexes, chainIDs []interfaces.IHash) error
+	SetChainHeads(primaryIndexes, chainIDs []interfaces.*HashS) error
 	FetchDBlockHead() (interfaces.IDirectoryBlock, error)
-	//FetchDBlock(hash interfaces.IHash) (interfaces.IDirectoryBlock, error)
-	FetchHeadIndexByChainID(chainID interfaces.IHash) (interfaces.IHash, error)
-	FetchEBlock(hash interfaces.IHash) (interfaces.IEntryBlock, error)
+	//FetchDBlock(hash interfaces.*HashS) (interfaces.IDirectoryBlock, error)
+	FetchHeadIndexByChainID(chainID interfaces.*HashS) (interfaces.*HashS, error)
+	FetchEBlock(hash interfaces.*HashS) (interfaces.IEntryBlock, error)
 
-	FetchEntry(hash interfaces.IHash) (interfaces.IEBEntry, error)
+	FetchEntry(hash interfaces.*HashS) (interfaces.IEBEntry, error)
 	FetchDBlockByHeight(dBlockHeight uint32) (interfaces.IDirectoryBlock, error)
 	FetchABlockByHeight(blockHeight uint32) (interfaces.IAdminBlock, error)
 	FetchFBlockByHeight(blockHeight uint32) (interfaces.IFBlock, error)
 	FetchECBlockByHeight(blockHeight uint32) (interfaces.IEntryCreditBlock, error)
-	FetchECBlockByPrimary(keymr interfaces.IHash) (interfaces.IEntryCreditBlock, error)
+	FetchECBlockByPrimary(keymr interfaces.*HashS) (interfaces.IEntryCreditBlock, error)
 }
 
 var _ Fetcher = (*APIReader)(nil)
@@ -62,11 +62,11 @@ func NewAPIReader(loc string) *APIReader {
 	return a
 }
 
-func (a *APIReader) SetChainHeads(primaryIndexes, chainIDs []interfaces.IHash) error {
+func (a *APIReader) SetChainHeads(primaryIndexes, chainIDs []interfaces.*HashS) error {
 	return nil
 }
 
-func (a *APIReader) FetchEntry(hash interfaces.IHash) (interfaces.IEBEntry, error) {
+func (a *APIReader) FetchEntry(hash interfaces.*HashS) (interfaces.IEBEntry, error) {
 	raw, err := factom.GetRaw(hash.String())
 	if err != nil {
 		return nil, err
@@ -77,7 +77,7 @@ func (a *APIReader) FetchEntry(hash interfaces.IHash) (interfaces.IEBEntry, erro
 	return entry, err
 }
 
-func (a *APIReader) FetchEBlock(hash interfaces.IHash) (interfaces.IEntryBlock, error) {
+func (a *APIReader) FetchEBlock(hash interfaces.*HashS) (interfaces.IEntryBlock, error) {
 	raw, err := factom.GetRaw(hash.String())
 	if err != nil {
 		return nil, err
@@ -136,7 +136,7 @@ func (a *APIReader) FetchABlockByHeight(height uint32) (interfaces.IAdminBlock, 
 	return ablock, err
 }
 
-func (a *APIReader) FetchECBlockByPrimary(keymr interfaces.IHash) (interfaces.IEntryCreditBlock, error) {
+func (a *APIReader) FetchECBlockByPrimary(keymr interfaces.*HashS) (interfaces.IEntryCreditBlock, error) {
 	data, err := factom.GetRaw(keymr.String())
 	if err != nil {
 		return nil, err
@@ -158,7 +158,7 @@ func (a *APIReader) FetchECBlockByHeight(height uint32) (interfaces.IEntryCredit
 	return ecblock, err
 }
 
-func (a *APIReader) FetchHeadIndexByChainID(chainID interfaces.IHash) (interfaces.IHash, error) {
+func (a *APIReader) FetchHeadIndexByChainID(chainID interfaces.*HashS) (interfaces.*HashS, error) {
 	resp, _, err := factom.GetChainHead(chainID.String())
 	if err != nil {
 		return nil, err

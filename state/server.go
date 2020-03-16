@@ -14,10 +14,10 @@ import (
 )
 
 type Server struct {
-	ChainID interfaces.IHash
+	ChainID interfaces.*HashS
 	Name    string
 	Online  bool
-	Replace interfaces.IHash
+	Replace interfaces.*HashS
 }
 
 var _ interfaces.IServer = (*Server)(nil)
@@ -130,7 +130,7 @@ func (s *Server) GetName() string {
 	return s.Name
 }
 
-func (s *Server) GetChainID() (rval interfaces.IHash) {
+func (s *Server) GetChainID() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "Server.GetChainID") }()
 
 	return s.ChainID
@@ -148,14 +148,14 @@ func (s *Server) SetOnline(o bool) {
 	s.Online = o
 }
 
-func (s *Server) LeaderToReplace() (rval interfaces.IHash) {
+func (s *Server) LeaderToReplace() (rval interfaces.*HashS) {
 	if s.Replace != nil {
 		defer func() { rval = primitives.CheckNil(rval, "Server.LeaderToReplace") }()
 	}
 	return s.Replace
 }
 
-func (s *Server) SetReplace(h interfaces.IHash) {
+func (s *Server) SetReplace(h interfaces.*HashS) {
 	s.Replace = h
 }
 

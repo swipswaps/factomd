@@ -5,7 +5,7 @@
 package interfaces
 
 type IAddress interface {
-	IHash
+	*HashS
 }
 
 type ITransAddress interface {

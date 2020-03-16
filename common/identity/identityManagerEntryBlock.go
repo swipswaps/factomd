@@ -220,7 +220,7 @@ func (im *IdentityManager) ProcessIdentityEntryWithABlockUpdate(entry interfaces
 	return change, nil
 }
 
-func (im *IdentityManager) ApplyIdentityChainStructure(ic *IdentityChainStructure, chainID interfaces.IHash, dBlockHeight uint32) (bool, error) {
+func (im *IdentityManager) ApplyIdentityChainStructure(ic *IdentityChainStructure, chainID interfaces.*HashS, dBlockHeight uint32) (bool, error) {
 	id := im.GetIdentity(chainID)
 	if id == nil {
 		id = NewIdentity()
@@ -249,7 +249,7 @@ func (im *IdentityManager) ApplyIdentityChainStructure(ic *IdentityChainStructur
 //			bool	change		If a key has been changed
 //			bool	tryagain	If this is set to true, this entry can be reprocessed if it is *new*
 //			error	err			Any errors
-func (im *IdentityManager) ApplyNewBitcoinKeyStructure(bnk *NewBitcoinKeyStructure, subChainID interfaces.IHash, BlockChain string, dBlockTimestamp interfaces.Timestamp, a interfaces.IAdminBlock) (bool, bool, error) {
+func (im *IdentityManager) ApplyNewBitcoinKeyStructure(bnk *NewBitcoinKeyStructure, subChainID interfaces.*HashS, BlockChain string, dBlockTimestamp interfaces.Timestamp, a interfaces.IAdminBlock) (bool, bool, error) {
 	chainID := bnk.RootIdentityChainID
 
 	id := im.GetIdentity(chainID)
@@ -311,7 +311,7 @@ func (im *IdentityManager) ApplyNewBitcoinKeyStructure(bnk *NewBitcoinKeyStructu
 //			bool	change		If a key has been changed
 //			bool	tryagain	If this is set to true, this entry can be reprocessed if it is *new*
 //			error	err			Any errors
-func (im *IdentityManager) ApplyNewBlockSigningKeyStruct(nbsk *NewBlockSigningKeyStruct, subchainID interfaces.IHash, dBlockTimestamp interfaces.Timestamp, a interfaces.IAdminBlock) (bool, bool, error) {
+func (im *IdentityManager) ApplyNewBlockSigningKeyStruct(nbsk *NewBlockSigningKeyStruct, subchainID interfaces.*HashS, dBlockTimestamp interfaces.Timestamp, a interfaces.IAdminBlock) (bool, bool, error) {
 	chainID := nbsk.RootIdentityChainID
 	id := im.GetIdentity(chainID)
 	if id == nil {
@@ -410,7 +410,7 @@ func (im *IdentityManager) ApplyRegisterFactomIdentityStructure(rfi *RegisterFac
 	return false, nil
 }
 
-func (im *IdentityManager) ApplyRegisterServerManagementStructure(rsm *RegisterServerManagementStructure, chainID interfaces.IHash, dBlockHeight uint32) (bool, error) {
+func (im *IdentityManager) ApplyRegisterServerManagementStructure(rsm *RegisterServerManagementStructure, chainID interfaces.*HashS, dBlockHeight uint32) (bool, error) {
 	id := im.GetIdentity(chainID)
 	if id == nil {
 		return true, fmt.Errorf("ChainID doesn't exists! %v", chainID.String())
@@ -433,7 +433,7 @@ func (im *IdentityManager) ApplyRegisterServerManagementStructure(rsm *RegisterS
 // ApplyServerManagementStructure is the first entry in the management chain
 //	DO NOT set the management chain in the identity, as it will be set on the register
 //		"Server Management"
-func (im *IdentityManager) ApplyServerManagementStructure(sm *ServerManagementStructure, chainID interfaces.IHash, dBlockHeight uint32) (bool, error) {
+func (im *IdentityManager) ApplyServerManagementStructure(sm *ServerManagementStructure, chainID interfaces.*HashS, dBlockHeight uint32) (bool, error) {
 	id := im.GetIdentity(sm.RootIdentityChainID)
 	if id == nil {
 		return true, fmt.Errorf("ChainID doesn't exists! %v", chainID.String())
@@ -453,7 +453,7 @@ func (im *IdentityManager) ApplyServerManagementStructure(sm *ServerManagementSt
 //			bool	change		If a key has been changed
 //			bool	tryagain	If this is set to true, this entry can be reprocessed if it is *new*
 //			error	err			Any errors
-func (im *IdentityManager) ApplyNewServerEfficiencyStruct(nses *NewServerEfficiencyStruct, subchainID interfaces.IHash, dBlockTimestamp interfaces.Timestamp, a interfaces.IAdminBlock) (bool, bool, error) {
+func (im *IdentityManager) ApplyNewServerEfficiencyStruct(nses *NewServerEfficiencyStruct, subchainID interfaces.*HashS, dBlockTimestamp interfaces.Timestamp, a interfaces.IAdminBlock) (bool, bool, error) {
 	chainID := nses.RootIdentityChainID
 	id := im.GetIdentity(chainID)
 	if id == nil {
@@ -499,7 +499,7 @@ func (im *IdentityManager) ApplyNewServerEfficiencyStruct(nses *NewServerEfficie
 //			bool	change		If a key has been changed
 //			bool	tryagain	If this is set to true, this entry can be reprocessed if it is *new*
 //			error	err			Any errors
-func (im *IdentityManager) ApplyNewCoinbaseAddressStruct(ncas *NewCoinbaseAddressStruct, rootchainID interfaces.IHash, dBlockTimestamp interfaces.Timestamp, a interfaces.IAdminBlock) (bool, bool, error) {
+func (im *IdentityManager) ApplyNewCoinbaseAddressStruct(ncas *NewCoinbaseAddressStruct, rootchainID interfaces.*HashS, dBlockTimestamp interfaces.Timestamp, a interfaces.IAdminBlock) (bool, bool, error) {
 	root := ncas.RootIdentityChainID
 	id := im.GetIdentity(root)
 	if id == nil {
@@ -544,7 +544,7 @@ func (im *IdentityManager) ApplyNewCoinbaseAddressStruct(ncas *NewCoinbaseAddres
 //			bool	change		If a key has been changed
 //			bool	tryagain	If this is set to true, this entry can be reprocessed if it is *new*
 //			error	err			Any errors
-func (im *IdentityManager) ApplyNewCoinbaseCancelStruct(nccs *NewCoinbaseCancelStruct, managechain interfaces.IHash, dblockHeight uint32, a interfaces.IAdminBlock) (bool, bool, error) {
+func (im *IdentityManager) ApplyNewCoinbaseCancelStruct(nccs *NewCoinbaseCancelStruct, managechain interfaces.*HashS, dblockHeight uint32, a interfaces.IAdminBlock) (bool, bool, error) {
 	// Validate Block window
 	//		If the descriptor to cancel has already been applied, then this entry is no longer valid
 	//		Descriptor height + Declaration is the block the coinbase is added

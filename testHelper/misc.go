@@ -6,7 +6,7 @@ import (
 	"github.com/FactomProject/factomd/common/primitives"
 )
 
-func NewRepeatingHash(b byte) interfaces.IHash {
+func NewRepeatingHash(b byte) interfaces.*HashS {
 	tmp := make([]byte, constants.HASH_LENGTH)
 	for i := range tmp {
 		tmp[i] = b

@@ -37,8 +37,8 @@ type hardCodedAuthority struct {
 	EntryCommits []string
 	EntryReveals []string
 
-	ChainID     interfaces.IHash
-	ManageChain interfaces.IHash
+	ChainID     interfaces.*HashS
+	ManageChain interfaces.*HashS
 	Sk1         [64]byte
 	Ready       bool
 
@@ -407,7 +407,7 @@ func makeServerEfficiency(ele hardCodedAuthority, ec *factom.ECAddress, eff uint
 	return str1, str2, e
 }
 
-func makeServerCoinbaseAddress(ele hardCodedAuthority, ec *factom.ECAddress, add interfaces.IHash) (string, string, *factom.Entry) {
+func makeServerCoinbaseAddress(ele hardCodedAuthority, ec *factom.ECAddress, add interfaces.*HashS) (string, string, *factom.Entry) {
 	var se identityEntries.NewCoinbaseAddressStruct
 	se.CoinbaseAddress = add
 	t := primitives.NewTimestampNow().GetTimeSeconds()
@@ -530,7 +530,7 @@ func getMessageStringChain(c *factom.Chain, ec *factom.ECAddress) (string, strin
 	return tC.Params.Message, tR.Params.Message
 }
 
-func changeSigningKey(auth interfaces.IHash, st *state.State) (*primitives.PrivateKey, error) {
+func changeSigningKey(auth interfaces.*HashS, st *state.State) (*primitives.PrivateKey, error) {
 	sec, _ := hex.DecodeString(ecSec)
 	ec, _ := factom.MakeECAddress(sec[:32])
 	if h, err := st.DB.FetchHeadIndexByChainID(auth); h == nil || err != nil {
@@ -564,7 +564,7 @@ func changeSigningKey(auth interfaces.IHash, st *state.State) (*primitives.Priva
 	return nil, errors.New("No identity found, it must be one of the pregenerated ones.")
 }
 
-func changeServerEfficiency(auth interfaces.IHash, st *state.State, eff uint16) error {
+func changeServerEfficiency(auth interfaces.*HashS, st *state.State, eff uint16) error {
 	sec, _ := hex.DecodeString(ecSec)
 	ec, _ := factom.MakeECAddress(sec[:32])
 	if h, err := st.DB.FetchHeadIndexByChainID(auth); h == nil || err != nil {
@@ -596,7 +596,7 @@ func changeServerEfficiency(auth interfaces.IHash, st *state.State, eff uint16) 
 	return errors.New("No identity found, it must be one of the pregenerated ones.")
 }
 
-func changeServerCoinbaseAddress(auth interfaces.IHash, st *state.State, add string) error {
+func changeServerCoinbaseAddress(auth interfaces.*HashS, st *state.State, add string) error {
 	sec, _ := hex.DecodeString(ecSec)
 	ec, _ := factom.MakeECAddress(sec[:32])
 	if h, err := st.DB.FetchHeadIndexByChainID(auth); h == nil || err != nil {
@@ -634,7 +634,7 @@ func changeServerCoinbaseAddress(auth interfaces.IHash, st *state.State, add str
 	return errors.New("No identity found, it must be one of the pregenerated ones.")
 }
 
-func cancelCoinbase(auth interfaces.IHash, st *state.State, h, i uint32) error {
+func cancelCoinbase(auth interfaces.*HashS, st *state.State, h, i uint32) error {
 	sec, _ := hex.DecodeString(ecSec)
 	ec, _ := factom.MakeECAddress(sec[:32])
 	if h, err := st.DB.FetchHeadIndexByChainID(auth); h == nil || err != nil {
@@ -668,7 +668,7 @@ func cancelCoinbase(auth interfaces.IHash, st *state.State, h, i uint32) error {
 }
 
 // Returns the private block signing key of the authority
-func authKeyLookup(auth interfaces.IHash) (string, *primitives.PrivateKey, *hardCodedAuthority) {
+func authKeyLookup(auth interfaces.*HashS) (string, *primitives.PrivateKey, *hardCodedAuthority) {
 	key := ""
 	var resA hardCodedAuthority
 	for _, a := range authKeyLibrary {
@@ -837,14 +837,14 @@ func v2Request(req *primitives.JSON2Request, port int) (*primitives.JSON2Respons
 func modifyLoadIdentities() {
 	chainIDList := strings.Split(chainIDs, "#")
 
-	list := make([]interfaces.IHash, 0)
+	list := make([]interfaces.*HashS, 0)
 	for i := 0; i < len(chainIDList); i = i + 2 {
 		next, err := primitives.HexToHash(chainIDList[i+1])
 		if err != nil {
 			continue
 		}
 		list = append(list, next)
-		//list = append([]interfaces.IHash{next}, list...)
+		//list = append([]interfaces.*HashS{next}, list...)
 	}
 
 	if len(list) == 0 {

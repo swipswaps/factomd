@@ -139,7 +139,7 @@ func TestVerify(t *testing.T) {
 	pl := s.ProcessLists.Get(10)
 
 	var privs []*primitives.PrivateKey
-	var ids []interfaces.IHash
+	var ids []interfaces.*HashS
 	for i := 0; i < 10; i++ {
 		p := primitives.RandomPrivateKey()
 		id := primitives.RandomHash()
@@ -244,7 +244,7 @@ func TestSameAuth(t *testing.T) {
 
 }
 
-func newAck(id interfaces.IHash, ts interfaces.Timestamp) *messages.Ack {
+func newAck(id interfaces.*HashS, ts interfaces.Timestamp) *messages.Ack {
 	ack := new(messages.Ack)
 	ack.DBHeight = 0
 	ack.VMIndex = 1

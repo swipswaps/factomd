@@ -22,7 +22,7 @@ func (db *Overlay) ProcessABlockMultiBatch(block interfaces.DatabaseBatchable) e
 	return db.ProcessBlockMultiBatch(ADMINBLOCK, ADMINBLOCK_NUMBER, ADMINBLOCK_SECONDARYINDEX, block)
 }
 
-func (db *Overlay) FetchABlock(hash interfaces.IHash) (interfaces.IAdminBlock, error) {
+func (db *Overlay) FetchABlock(hash interfaces.*HashS) (interfaces.IAdminBlock, error) {
 	block, err := db.FetchABlockByPrimary(hash)
 	if err != nil {
 		return nil, err
@@ -34,7 +34,7 @@ func (db *Overlay) FetchABlock(hash interfaces.IHash) (interfaces.IAdminBlock, e
 }
 
 // FetchABlockByHash gets an admin block by hash from the database.
-func (db *Overlay) FetchABlockBySecondary(hash interfaces.IHash) (interfaces.IAdminBlock, error) {
+func (db *Overlay) FetchABlockBySecondary(hash interfaces.*HashS) (interfaces.IAdminBlock, error) {
 	block, err := db.FetchBlockBySecondaryIndex(ADMINBLOCK_SECONDARYINDEX, ADMINBLOCK, hash, new(adminBlock.AdminBlock))
 	if err != nil {
 		return nil, err
@@ -46,7 +46,7 @@ func (db *Overlay) FetchABlockBySecondary(hash interfaces.IHash) (interfaces.IAd
 }
 
 // FetchABlockByKeyMR gets an admin block by keyMR from the database.
-func (db *Overlay) FetchABlockByPrimary(hash interfaces.IHash) (interfaces.IAdminBlock, error) {
+func (db *Overlay) FetchABlockByPrimary(hash interfaces.*HashS) (interfaces.IAdminBlock, error) {
 	block, err := db.FetchBlock(ADMINBLOCK, hash, new(adminBlock.AdminBlock))
 	if err != nil {
 		return nil, err
@@ -78,7 +78,7 @@ func (db *Overlay) FetchAllABlocks() ([]interfaces.IAdminBlock, error) {
 	return toABlocksList(list), nil
 }
 
-func (db *Overlay) FetchAllABlockKeys() ([]interfaces.IHash, error) {
+func (db *Overlay) FetchAllABlockKeys() ([]interfaces.*HashS, error) {
 	return db.FetchAllBlockKeysFromBucket(ADMINBLOCK)
 }
 

@@ -128,8 +128,8 @@ type EntryCreditBlockResponse struct {
 	ECBlock struct {
 		Header     interfaces.IECBlockHeader `json:"header"`
 		Body       interfaces.IECBlockBody   `json:"body"`
-		HeaderHash interfaces.IHash          `json:"headerhash"`
-		FullHash   interfaces.IHash          `json:"fullhash"`
+		HeaderHash interfaces.*HashS          `json:"headerhash"`
+		FullHash   interfaces.*HashS          `json:"fullhash"`
 	} `json:"ecblock"`
 	RawData string `json:"rawdata"`
 }
@@ -310,13 +310,13 @@ type MessageRequest struct {
 }
 
 type PendingEntry struct {
-	EntryHash interfaces.IHash `json:"entryhash"`
-	ChainID   interfaces.IHash `json:"chainid"`
+	EntryHash interfaces.*HashS `json:"entryhash"`
+	ChainID   interfaces.*HashS `json:"chainid"`
 	Status    string           `json:"status"`
 }
 
 type PendingTransaction struct {
-	TransactionID interfaces.IHash `json:"transactionid"`
+	TransactionID interfaces.*HashS `json:"transactionid"`
 	Status        string           `json:"status"`
 }
 

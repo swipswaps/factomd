@@ -31,7 +31,7 @@ func (s *State) FixMissingKeys(id *Identity) error {
 }
 
 // Sig is signed message, msg is raw message
-func CheckSig(idKey interfaces.IHash, pub []byte, msg []byte, sig []byte) bool {
+func CheckSig(idKey interfaces.*HashS, pub []byte, msg []byte, sig []byte) bool {
 	var pubFix [32]byte
 	var sigFix [64]byte
 

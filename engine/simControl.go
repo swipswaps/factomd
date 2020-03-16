@@ -571,7 +571,7 @@ func SimControl(listenTo int, listenStdin bool) {
 					break
 				}
 				if 's' == b[1] {
-					getName := func(chainID interfaces.IHash) string {
+					getName := func(chainID interfaces.*HashS) string {
 						for _, fn := range fnodes {
 							if fn.State.IdentityChainID.Fixed() == chainID.Fixed() {
 								return fn.State.FactomNodeName

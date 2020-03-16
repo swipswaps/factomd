@@ -27,7 +27,7 @@ type FedVoteProposalMsg struct {
 	FedVoteMsg
 
 	// Signer of the message
-	Signer interfaces.IHash
+	Signer interfaces.*HashS
 
 	// Volunteer fields
 	Volunteer FedVoteVolunteerMsg
@@ -38,7 +38,7 @@ type FedVoteProposalMsg struct {
 var _ interfaces.IMsg = (*FedVoteVolunteerMsg)(nil)
 var _ interfaces.IElectionMsg = (*FedVoteVolunteerMsg)(nil)
 
-func NewFedProposalMsg(signer interfaces.IHash, vol FedVoteVolunteerMsg) *FedVoteProposalMsg {
+func NewFedProposalMsg(signer interfaces.*HashS, vol FedVoteVolunteerMsg) *FedVoteProposalMsg {
 	p := new(FedVoteProposalMsg)
 	p.SetFullBroadcast(true)
 	p.Volunteer = vol
@@ -87,7 +87,7 @@ func (a *FedVoteProposalMsg) IsSameAs(msg interfaces.IMsg) bool {
 	return false
 }
 
-func (m *FedVoteProposalMsg) GetServerID() (rval interfaces.IHash) {
+func (m *FedVoteProposalMsg) GetServerID() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "FedVoteProposalMsg.GetServerID") }()
 
 	return m.Signer
@@ -97,7 +97,7 @@ func (m *FedVoteProposalMsg) LogFields() log.Fields {
 	return log.Fields{"category": "message", "messagetype": "FedVoteVolunteerMsg", "dbheight": m.DBHeight, "newleader": m.Signer.String()[4:12]}
 }
 
-func (m *FedVoteProposalMsg) GetRepeatHash() (rval interfaces.IHash) {
+func (m *FedVoteProposalMsg) GetRepeatHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "FedVoteProposalMsg.GetRepeatHash") }()
 
 	return m.GetMsgHash()
@@ -105,7 +105,7 @@ func (m *FedVoteProposalMsg) GetRepeatHash() (rval interfaces.IHash) {
 
 // We have to return the hash of the underlying message.
 
-func (m *FedVoteProposalMsg) GetHash() (rval interfaces.IHash) {
+func (m *FedVoteProposalMsg) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "FedVoteProposalMsg.GetHash") }()
 
 	return m.GetMsgHash()
@@ -115,7 +115,7 @@ func (m *FedVoteProposalMsg) GetTimestamp() interfaces.Timestamp {
 	return m.TS.Clone()
 }
 
-func (m *FedVoteProposalMsg) GetMsgHash() (rval interfaces.IHash) {
+func (m *FedVoteProposalMsg) GetMsgHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "FedVoteProposalMsg.GetMsgHash") }()
 
 	if m.MsgHash == nil {

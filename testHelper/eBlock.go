@@ -141,11 +141,11 @@ func CreateTestAnchorEntryBlock(p interfaces.IEntryBlock, prevDBlock *directoryB
 	return e, entries
 }
 
-func GetChainID() interfaces.IHash {
+func GetChainID() interfaces.*HashS {
 	return CreateFirstTestEntry().GetChainIDHash()
 }
 
-func GetAnchorChainID() interfaces.IHash {
+func GetAnchorChainID() interfaces.*HashS {
 	return CreateFirstAnchorEntry().GetChainIDHash()
 }
 

@@ -61,9 +61,9 @@ func (e *Receipt) Validate() error {
 	if err != nil {
 		return err
 	}
-	var left interfaces.IHash
-	var right interfaces.IHash
-	var currentEntry interfaces.IHash
+	var left interfaces.*HashS
+	var right interfaces.*HashS
+	var currentEntry interfaces.*HashS
 	currentEntry = entryHash
 	eBlockFound := false
 	dBlockFound := false
@@ -250,11 +250,11 @@ func (e *EntryJSON) IsSameAs(r *EntryJSON) bool {
 	return true
 }
 
-func CreateFullReceipt(dbo interfaces.DBOverlaySimple, entryHash interfaces.IHash, includeRawEntry bool) (*Receipt, error) {
+func CreateFullReceipt(dbo interfaces.DBOverlaySimple, entryHash interfaces.*HashS, includeRawEntry bool) (*Receipt, error) {
 	return CreateReceipt(dbo, entryHash, includeRawEntry)
 }
 
-func CreateMinimalReceipt(dbo interfaces.DBOverlaySimple, entryID interfaces.IHash) (*Receipt, error) {
+func CreateMinimalReceipt(dbo interfaces.DBOverlaySimple, entryID interfaces.*HashS) (*Receipt, error) {
 	receipt, err := CreateReceipt(dbo, entryID, false)
 	if err != nil {
 		return nil, err
@@ -265,7 +265,7 @@ func CreateMinimalReceipt(dbo interfaces.DBOverlaySimple, entryID interfaces.IHa
 	return receipt, nil
 }
 
-func CreateReceipt(dbo interfaces.DBOverlaySimple, entryHash interfaces.IHash, includeRawEntry bool) (*Receipt, error) {
+func CreateReceipt(dbo interfaces.DBOverlaySimple, entryHash interfaces.*HashS, includeRawEntry bool) (*Receipt, error) {
 	receipt := new(Receipt)
 	receipt.Entry = new(EntryJSON)
 	receipt.Entry.EntryHash = entryHash.String()

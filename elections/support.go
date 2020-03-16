@@ -32,7 +32,7 @@ func (e *Elections) Sort(serv []interfaces.IServer) bool {
 
 // Creates an order for all servers by using a certain hash function.  The list of unordered hashes (in the same order
 // as the slice of servers) is returned.
-func Order(servers []interfaces.IServer, dbheight int, minute int, serverIdx int) (priority []interfaces.IHash) {
+func Order(servers []interfaces.IServer, dbheight int, minute int, serverIdx int) (priority []interfaces.*HashS) {
 	for _, s := range servers {
 		var data []byte
 		data = append(data, byte(dbheight>>24), byte(dbheight>>16), byte(dbheight>>8), byte(dbheight))
@@ -46,7 +46,7 @@ func Order(servers []interfaces.IServer, dbheight int, minute int, serverIdx int
 }
 
 // Returns the index of the maximum priority entry
-func MaxIdx(priority []interfaces.IHash) (idx int) {
+func MaxIdx(priority []interfaces.*HashS) (idx int) {
 	for i, v := range priority {
 		if bytes.Compare(v.Bytes(), priority[idx].Bytes()) > 0 {
 			idx = i

@@ -25,7 +25,7 @@ func (s *State) IsStateFullySynced() bool {
 //		PL			-->	See if it is still in the processlist
 //		PL - 1		-->	Only if min 0, because then it's not in DB yet, but still in this PL
 //		Holding 	--> See if it is in holding
-func (s *State) GetEntryCommitAckByTXID(hash interfaces.IHash) (status int, blktime interfaces.Timestamp, commit interfaces.IMsg, entryhash interfaces.IHash) {
+func (s *State) GetEntryCommitAckByTXID(hash interfaces.*HashS) (status int, blktime interfaces.Timestamp, commit interfaces.IMsg, entryhash interfaces.*HashS) {
 	status = constants.AckStatusUnknown
 	// Check Database for commit
 	ecblkHash, err := s.DB.FetchIncludedIn(hash)
@@ -139,7 +139,7 @@ func (s *State) GetEntryCommitAckByTXID(hash interfaces.IHash) (status int, blkt
 //	Returns:
 //		status 		= Status of reveal from possible ack responses
 //		commit 		= The commit message
-func (s *State) GetEntryCommitAckByEntryHash(hash interfaces.IHash) (status int, commit interfaces.IMsg) {
+func (s *State) GetEntryCommitAckByEntryHash(hash interfaces.*HashS) (status int, commit interfaces.IMsg) {
 	// We begin as unknown
 	status = constants.AckStatusUnknown
 
@@ -216,7 +216,7 @@ func (s *State) GetEntryCommitAckByEntryHash(hash interfaces.IHash) (status int,
 //		status 		= Status of reveal from possible ack responses
 // 		blktime		= The time of the block if found in the database, nil if not found in blockchain
 //		commit		 = Only returned if found from holding. This will be empty if found in dbase or in processlist
-func (s *State) GetEntryRevealAckByEntryHash(hash interfaces.IHash) (status int, blktime interfaces.Timestamp, commit interfaces.IMsg) {
+func (s *State) GetEntryRevealAckByEntryHash(hash interfaces.*HashS) (status int, blktime interfaces.Timestamp, commit interfaces.IMsg) {
 	// We begin as unknown
 	status = constants.AckStatusUnknown
 
@@ -265,19 +265,19 @@ func (s *State) GetEntryRevealAckByEntryHash(hash interfaces.IHash) (status int,
 }
 
 // GetACKStatus also checks the oldmsgs map
-func (s *State) GetACKStatus(hash interfaces.IHash) (int, interfaces.IHash, interfaces.Timestamp, interfaces.Timestamp, error) {
+func (s *State) GetACKStatus(hash interfaces.*HashS) (int, interfaces.*HashS, interfaces.Timestamp, interfaces.Timestamp, error) {
 	return s.getACKStatus(hash, true)
 }
 
 // GetSpecificACKStatus does NOT check the oldmsgs map. This is because the processlists map for entries and entry blocks is
 // updated after the oldmsgs. This means an EntryACK will returns TransactionACK, but GetChain will return not found
 // To fix this, for some calls (entries) we don't want to check the oldmsgs.
-func (s *State) GetSpecificACKStatus(hash interfaces.IHash) (int, interfaces.IHash, interfaces.Timestamp, interfaces.Timestamp, error) {
+func (s *State) GetSpecificACKStatus(hash interfaces.*HashS) (int, interfaces.*HashS, interfaces.Timestamp, interfaces.Timestamp, error) {
 	return s.getACKStatus(hash, false)
 }
 
 //returns status, proper transaction ID, transaction timestamp, block timestamp, and an error
-func (s *State) getACKStatus(hash interfaces.IHash, useOldMsgs bool) (int, interfaces.IHash, interfaces.Timestamp, interfaces.Timestamp, error) {
+func (s *State) getACKStatus(hash interfaces.*HashS, useOldMsgs bool) (int, interfaces.*HashS, interfaces.Timestamp, interfaces.Timestamp, error) {
 	msg := s.GetInvalidMsg(hash)
 	if msg != nil {
 		return constants.AckStatusInvalid, hash, nil, nil, nil
@@ -393,7 +393,7 @@ func (s *State) getACKStatus(hash interfaces.IHash, useOldMsgs bool) (int, inter
 //		Returns
 //			reveal = The reveal message if found
 //			commit = The commit message if found
-func (s *State) FetchEntryRevealAndCommitFromHolding(hash interfaces.IHash) (reveal interfaces.IMsg, commit interfaces.IMsg) {
+func (s *State) FetchEntryRevealAndCommitFromHolding(hash interfaces.*HashS) (reveal interfaces.IMsg, commit interfaces.IMsg) {
 	q := s.LoadHoldingMap()
 	for _, h := range q {
 		switch {
@@ -431,7 +431,7 @@ func (s *State) FetchEntryRevealAndCommitFromHolding(hash interfaces.IHash) (rev
 	return
 }
 
-func (s *State) FetchHoldingMessageByHash(hash interfaces.IHash) (int, byte, interfaces.IMsg, error) {
+func (s *State) FetchHoldingMessageByHash(hash interfaces.*HashS) (int, byte, interfaces.IMsg, error) {
 	q := s.LoadHoldingMap()
 	for _, h := range q {
 		switch {
@@ -494,7 +494,7 @@ func (s *State) FetchHoldingMessageByHash(hash interfaces.IHash) (int, byte, int
 	return constants.AckStatusUnknown, byte(0), nil, fmt.Errorf("Not Found")
 }
 
-func (s *State) FetchECTransactionByHash(hash interfaces.IHash) (interfaces.IECBlockEntry, error) {
+func (s *State) FetchECTransactionByHash(hash interfaces.*HashS) (interfaces.IECBlockEntry, error) {
 	//TODO: expand to search data from outside database
 	if hash == nil {
 		return nil, nil
@@ -521,7 +521,7 @@ func (s *State) FetchECTransactionByHash(hash interfaces.IHash) (interfaces.IECB
 	return dbase.FetchECTransaction(hash)
 }
 
-func (s *State) FetchFactoidTransactionByHash(hash interfaces.IHash) (interfaces.ITransaction, error) {
+func (s *State) FetchFactoidTransactionByHash(hash interfaces.*HashS) (interfaces.ITransaction, error) {
 	//TODO: expand to search data from outside database
 	if hash == nil {
 		return nil, nil
@@ -578,7 +578,7 @@ func (s *State) FetchFactoidTransactionByHash(hash interfaces.IHash) (interfaces
 	return dbase.FetchFactoidTransaction(hash)
 }
 
-func (s *State) FetchPaidFor(hash interfaces.IHash) (interfaces.IHash, error) {
+func (s *State) FetchPaidFor(hash interfaces.*HashS) (interfaces.*HashS, error) {
 	//TODO: expand to search data from outside database
 	if hash == nil {
 		return nil, nil
@@ -608,7 +608,7 @@ func (s *State) FetchPaidFor(hash interfaces.IHash) (interfaces.IHash, error) {
 	return dbase.FetchPaidFor(hash)
 }
 
-func (s *State) FetchEntryByHash(hash interfaces.IHash) (interfaces.IEBEntry, error) {
+func (s *State) FetchEntryByHash(hash interfaces.*HashS) (interfaces.IEBEntry, error) {
 	//TODO: expand to search data from outside database
 	if hash == nil {
 		return nil, nil

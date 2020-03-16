@@ -48,7 +48,7 @@ func (b *MessageBuffer) Add(msg interfaces.IMsg) {
 
 }
 
-func (b *MessageBuffer) RetrieveLeaderLevelMessageByLevel(leader interfaces.IHash, level int) interfaces.IMsg {
+func (b *MessageBuffer) RetrieveLeaderLevelMessageByLevel(leader interfaces.*HashS, level int) interfaces.IMsg {
 	list := b.MessagesMap[leader.Fixed()]
 	for _, v := range list {
 		msg, _ := b.RetrieveIndex(v)
@@ -64,7 +64,7 @@ func (b *MessageBuffer) RetrieveLeaderLevelMessageByLevel(leader interfaces.IHas
 }
 
 // RetrieveLeaderVoteMessage takes a vol too as multiple vote 0s can be sent out
-func (b *MessageBuffer) RetrieveLeaderVoteMessage(leader interfaces.IHash, vol interfaces.IHash) interfaces.IMsg {
+func (b *MessageBuffer) RetrieveLeaderVoteMessage(leader interfaces.*HashS, vol interfaces.*HashS) interfaces.IMsg {
 	list := b.MessagesMap[leader.Fixed()]
 	for _, v := range list {
 		msg, _ := b.RetrieveIndex(v)

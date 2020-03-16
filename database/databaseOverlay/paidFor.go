@@ -7,7 +7,7 @@ import (
 	"github.com/FactomProject/factomd/common/primitives"
 )
 
-func (db *Overlay) SavePaidFor(entry, ecEntry interfaces.IHash) error {
+func (db *Overlay) SavePaidFor(entry, ecEntry interfaces.*HashS) error {
 	if entry == nil || ecEntry == nil {
 		return nil
 	}
@@ -33,7 +33,7 @@ func (db *Overlay) SavePaidForMultiFromBlockMultiBatch(block interfaces.IEntryCr
 		if entry.ECID() != constants.ECIDChainCommit && entry.ECID() != constants.ECIDEntryCommit {
 			continue
 		}
-		var entryHash interfaces.IHash
+		var entryHash interfaces.*HashS
 
 		if entry.ECID() == constants.ECIDChainCommit {
 			entryHash = entry.(*entryCreditBlock.CommitChain).EntryHash
@@ -72,7 +72,7 @@ func (db *Overlay) SavePaidForMultiFromBlock(block interfaces.IEntryCreditBlock,
 		if entry.ECID() != constants.ECIDChainCommit && entry.ECID() != constants.ECIDEntryCommit {
 			continue
 		}
-		var entryHash interfaces.IHash
+		var entryHash interfaces.*HashS
 
 		if entry.ECID() == constants.ECIDChainCommit {
 			entryHash = entry.(*entryCreditBlock.CommitChain).EntryHash
@@ -104,7 +104,7 @@ func (db *Overlay) SavePaidForMultiFromBlock(block interfaces.IEntryCreditBlock,
 	return nil
 }
 
-func (db *Overlay) FetchPaidFor(hash interfaces.IHash) (interfaces.IHash, error) {
+func (db *Overlay) FetchPaidFor(hash interfaces.*HashS) (interfaces.*HashS, error) {
 	block, err := db.DB.Get(PAID_FOR, hash.Bytes(), new(primitives.Hash))
 	if err != nil {
 		return nil, err
@@ -112,5 +112,5 @@ func (db *Overlay) FetchPaidFor(hash interfaces.IHash) (interfaces.IHash, error)
 	if block == nil {
 		return nil, nil
 	}
-	return block.(interfaces.IHash), nil
+	return block.(interfaces.*HashS), nil
 }

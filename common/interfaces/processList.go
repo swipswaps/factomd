@@ -12,15 +12,15 @@ type IProcessList interface {
 	SortAuditServers()
 	SortDBSigs()
 	FedServerFor(minute int, hash []byte) IServer
-	GetVirtualServers(minute int, identityChainID IHash) (found bool, index int)
-	GetFedServerIndexHash(identityChainID IHash) (bool, int)
-	GetAuditServerIndexHash(identityChainID IHash) (bool, int)
+	GetVirtualServers(minute int, identityChainID *HashS) (found bool, index int)
+	GetFedServerIndexHash(identityChainID *HashS) (bool, int)
+	GetAuditServerIndexHash(identityChainID *HashS) (bool, int)
 	MakeMap()
 	PrintMap() string
-	AddFedServer(identityChainID IHash) int
-	AddAuditServer(identityChainID IHash) int
-	RemoveFedServerHash(identityChainID IHash)
-	RemoveAuditServerHash(identityChainID IHash)
+	AddFedServer(identityChainID *HashS) int
+	AddAuditServer(identityChainID *HashS) int
+	RemoveFedServerHash(identityChainID *HashS)
+	RemoveAuditServerHash(identityChainID *HashS)
 	String() string
 	GetDBHeight() uint32
 }

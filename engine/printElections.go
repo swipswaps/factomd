@@ -9,7 +9,7 @@ import (
 	"github.com/FactomProject/factomd/state"
 )
 
-func lookup(id interfaces.IHash) *state.State {
+func lookup(id interfaces.*HashS) *state.State {
 	for _, fn := range fnodes {
 		if fn.State.IdentityChainID.Fixed() == id.Fixed() {
 			return fn.State

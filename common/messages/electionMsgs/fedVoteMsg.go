@@ -78,11 +78,11 @@ func (a *FedVoteMsg) IsSameAs(msg interfaces.IMsg) bool {
 	return true
 }
 
-//func (m *FedVoteMsg) GetServerID()(rval interfaces.IHash) {
+//func (m *FedVoteMsg) GetServerID()(rval interfaces.*HashS) {
 //defer func() {
 //		if rval != nil && reflect.ValueOf(rval).IsNil() {
 //		rval = nil // convert an interface that is nil to a nil interface
-//			primitives.LogNilHashBug("FedVoteMsg.GetServerID() returned a nil for IHash")
+//			primitives.LogNilHashBug("FedVoteMsg.GetServerID() returned a nil for *HashS")
 //		}
 //	}()
 //
@@ -104,19 +104,19 @@ func (m *FedVoteMsg) LogFields() log.Fields {
 	return log.Fields{"category": "message", "messagetype": "FedVoteMsg", "dbheight": m.DBHeight}
 }
 
-func (m *FedVoteMsg) GetRepeatHash() (rval interfaces.IHash) {
+func (m *FedVoteMsg) GetRepeatHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "FedVoteMsg.GetRepeatHash") }()
 
 	return m.GetMsgHash()
 }
 
-func (m *FedVoteMsg) GetHash() (rval interfaces.IHash) {
+func (m *FedVoteMsg) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "FedVoteMsg.GetHash") }()
 
 	return m.GetMsgHash()
 }
 
-func (m *FedVoteMsg) GetMsgHash() (rval interfaces.IHash) {
+func (m *FedVoteMsg) GetMsgHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "FedVoteMsg.GetMsgHash") }()
 
 	if m.MsgHash == nil {

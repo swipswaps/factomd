@@ -19,7 +19,7 @@ import (
 
 // Admin Block Header
 type ABlockHeader struct {
-	PrevBackRefHash interfaces.IHash `json:"prevbackrefhash"`
+	PrevBackRefHash interfaces.*HashS `json:"prevbackrefhash"`
 	DBHeight        uint32           `json:"dbheight"`
 
 	HeaderExpansionSize uint64 `json:"headerexpansionsize"`
@@ -91,7 +91,7 @@ func (b *ABlockHeader) SetBodySize(bodySize uint32) {
 	b.BodySize = bodySize
 }
 
-func (b *ABlockHeader) GetAdminChainID() (rval interfaces.IHash) {
+func (b *ABlockHeader) GetAdminChainID() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "ABlockHeader.GetAdminChainID") }()
 	return primitives.NewHash(constants.ADMIN_CHAINID)
 }
@@ -108,7 +108,7 @@ func (b *ABlockHeader) GetHeaderExpansionSize() uint64 {
 	return b.HeaderExpansionSize
 }
 
-func (b *ABlockHeader) GetPrevBackRefHash() (rval interfaces.IHash) {
+func (b *ABlockHeader) GetPrevBackRefHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "ABlockHeader.GetPrevBackRefHash") }()
 	b.Init()
 	return b.PrevBackRefHash
@@ -123,7 +123,7 @@ func (b *ABlockHeader) SetHeaderExpansionArea(area []byte) {
 	b.HeaderExpansionSize = uint64(len(area))
 }
 
-func (b *ABlockHeader) SetPrevBackRefHash(BackRefHash interfaces.IHash) {
+func (b *ABlockHeader) SetPrevBackRefHash(BackRefHash interfaces.*HashS) {
 	b.PrevBackRefHash = BackRefHash
 }
 

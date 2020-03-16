@@ -29,17 +29,17 @@ type SyncMsg struct {
 
 	// Server that is faulting
 	FedIdx uint32           // Server faulting
-	FedID  interfaces.IHash // Server faulting
+	FedID  interfaces.*HashS // Server faulting
 
 	// Audit server to replace faulting server
 	ServerIdx  uint32           // Index of Server replacing
-	ServerID   interfaces.IHash // Volunteer Server ChainID
+	ServerID   interfaces.*HashS // Volunteer Server ChainID
 	ServerName string           // Name of the Volunteer
 
-	Weight      interfaces.IHash // Computed Weight at this DBHeight, Minute, Round
+	Weight      interfaces.*HashS // Computed Weight at this DBHeight, Minute, Round
 	DBHeight    uint32           // Directory Block Height that owns this ack
 	Round       int              // Voting Round
-	messageHash interfaces.IHash
+	messageHash interfaces.*HashS
 }
 
 func (m *SyncMsg) ElectionProcess(is interfaces.IState, elect interfaces.IElections) {
@@ -86,7 +86,7 @@ func (a *SyncMsg) IsSameAs(msg interfaces.IMsg) bool {
 	return true
 }
 
-func (m *SyncMsg) GetServerID() (rval interfaces.IHash) {
+func (m *SyncMsg) GetServerID() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "SyncMsg.GetServerID") }()
 
 	return m.ServerID
@@ -96,14 +96,14 @@ func (m *SyncMsg) LogFields() log.Fields {
 	return log.Fields{"category": "message", "messagetype": "FedVoteMsg", "dbheight": m.DBHeight, "newleader": m.ServerID.String()[4:12]}
 }
 
-func (m *SyncMsg) GetRepeatHash() (rval interfaces.IHash) {
+func (m *SyncMsg) GetRepeatHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "SyncMsg.GetRepeatHash") }()
 
 	return m.GetMsgHash()
 }
 
 // We have to return the hash of the underlying message.
-func (m *SyncMsg) GetHash() (rval interfaces.IHash) {
+func (m *SyncMsg) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "SyncMsg.GetHash") }()
 
 	return m.GetMsgHash()
@@ -113,7 +113,7 @@ func (m *SyncMsg) GetTimestamp() interfaces.Timestamp {
 	return m.TS.Clone()
 }
 
-func (m *SyncMsg) GetMsgHash() (rval interfaces.IHash) {
+func (m *SyncMsg) GetMsgHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "SyncMsg.GetMsgHash") }()
 
 	if m.MsgHash == nil {
@@ -239,10 +239,10 @@ func (m *SyncMsg) MarshalBinary() (data []byte, err error) {
 	if e := buf.PushUInt32(m.ServerIdx); e != nil {
 		return nil, e
 	}
-	if e := buf.PushIHash(m.ServerID); e != nil {
+	if e := buf.Push*HashS(m.ServerID); e != nil {
 		return nil, e
 	}
-	if e := buf.PushIHash(m.Weight); e != nil {
+	if e := buf.Push*HashS(m.Weight); e != nil {
 		return nil, e
 	}
 	if e := buf.PushUInt32(m.DBHeight); e != nil {

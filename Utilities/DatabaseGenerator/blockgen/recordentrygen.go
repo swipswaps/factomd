@@ -28,7 +28,7 @@ func (r *RecordEntryGenerator) Name() string {
 func (r *RecordEntryGenerator) NewChainHead() *entryBlock.Entry {
 	return r.EntryGenCore.NewChainHead()
 }
-func (r *RecordEntryGenerator) NewEntry(chain interfaces.IHash) *entryBlock.Entry {
+func (r *RecordEntryGenerator) NewEntry(chain interfaces.*HashS) *entryBlock.Entry {
 	ent := entryBlock.NewEntry()
 	// Putting the ASCII number so you can read in explorer
 	ent.ExtIDs = []primitives.ByteSlice{

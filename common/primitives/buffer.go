@@ -98,8 +98,8 @@ func (b *Buffer) PushBytes(h []byte) error {
 	return err
 }
 
-// PushIHash marshals and writes the input hash to the Buffer
-func (b *Buffer) PushIHash(h interfaces.IHash) error {
+// Push*HashS marshals and writes the input hash to the Buffer
+func (b *Buffer) Push*HashS(h interfaces.*HashS) error {
 	return b.PushBytes(h.Bytes())
 }
 
@@ -285,8 +285,8 @@ func (b *Buffer) PopBytes() ([]byte, error) {
 	return answer, nil
 }
 
-// PopIHash reads an hash from the Buffer
-func (b *Buffer) PopIHash() (interfaces.IHash, error) {
+// Pop*HashS reads an hash from the Buffer
+func (b *Buffer) Pop*HashS() (interfaces.*HashS, error) {
 	bb, err := b.PopBytes()
 	if err != nil {
 		return nil, err

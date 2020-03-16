@@ -51,7 +51,7 @@ func (db *Overlay) InsertEntryMultiBatch(entry interfaces.IEBEntry) error {
 }
 
 // FetchEntry gets an entry by hash from the database.
-func (db *Overlay) FetchEntry(hash interfaces.IHash) (interfaces.IEBEntry, error) {
+func (db *Overlay) FetchEntry(hash interfaces.*HashS) (interfaces.IEBEntry, error) {
 	chainID, err := db.FetchPrimaryIndexBySecondaryIndex(ENTRY, hash)
 	if err != nil {
 		return nil, err
@@ -71,7 +71,7 @@ func (db *Overlay) FetchEntry(hash interfaces.IHash) (interfaces.IEBEntry, error
 	return entry.(interfaces.IEBEntry), nil
 }
 
-func (db *Overlay) FetchAllEntriesByChainID(chainID interfaces.IHash) ([]interfaces.IEBEntry, error) {
+func (db *Overlay) FetchAllEntriesByChainID(chainID interfaces.*HashS) ([]interfaces.IEBEntry, error) {
 	list, err := db.FetchAllBlocksFromBucket(chainID.Bytes(), entryBlock.NewEntry())
 	if err != nil {
 		return nil, err
@@ -79,16 +79,16 @@ func (db *Overlay) FetchAllEntriesByChainID(chainID interfaces.IHash) ([]interfa
 	return toEntryList(list), nil
 }
 
-func (db *Overlay) FetchAllEntryIDsByChainID(chainID interfaces.IHash) ([]interfaces.IHash, error) {
+func (db *Overlay) FetchAllEntryIDsByChainID(chainID interfaces.*HashS) ([]interfaces.*HashS, error) {
 	return db.FetchAllBlockKeysFromBucket(chainID.Bytes())
 }
 
-func (db *Overlay) FetchAllEntryIDs() ([]interfaces.IHash, error) {
+func (db *Overlay) FetchAllEntryIDs() ([]interfaces.*HashS, error) {
 	ids, err := db.ListAllKeys(ENTRY)
 	if err != nil {
 		return nil, err
 	}
-	entries := []interfaces.IHash{}
+	entries := []interfaces.*HashS{}
 	for _, id := range ids {
 		h, err := primitives.NewShaHash(id)
 		if err != nil {

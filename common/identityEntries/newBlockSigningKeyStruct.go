@@ -22,7 +22,7 @@ type NewBlockSigningKeyStruct struct {
 	//The second is the ASCII string "New Block Signing Key".
 	FunctionName []byte //"New Block Signing Key"
 	//The third is the root identity ChainID.
-	RootIdentityChainID interfaces.IHash
+	RootIdentityChainID interfaces.*HashS
 	//Forth is the new public key being asserted.
 	NewPublicKey []byte
 	//5th is the timestamp with an 8 byte epoch time.
@@ -52,7 +52,7 @@ func (nbsk *NewBlockSigningKeyStruct) MarshalForSig() []byte {
 	return answer
 }
 
-func (nbsk *NewBlockSigningKeyStruct) VerifySignature(key1 interfaces.IHash) error {
+func (nbsk *NewBlockSigningKeyStruct) VerifySignature(key1 interfaces.*HashS) error {
 	bin := nbsk.MarshalForSig()
 	pk := new(primitives.PublicKey)
 	err := pk.UnmarshalBinary(nbsk.PreimageIdentityKey[1:])
@@ -124,7 +124,7 @@ func (nbsk *NewBlockSigningKeyStruct) ToExternalIDs() [][]byte {
 	return extIDs
 }
 
-func (nbsk *NewBlockSigningKeyStruct) GetChainID() (rval interfaces.IHash) {
+func (nbsk *NewBlockSigningKeyStruct) GetChainID() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "NewBlockSigningKeyStruct.GetChainID") }()
 
 	extIDs := nbsk.ToExternalIDs()

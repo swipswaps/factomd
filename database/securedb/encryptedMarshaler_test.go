@@ -21,7 +21,7 @@ func TestEncryptedMarshaler(t *testing.T) {
 	s := testHelper.CreateAndPopulateTestStateAndStartValidator()
 
 	key := primitives.RandomHash().Bytes()
-	// Test with IHash
+	// Test with *HashS
 	for i := 0; i < 10; i++ {
 		o = primitives.RandomHash()
 		m := NewEncryptedMarshaler(key, o)

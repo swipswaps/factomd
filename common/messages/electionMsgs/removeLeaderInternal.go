@@ -21,7 +21,7 @@ import (
 type RemoveLeaderInternal struct {
 	msgbase.MessageBase
 	NName    string
-	ServerID interfaces.IHash // Hash of message acknowledged
+	ServerID interfaces.*HashS // Hash of message acknowledged
 	DBHeight uint32           // Directory Block Height that owns this ack
 	Height   uint32           // Height of this ack in this process list
 }
@@ -35,7 +35,7 @@ func (m *RemoveLeaderInternal) MarshalBinary() (data []byte, err error) {
 	if err = buf.PushByte(constants.INTERNALREMOVELEADER); err != nil {
 		return nil, err
 	}
-	if e := buf.PushIHash(m.ServerID); e != nil {
+	if e := buf.Push*HashS(m.ServerID); e != nil {
 		return nil, e
 	}
 	if e := buf.PushInt(int(m.DBHeight)); e != nil {
@@ -51,7 +51,7 @@ func (m *RemoveLeaderInternal) MarshalBinary() (data []byte, err error) {
 	return data, nil
 }
 
-func (m *RemoveLeaderInternal) GetMsgHash() (rval interfaces.IHash) {
+func (m *RemoveLeaderInternal) GetMsgHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "RemoveLeaderInternal.GetMsgHash") }()
 
 	if m.MsgHash == nil {
@@ -82,7 +82,7 @@ func (m *RemoveLeaderInternal) ElectionProcess(state interfaces.IState, elect in
 	}
 }
 
-func (m *RemoveLeaderInternal) GetServerID() (rval interfaces.IHash) {
+func (m *RemoveLeaderInternal) GetServerID() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "RemoveLeaderInternal.GetServerID") }()
 
 	return m.ServerID
@@ -92,14 +92,14 @@ func (m *RemoveLeaderInternal) LogFields() log.Fields {
 	return log.Fields{"category": "message", "messagetype": "RemoveLeaderInternal", "dbheight": m.DBHeight, "newleader": m.ServerID.String()[4:12]}
 }
 
-func (m *RemoveLeaderInternal) GetRepeatHash() (rval interfaces.IHash) {
+func (m *RemoveLeaderInternal) GetRepeatHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "RemoveLeaderInternal.GetRepeatHash") }()
 
 	return m.GetMsgHash()
 }
 
 // We have to return the hash of the underlying message.
-func (m *RemoveLeaderInternal) GetHash() (rval interfaces.IHash) {
+func (m *RemoveLeaderInternal) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "RemoveLeaderInternal.GetHash") }()
 
 	return m.GetMsgHash()

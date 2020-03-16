@@ -33,12 +33,12 @@ type Hash [constants.HASH_LENGTH]byte
 
 // The various interfaces Hash will be a part of, and must implement below
 var _ interfaces.Printable = (*Hash)(nil)
-var _ interfaces.IHash = (*Hash)(nil)
+var _ interfaces.*HashS = (*Hash)(nil)
 var _ interfaces.BinaryMarshallableAndCopyable = (*Hash)(nil)
 var _ encoding.TextMarshaler = (*Hash)(nil)
 
 // ZeroHash is a zero hash
-var ZeroHash interfaces.IHash = NewHash(constants.ZERO_HASH)
+var ZeroHash interfaces.*HashS = NewHash(constants.ZERO_HASH)
 var mutex sync.Mutex
 var noRepeat map[string]int = make(map[string]int)
 
@@ -68,9 +68,9 @@ func LogNilHashBug(msg string) {
 
 }
 
-func CheckNil(h interfaces.IHash, caller string) (rval interfaces.IHash) {
+func CheckNil(h interfaces.*HashS, caller string) (rval interfaces.*HashS) {
 	if h == nil {
-		LogNilHashBug(caller + "() returned a nil for IHash")
+		LogNilHashBug(caller + "() returned a nil for *HashS")
 	} else if reflect.ValueOf(h).IsNil() {
 		LogNilHashBug(caller + "() returned an interface  nil")
 		return nil // convert an interface that is nil to a nil interface
@@ -84,14 +84,14 @@ func (h *Hash) IsHashNil() bool {
 }
 
 // RandomHash returns a new random hash
-func RandomHash() interfaces.IHash {
+func RandomHash() interfaces.*HashS {
 	h := random.RandByteSliceOfLen(constants.HASH_LENGTH)
 	answer := NewHash(h)
 	return answer
 }
 
 // Copy returns a copy of this Hash
-func (h *Hash) Copy() (rval interfaces.IHash) {
+func (h *Hash) Copy() (rval interfaces.*HashS) {
 	defer func() { rval = CheckNil(rval, "Hash.Copy") }()
 	nh := new(Hash)
 	err := nh.SetBytes(h.Bytes())
@@ -145,7 +145,7 @@ func (h *Hash) UnmarshalText(b []byte) error {
 
 // Fixed returns the fixed []byte array
 func (h *Hash) Fixed() [constants.HASH_LENGTH]byte {
-	// Might change the error produced by IHash in FD-398
+	// Might change the error produced by *HashS in FD-398
 	if h == nil {
 		panic("nil Hash")
 	}
@@ -154,7 +154,7 @@ func (h *Hash) Fixed() [constants.HASH_LENGTH]byte {
 
 // PFixed returns a pointer to the fixed []byte array
 func (h *Hash) PFixed() *[constants.HASH_LENGTH]byte {
-	// Might change the error produced by IHash in FD-398
+	// Might change the error produced by *HashS in FD-398
 	return (*[constants.HASH_LENGTH]byte)(h)
 }
 
@@ -171,13 +171,13 @@ func (h *Hash) Bytes() (rval []byte) {
 	return h.GetBytes()
 }
 
-// GetHash is unused, merely here to implement the IHash interface
-func (Hash) GetHash() interfaces.IHash {
+// GetHash is unused, merely here to implement the *HashS interface
+func (Hash) GetHash() interfaces.*HashS {
 	return nil
 }
 
 // CreateHash returns a hash created from all input entities
-func CreateHash(entities ...interfaces.BinaryMarshallable) (h interfaces.IHash, err error) {
+func CreateHash(entities ...interfaces.BinaryMarshallable) (h interfaces.*HashS, err error) {
 	sha := sha256.New()
 	h = new(Hash)
 	for _, entity := range entities {
@@ -277,7 +277,7 @@ func (h *Hash) ByteString() string {
 }
 
 // HexToHash converts the input hexidecimal (0-F) string into the internal []byte array
-func HexToHash(hexStr string) (h interfaces.IHash, err error) {
+func HexToHash(hexStr string) (h interfaces.*HashS, err error) {
 	h = new(Hash)
 	v, err := hex.DecodeString(hexStr)
 	err = h.SetBytes(v)
@@ -285,7 +285,7 @@ func HexToHash(hexStr string) (h interfaces.IHash, err error) {
 }
 
 // IsSameAs compares two Hashes and returns true iff they hashs are binary identical
-func (a *Hash) IsSameAs(b interfaces.IHash) bool {
+func (a *Hash) IsSameAs(b interfaces.*HashS) bool {
 	if a == nil || b == nil {
 		if a == nil && b == nil {
 			return true
@@ -371,7 +371,7 @@ func Loghashfixed(h [32]byte) {
 }
 
 // Loghash logs the input interface
-func Loghash(h interfaces.IHash) {
+func Loghash(h interfaces.*HashS) {
 	if h == nil {
 		return
 	}
@@ -383,7 +383,7 @@ func Loghash(h interfaces.IHash) {
  **********************/
 
 // Sha creates a Sha256 Hash from a byte array
-func Sha(p []byte) interfaces.IHash {
+func Sha(p []byte) interfaces.*HashS {
 	h := new(Hash)
 	b := sha256.Sum256(p)
 	h.SetBytes(b[:])
@@ -392,7 +392,7 @@ func Sha(p []byte) interfaces.IHash {
 }
 
 // Shad returns a new hash created by double hashing the input: Double Sha256 Hash; sha256(sha256(data))
-func Shad(data []byte) interfaces.IHash {
+func Shad(data []byte) interfaces.*HashS {
 	h1 := sha256.Sum256(data)
 	h2 := sha256.Sum256(h1[:])
 	h := new(Hash)
@@ -401,13 +401,13 @@ func Shad(data []byte) interfaces.IHash {
 }
 
 // NewZeroHash creates a new zero hash object
-func NewZeroHash() interfaces.IHash {
+func NewZeroHash() interfaces.*HashS {
 	h := new(Hash)
 	return h
 }
 
 // NewHash creates a new object for the input hash
-func NewHash(b []byte) interfaces.IHash {
+func NewHash(b []byte) interfaces.*HashS {
 	h := new(Hash)
 	h.SetBytes(b)
 	return h
@@ -422,7 +422,7 @@ func DoubleSha(data []byte) []byte {
 }
 
 // NewShaHashFromStruct marshals the input struct into a json byte array, then double hashes the json array
-func NewShaHashFromStruct(DataStruct interface{}) (interfaces.IHash, error) {
+func NewShaHashFromStruct(DataStruct interface{}) (interfaces.*HashS, error) {
 	jsonbytes, err := json.Marshal(DataStruct)
 	if err != nil {
 		return nil, err

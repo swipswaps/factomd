@@ -33,13 +33,13 @@ type FedVoteLevelMsg struct {
 	FedVoteMsg
 
 	// Signer of the message
-	Signer interfaces.IHash
+	Signer interfaces.*HashS
 
 	// Volunteer fields
 	Volunteer FedVoteVolunteerMsg
 
 	Committed bool
-	EOMFrom   interfaces.IHash
+	EOMFrom   interfaces.*HashS
 
 	// Information about the vote for comparing
 	Level uint32
@@ -53,7 +53,7 @@ type FedVoteLevelMsg struct {
 	// Tells the state to process it
 	ProcessInState bool
 
-	messageHash interfaces.IHash
+	messageHash interfaces.*HashS
 }
 
 var _ interfaces.IMsg = (*FedVoteVolunteerMsg)(nil)
@@ -71,7 +71,7 @@ func (m *FedVoteLevelMsg) String() string {
 		m.Rank)
 }
 
-func NewFedVoteLevelMessage(signer interfaces.IHash, vol FedVoteVolunteerMsg) *FedVoteLevelMsg {
+func NewFedVoteLevelMessage(signer interfaces.*HashS, vol FedVoteVolunteerMsg) *FedVoteLevelMsg {
 	f := new(FedVoteLevelMsg)
 	f.SetFullBroadcast(true)
 	f.Volunteer = vol
@@ -327,7 +327,7 @@ func (a *FedVoteLevelMsg) IsSameAs(msg interfaces.IMsg) bool {
 	return true
 }
 
-func (m *FedVoteLevelMsg) GetServerID() (rval interfaces.IHash) {
+func (m *FedVoteLevelMsg) GetServerID() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "FedVoteLevelMsg.GetServerID") }()
 
 	return m.Signer
@@ -337,7 +337,7 @@ func (m *FedVoteLevelMsg) LogFields() log.Fields {
 	return log.Fields{"category": "message", "messagetype": "FedVoteVolunteerMsg", "dbheight": m.DBHeight, "newleader": m.Signer.String()[4:12]}
 }
 
-func (m *FedVoteLevelMsg) GetRepeatHash() (rval interfaces.IHash) {
+func (m *FedVoteLevelMsg) GetRepeatHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "FedVoteLevelMsg.GetRepeatHash") }()
 
 	return m.GetMsgHash()
@@ -345,7 +345,7 @@ func (m *FedVoteLevelMsg) GetRepeatHash() (rval interfaces.IHash) {
 
 // We have to return the hash of the underlying message.
 
-func (m *FedVoteLevelMsg) GetHash() (rval interfaces.IHash) {
+func (m *FedVoteLevelMsg) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "FedVoteLevelMsg.GetHash") }()
 
 	return m.GetMsgHash()
@@ -355,7 +355,7 @@ func (m *FedVoteLevelMsg) GetTimestamp() interfaces.Timestamp {
 	return m.TS.Clone()
 }
 
-func (m *FedVoteLevelMsg) GetMsgHash() (rval interfaces.IHash) {
+func (m *FedVoteLevelMsg) GetMsgHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "FedVoteLevelMsg.GetMsgHash") }()
 
 	if m.MsgHash == nil {
@@ -423,7 +423,7 @@ func (m *FedVoteLevelMsg) UnmarshalBinaryData(data []byte) (newData []byte, err 
 		return
 	}
 
-	m.Signer, err = buf.PopIHash()
+	m.Signer, err = buf.Pop*HashS()
 	if err != nil {
 		return
 	}
@@ -433,7 +433,7 @@ func (m *FedVoteLevelMsg) UnmarshalBinaryData(data []byte) (newData []byte, err 
 		return
 	}
 
-	m.EOMFrom, err = buf.PopIHash()
+	m.EOMFrom, err = buf.Pop*HashS()
 	if err != nil {
 		return
 	}
@@ -527,7 +527,7 @@ func (m *FedVoteLevelMsg) MarshalForSignature() (data []byte, err error) {
 		return
 	}
 
-	err = buf.PushIHash(m.Signer)
+	err = buf.Push*HashS(m.Signer)
 	if err != nil {
 		return
 	}
@@ -537,7 +537,7 @@ func (m *FedVoteLevelMsg) MarshalForSignature() (data []byte, err error) {
 		return
 	}
 
-	err = buf.PushIHash(m.EOMFrom)
+	err = buf.Push*HashS(m.EOMFrom)
 	if err != nil {
 		return
 	}

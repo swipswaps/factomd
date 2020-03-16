@@ -67,7 +67,7 @@ func (lg *LoadGenerator) Run() {
 			lg.running.Store(false)
 			return
 		}
-		var chain interfaces.IHash = nil
+		var chain interfaces.*HashS = nil
 
 		for i := 0; i < top; i++ {
 			var c interfaces.IMsg

@@ -22,7 +22,7 @@ type RegisterServerManagementStructure struct {
 	//The second ExtID has 26 ASCII bytes "Register Server Management".
 	FunctionName []byte //"Register Server Management"
 	//The third ExtID is the binary encoded ChainID of the identity. It will start with 888888.
-	SubchainChainID interfaces.IHash //888888...
+	SubchainChainID interfaces.*HashS //888888...
 	//The 4th ExtID is the preimage to the identity key. It includes the type prefix (0x01) and the raw ed25519 pubkey.
 	PreimageIdentityKey []byte
 	//The 5th ExtID is the signature of the first, second, and third ExtIDs serialized together.
@@ -46,7 +46,7 @@ func (rsm *RegisterServerManagementStructure) MarshalForSig() []byte {
 	return answer
 }
 
-func (rsm *RegisterServerManagementStructure) VerifySignature(key1 interfaces.IHash) error {
+func (rsm *RegisterServerManagementStructure) VerifySignature(key1 interfaces.*HashS) error {
 	bin := rsm.MarshalForSig()
 	pk := new(primitives.PublicKey)
 	err := pk.UnmarshalBinary(rsm.PreimageIdentityKey[1:])
@@ -118,7 +118,7 @@ func (rsm *RegisterServerManagementStructure) ToExternalIDs() [][]byte {
 	return extIDs
 }
 
-func (rsm *RegisterServerManagementStructure) GetChainID() (rval interfaces.IHash) {
+func (rsm *RegisterServerManagementStructure) GetChainID() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "RegisterServerManagementStructure.GetChainID") }()
 
 	extIDs := rsm.ToExternalIDs()

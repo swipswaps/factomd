@@ -67,7 +67,7 @@ func mapEntryBlocks(blocks []interfaces.IEntryBlock) []*eventmessages.EntryBlock
 	return result
 }
 
-func mapEntryBlockHashes(entries []interfaces.IHash) [][]byte {
+func mapEntryBlockHashes(entries []interfaces.*HashS) [][]byte {
 	result := make([][]byte, len(entries))
 	for i, entry := range entries {
 		result[i] = entry.Bytes()

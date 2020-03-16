@@ -54,17 +54,17 @@ type IMsg interface {
 	// This is the hash used to check for repeated messages.  Almost always this
 	// is the MsgHash, however for Chain Commits, Entry Commits, and Factoid Transactions,
 	// this is the GetHash().
-	GetRepeatHash() IHash
+	GetRepeatHash() *HashS
 
 	// Hash for this message as used by Consensus (i.e. what we match). Does not include
 	// signatures to avoid Signature Maliation attacks.
-	GetHash() IHash
+	GetHash() *HashS
 
 	// Hash of this message.  Each message must be unique includes signatures
-	GetMsgHash() IHash
+	GetMsgHash() *HashS
 
 	// Returns the full message hash of a message (includes signatures)
-	GetFullMsgHash() IHash
+	GetFullMsgHash() *HashS
 
 	// If this message should only reply to a peer, this is true.  If to
 	// be broadcast, this should be false.  If the Origin is 0, then the
@@ -86,8 +86,8 @@ type IMsg interface {
 	LeaderExecute(IState)
 
 	// Debugging thing to track the leader responsible for a message ack.
-	GetLeaderChainID() IHash
-	SetLeaderChainID(IHash)
+	GetLeaderChainID() *HashS
+	SetLeaderChainID(*HashS)
 
 	// Call here if the server is a follower
 	FollowerExecute(IState)

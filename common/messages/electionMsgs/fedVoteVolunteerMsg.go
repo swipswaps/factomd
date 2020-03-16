@@ -32,16 +32,16 @@ type FedVoteVolunteerMsg struct {
 	// Volunteer fields
 	Name       string           // Server name
 	FedIdx     uint32           // Server faulting
-	FedID      interfaces.IHash // Server faulting
+	FedID      interfaces.*HashS // Server faulting
 	ServerIdx  uint32           // Index of Server replacing
-	ServerID   interfaces.IHash // Volunteer Server ChainID
+	ServerID   interfaces.*HashS // Volunteer Server ChainID
 	ServerName string           // Volunteer Name
-	Weight     interfaces.IHash
+	Weight     interfaces.*HashS
 	Missing    interfaces.IMsg // The Missing DBSig or EOM
 	Ack        interfaces.IMsg // The acknowledgement for the missing message
 	Round      int
 
-	messageHash interfaces.IHash
+	messageHash interfaces.*HashS
 
 	Signature interfaces.IFullSignature
 
@@ -175,7 +175,7 @@ func (a *FedVoteVolunteerMsg) IsSameAs(msg interfaces.IMsg) bool {
 	return true
 }
 
-func (m *FedVoteVolunteerMsg) GetServerID() (rval interfaces.IHash) {
+func (m *FedVoteVolunteerMsg) GetServerID() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "FedVoteVolunteerMsg.GetServerID") }()
 	return m.ServerID
 }
@@ -184,14 +184,14 @@ func (m *FedVoteVolunteerMsg) LogFields() log.Fields {
 	return log.Fields{"category": "message", "messagetype": "FedVoteVolunteerMsg", "dbheight": m.DBHeight, "newleader": m.ServerID.String()[4:12]}
 }
 
-func (m *FedVoteVolunteerMsg) GetRepeatHash() (rval interfaces.IHash) {
+func (m *FedVoteVolunteerMsg) GetRepeatHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "FedVoteVolunteerMsg.GetRepeatHash") }()
 	return m.GetMsgHash()
 }
 
 // We have to return the hash of the underlying message.
 
-func (m *FedVoteVolunteerMsg) GetHash() (rval interfaces.IHash) {
+func (m *FedVoteVolunteerMsg) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "FedVoteVolunteerMsg.GetHash") }()
 	return m.Missing.GetMsgHash()
 }
@@ -200,7 +200,7 @@ func (m *FedVoteVolunteerMsg) GetTimestamp() interfaces.Timestamp {
 	return m.TS.Clone()
 }
 
-func (m *FedVoteVolunteerMsg) GetMsgHash() (rval interfaces.IHash) {
+func (m *FedVoteVolunteerMsg) GetMsgHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "FedVoteVolunteerMsg.GetMsgHash") }()
 	if m.MsgHash == nil {
 		data, err := m.MarshalBinary()
@@ -283,7 +283,7 @@ func (m *FedVoteVolunteerMsg) UnmarshalBinaryData(data []byte) (newData []byte, 
 	if m.ServerIdx, err = buf.PopUInt32(); err != nil {
 		return newData, err
 	}
-	if m.ServerID, err = buf.PopIHash(); err != nil {
+	if m.ServerID, err = buf.Pop*HashS(); err != nil {
 		return newData, err
 	}
 	if m.ServerName, err = buf.PopString(); err != nil {
@@ -292,7 +292,7 @@ func (m *FedVoteVolunteerMsg) UnmarshalBinaryData(data []byte) (newData []byte, 
 	if m.FedIdx, err = buf.PopUInt32(); err != nil {
 		return newData, err
 	}
-	if m.FedID, err = buf.PopIHash(); err != nil {
+	if m.FedID, err = buf.Pop*HashS(); err != nil {
 		return newData, err
 	}
 	if m.DBHeight, err = buf.PopUInt32(); err != nil {
@@ -304,7 +304,7 @@ func (m *FedVoteVolunteerMsg) UnmarshalBinaryData(data []byte) (newData []byte, 
 	if m.Minute, err = buf.PopByte(); err != nil {
 		return newData, err
 	}
-	if m.Weight, err = buf.PopIHash(); err != nil {
+	if m.Weight, err = buf.Pop*HashS(); err != nil {
 		return newData, err
 	}
 	if m.Ack, err = buf.PopMsg(); err != nil {
@@ -386,7 +386,7 @@ func (m *FedVoteVolunteerMsg) MarshalForSignature() (data []byte, err error) {
 	if e := buf.PushUInt32(m.ServerIdx); e != nil {
 		return nil, e
 	}
-	if e := buf.PushIHash(m.ServerID); e != nil {
+	if e := buf.Push*HashS(m.ServerID); e != nil {
 		return nil, e
 	}
 	if e := buf.PushString(m.ServerName); e != nil {
@@ -395,7 +395,7 @@ func (m *FedVoteVolunteerMsg) MarshalForSignature() (data []byte, err error) {
 	if e := buf.PushUInt32(m.FedIdx); e != nil {
 		return nil, e
 	}
-	if e := buf.PushIHash(m.FedID); e != nil {
+	if e := buf.Push*HashS(m.FedID); e != nil {
 		return nil, e
 	}
 	if e := buf.PushUInt32(m.DBHeight); e != nil {
@@ -412,7 +412,7 @@ func (m *FedVoteVolunteerMsg) MarshalForSignature() (data []byte, err error) {
 	if m.Weight == nil {
 		m.Weight = primitives.NewZeroHash()
 	}
-	if e := buf.PushIHash(m.Weight); e != nil {
+	if e := buf.Push*HashS(m.Weight); e != nil {
 		return nil, e
 	}
 	if e := buf.PushMsg(m.Ack); e != nil {

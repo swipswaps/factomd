@@ -32,14 +32,14 @@ type BounceReply struct {
 
 var _ interfaces.IMsg = (*BounceReply)(nil)
 
-func (m *BounceReply) GetRepeatHash() (rval interfaces.IHash) {
+func (m *BounceReply) GetRepeatHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "BounceReply.GetRepeatHash") }()
 
 	return m.GetMsgHash()
 }
 
 // We have to return the hash of the underlying message.
-func (m *BounceReply) GetHash() (rval interfaces.IHash) {
+func (m *BounceReply) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "BounceReply.GetHash") }()
 
 	return m.GetMsgHash()
@@ -50,7 +50,7 @@ func (m *BounceReply) SizeOf() int {
 	return m.size
 }
 
-func (m *BounceReply) GetMsgHash() (rval interfaces.IHash) {
+func (m *BounceReply) GetMsgHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "BounceReply.GetMsgHash") }()
 
 	data, err := m.MarshalForSignature()

@@ -60,7 +60,7 @@ func (a *EntryBlockSync) BlockParsed(block EntryBlockMarker) {
 	a.BlocksToBeParsed = a.BlocksToBeParsed[1:]
 }
 
-func (a *EntryBlockSync) AddNewHead(keymr interfaces.IHash, seq uint32, ht uint32, dblockTimestamp interfaces.Timestamp) {
+func (a *EntryBlockSync) AddNewHead(keymr interfaces.*HashS, seq uint32, ht uint32, dblockTimestamp interfaces.Timestamp) {
 	a.AddNewHeadMarker(EntryBlockMarker{keymr, seq, ht, dblockTimestamp})
 }
 
@@ -205,7 +205,7 @@ func (p EntryBlockMarkerList) Less(i, j int) bool {
 }
 
 type EntryBlockMarker struct {
-	KeyMr           interfaces.IHash
+	KeyMr           interfaces.*HashS
 	Sequence        uint32
 	DBHeight        uint32
 	DblockTimestamp interfaces.Timestamp
@@ -258,7 +258,7 @@ func (e *EntryBlockMarker) MarshalBinary() (rval []byte, err error) {
 	}(&err)
 	buf := primitives.NewBuffer(nil)
 
-	err = buf.PushIHash(e.KeyMr)
+	err = buf.Push*HashS(e.KeyMr)
 	if err != nil {
 		return nil, err
 	}
@@ -283,7 +283,7 @@ func (e *EntryBlockMarker) MarshalBinary() (rval []byte, err error) {
 
 // Returns the byte size when marshaled
 func (e *EntryBlockMarker) Size() int {
-	// If you count it, it's 46. However, PushIHash is actually 33 bytes. and PushTimestamp is actually 8, rather than 6.
+	// If you count it, it's 46. However, Push*HashS is actually 33 bytes. and PushTimestamp is actually 8, rather than 6.
 	return 49
 }
 
@@ -296,7 +296,7 @@ func (e *EntryBlockMarker) UnmarshalBinaryData(p []byte) (newData []byte, err er
 	buf := primitives.NewBuffer(p)
 	newData = p
 
-	e.KeyMr, err = buf.PopIHash()
+	e.KeyMr, err = buf.Pop*HashS()
 	if err != nil {
 		return
 	}

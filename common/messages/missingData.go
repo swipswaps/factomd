@@ -23,7 +23,7 @@ type MissingData struct {
 	msgbase.MessageBase
 	Timestamp interfaces.Timestamp
 
-	RequestHash interfaces.IHash
+	RequestHash interfaces.*HashS
 
 	//No signature!
 }
@@ -54,19 +54,19 @@ func (m *MissingData) Process(uint32, interfaces.IState) bool {
 	return true
 }
 
-func (m *MissingData) GetRepeatHash() (rval interfaces.IHash) {
+func (m *MissingData) GetRepeatHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "MissingData.GetRepeatHash") }()
 
 	return m.GetMsgHash()
 }
 
-func (m *MissingData) GetHash() (rval interfaces.IHash) {
+func (m *MissingData) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "MissingData.GetHash") }()
 
 	return m.GetMsgHash()
 }
 
-func (m *MissingData) GetMsgHash() (rval interfaces.IHash) {
+func (m *MissingData) GetMsgHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "MissingData.GetMsgHash") }()
 
 	if m.MsgHash == nil {
@@ -175,7 +175,7 @@ func (m *MissingData) FollowerExecute(state interfaces.IState) {
 
 func (m *MissingData) SendResponse(state interfaces.IState) {
 	var dataObject interfaces.BinaryMarshallable
-	//var dataHash interfaces.IHash
+	//var dataHash interfaces.*HashS
 	rawObject, dataType, err := state.LoadDataByHash(m.RequestHash)
 
 	if rawObject != nil && err == nil { // If I don't have this message, ignore.
@@ -207,7 +207,7 @@ func (e *MissingData) JSONString() (string, error) {
 	return primitives.EncodeJSONString(e)
 }
 
-func NewMissingData(state interfaces.IState, requestHash interfaces.IHash) interfaces.IMsg {
+func NewMissingData(state interfaces.IState, requestHash interfaces.*HashS) interfaces.IMsg {
 	msg := new(MissingData)
 
 	msg.Peer2Peer = true // Always a peer2peer request.

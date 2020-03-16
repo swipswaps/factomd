@@ -23,20 +23,20 @@ type IEntryBlock interface {
 	BuildHeader() error
 	// Hash returns the simple Sha256 hash of the serialized Entry Block. Hash is
 	// used to provide the PrevFullHash to the next Entry Block in a Chain.
-	Hash() (IHash, error)
+	Hash() (*HashS, error)
 	// KeyMR returns the hash of the hash of the Entry Block Header concatenated
 	// with the Merkle Root of the Entry Block Body. The Body Merkle Root is
 	// calculated by the func (e *EBlockBody) MR() which is called by the func
 	// (e *EBlock) BuildHeader().
-	KeyMR() (IHash, error)
+	KeyMR() (*HashS, error)
 
 	GetBody() IEBlockBody
 
-	BodyKeyMR() IHash
-	GetEntryHashes() []IHash
-	GetEntrySigHashes() []IHash
-	GetHash() IHash
-	HeaderHash() (IHash, error)
+	BodyKeyMR() *HashS
+	GetEntryHashes() []*HashS
+	GetEntrySigHashes() []*HashS
+	GetHash() *HashS
+	HeaderHash() (*HashS, error)
 	IsSameAs(IEntryBlock) bool
 }
 
@@ -44,14 +44,14 @@ type IEntryBlockHeader interface {
 	Printable
 	BinaryMarshallable
 
-	GetBodyMR() IHash
-	GetChainID() IHash
-	GetPrevFullHash() IHash
-	GetPrevKeyMR() IHash
-	SetBodyMR(bodyMR IHash)
-	SetChainID(IHash)
-	SetPrevFullHash(IHash)
-	SetPrevKeyMR(IHash)
+	GetBodyMR() *HashS
+	GetChainID() *HashS
+	GetPrevFullHash() *HashS
+	GetPrevKeyMR() *HashS
+	SetBodyMR(bodyMR *HashS)
+	SetChainID(*HashS)
+	SetPrevFullHash(*HashS)
+	SetPrevKeyMR(*HashS)
 
 	GetDBHeight() uint32
 	GetEBSequence() uint32
@@ -65,9 +65,9 @@ type IEntryBlockHeader interface {
 type IEBlockBody interface {
 	Printable
 
-	AddEBEntry(IHash)
+	AddEBEntry(*HashS)
 	AddEndOfMinuteMarker(m byte)
-	GetEBEntries() []IHash
-	MR() IHash
+	GetEBEntries() []*HashS
+	MR() *HashS
 	IsSameAs(IEBlockBody) bool
 }

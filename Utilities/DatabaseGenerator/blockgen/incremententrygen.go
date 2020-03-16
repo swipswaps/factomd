@@ -41,7 +41,7 @@ func (r *IncrementEntryGenerator) NewChainHead() *entryBlock.Entry {
 	r.currentCount = 0
 	return r.EntryGenCore.NewChainHead()
 }
-func (r *IncrementEntryGenerator) NewEntry(chain interfaces.IHash) *entryBlock.Entry {
+func (r *IncrementEntryGenerator) NewEntry(chain interfaces.*HashS) *entryBlock.Entry {
 	ent := entryBlock.NewEntry()
 	// Putting the ASCII number so you can read in explorer
 	ent.Content = primitives.ByteSlice{[]byte(fmt.Sprintf("%d", r.currentCount))}

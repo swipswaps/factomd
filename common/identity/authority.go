@@ -33,9 +33,9 @@ func (p AuthoritySort) Less(i, j int) bool {
 }
 
 type Authority struct {
-	AuthorityChainID  interfaces.IHash     `json:"chainid"`
-	ManagementChainID interfaces.IHash     `json:"manageid"`
-	MatryoshkaHash    interfaces.IHash     `json:"matroyshka"`
+	AuthorityChainID  interfaces.*HashS     `json:"chainid"`
+	ManagementChainID interfaces.*HashS     `json:"manageid"`
+	MatryoshkaHash    interfaces.*HashS     `json:"matroyshka"`
 	SigningKey        primitives.PublicKey `json:"signingkey"`
 	Status            uint8                `json:"status"`
 	AnchorKeys        []AnchorSigningKey   `json:"anchorkeys"`
@@ -236,7 +236,7 @@ func (e *Authority) MarshalBinary() (rval []byte, err error) {
 		return nil, err
 	}
 
-	err = buf.PushIHash(e.CoinbaseAddress)
+	err = buf.Push*HashS(e.CoinbaseAddress)
 	if err != nil {
 		return nil, err
 	}
@@ -302,7 +302,7 @@ func (e *Authority) UnmarshalBinaryData(p []byte) (newData []byte, err error) {
 		return nil, err
 	}
 
-	e.CoinbaseAddress, err = buf.PopIHash()
+	e.CoinbaseAddress, err = buf.Pop*HashS()
 	if err != nil {
 		return nil, err
 	}
@@ -316,7 +316,7 @@ func (e *Authority) UnmarshalBinary(p []byte) error {
 	return err
 }
 
-func (e *Authority) GetAuthorityChainID() (rval interfaces.IHash) {
+func (e *Authority) GetAuthorityChainID() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "Authority.GetAuthorityChainID") }()
 
 	return e.AuthorityChainID
@@ -373,9 +373,9 @@ func (auth *Authority) MarshalJSON() (rval []byte, err error) {
 		}
 	}(&err)
 	return json.Marshal(struct {
-		AuthorityChainID  interfaces.IHash   `json:"chainid"`
-		ManagementChainID interfaces.IHash   `json:"manageid"`
-		MatryoshkaHash    interfaces.IHash   `json:"matroyshka"`
+		AuthorityChainID  interfaces.*HashS   `json:"chainid"`
+		ManagementChainID interfaces.*HashS   `json:"manageid"`
+		MatryoshkaHash    interfaces.*HashS   `json:"matroyshka"`
 		SigningKey        string             `json:"signingkey"`
 		Status            string             `json:"status"`
 		AnchorKeys        []AnchorSigningKey `json:"anchorkeys"`

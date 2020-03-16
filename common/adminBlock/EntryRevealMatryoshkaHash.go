@@ -11,8 +11,8 @@ import (
 
 type RevealMatryoshkaHash struct {
 	AdminIDType     uint32           `json:"adminidtype"`
-	IdentityChainID interfaces.IHash `json:"identitychainid"`
-	MHash           interfaces.IHash `json:"mhash"`
+	IdentityChainID interfaces.*HashS `json:"identitychainid"`
+	MHash           interfaces.*HashS `json:"mhash"`
 }
 
 var _ interfaces.Printable = (*RevealMatryoshkaHash)(nil)
@@ -33,7 +33,7 @@ func (m *RevealMatryoshkaHash) Type() byte {
 	return constants.TYPE_REVEAL_MATRYOSHKA
 }
 
-func NewRevealMatryoshkaHash(identityChainID interfaces.IHash, mHash interfaces.IHash) *RevealMatryoshkaHash {
+func NewRevealMatryoshkaHash(identityChainID interfaces.*HashS, mHash interfaces.*HashS) *RevealMatryoshkaHash {
 	e := new(RevealMatryoshkaHash)
 	e.IdentityChainID = identityChainID
 	e.MHash = mHash
@@ -126,7 +126,7 @@ func (e *RevealMatryoshkaHash) Interpret() string {
 	return ""
 }
 
-func (e *RevealMatryoshkaHash) Hash() (rval interfaces.IHash) {
+func (e *RevealMatryoshkaHash) Hash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "RevealMatryoshkaHash.Hash") }()
 
 	bin, err := e.MarshalBinary()

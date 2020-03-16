@@ -13,19 +13,19 @@ type IDirectoryBlock interface {
 	GetDBEntries() []IDBEntry
 	GetEBlockDBEntries() []IDBEntry
 	SetDBEntries([]IDBEntry) error
-	AddEntry(chainID IHash, keyMR IHash) error
-	BuildKeyMerkleRoot() (IHash, error)
-	BuildBodyMR() (IHash, error)
-	GetKeyMR() IHash
-	GetHash() IHash
-	GetFullHash() IHash
-	GetHeaderHash() (IHash, error)
+	AddEntry(chainID *HashS, keyMR *HashS) error
+	BuildKeyMerkleRoot() (*HashS, error)
+	BuildBodyMR() (*HashS, error)
+	GetKeyMR() *HashS
+	GetHash() *HashS
+	GetFullHash() *HashS
+	GetHeaderHash() (*HashS, error)
 
 	GetTimestamp() Timestamp
-	BodyKeyMR() IHash
-	GetEntryHashesForBranch() []IHash
+	BodyKeyMR() *HashS
+	GetEntryHashesForBranch() []*HashS
 
-	SetEntryHash(hash, chainID IHash, index int)
+	SetEntryHash(hash, chainID *HashS, index int)
 	SetABlockHash(aBlock IAdminBlock) error
 	SetECBlockHash(ecBlock IEntryCreditBlock) error
 	SetFBlockHash(fBlock IFBlock) error
@@ -38,13 +38,13 @@ type IDirectoryBlockHeader interface {
 
 	GetVersion() byte
 	SetVersion(byte)
-	GetPrevFullHash() IHash
-	SetPrevFullHash(IHash)
-	GetBodyMR() IHash
-	SetBodyMR(IHash)
-	GetPrevKeyMR() IHash
-	SetPrevKeyMR(IHash)
-	GetHeaderHash() (IHash, error)
+	GetPrevFullHash() *HashS
+	SetPrevFullHash(*HashS)
+	GetBodyMR() *HashS
+	SetBodyMR(*HashS)
+	GetPrevKeyMR() *HashS
+	SetPrevKeyMR(*HashS)
+	GetHeaderHash() (*HashS, error)
 	GetDBHeight() uint32
 	SetDBHeight(uint32)
 	GetBlockCount() uint32
@@ -59,9 +59,9 @@ type IDirectoryBlockHeader interface {
 type IDBEntry interface {
 	Printable
 	BinaryMarshallable
-	GetChainID() IHash
-	SetChainID(IHash)
-	GetKeyMR() IHash
-	SetKeyMR(IHash)
+	GetChainID() *HashS
+	SetChainID(*HashS)
+	GetKeyMR() *HashS
+	SetKeyMR(*HashS)
 	IsSameAs(IDBEntry) bool
 }

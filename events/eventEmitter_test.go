@@ -151,7 +151,7 @@ func (m *mockEventSender) GetEventQueue() chan *eventmessages.FactomEvent {
 func (m *mockEventSender) Shutdown() {}
 
 type StateMock struct {
-	IdentityChainID interfaces.IHash
+	IdentityChainID interfaces.*HashS
 	RunState        runstate.RunState
 	RunLeader       bool
 	Service         EventService
@@ -161,7 +161,7 @@ func (s StateMock) GetRunState() runstate.RunState {
 	return s.RunState
 }
 
-func (s StateMock) GetIdentityChainID() interfaces.IHash {
+func (s StateMock) GetIdentityChainID() interfaces.*HashS {
 	return s.IdentityChainID
 }
 

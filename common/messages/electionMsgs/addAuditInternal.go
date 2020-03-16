@@ -22,7 +22,7 @@ import (
 type AddAuditInternal struct {
 	msgbase.MessageBase
 	NName    string
-	ServerID interfaces.IHash // Hash of message acknowledged
+	ServerID interfaces.*HashS // Hash of message acknowledged
 	DBHeight uint32           // Directory Block Height that owns this ack
 	Height   uint32           // Height of this ack in this process list
 }
@@ -36,7 +36,7 @@ func (m *AddAuditInternal) MarshalBinary() (data []byte, err error) {
 	if err = buf.PushByte(constants.INTERNALADDAUDIT); err != nil {
 		return nil, err
 	}
-	if e := buf.PushIHash(m.ServerID); e != nil {
+	if e := buf.Push*HashS(m.ServerID); e != nil {
 		return nil, e
 	}
 	if e := buf.PushInt(int(m.DBHeight)); e != nil {
@@ -52,7 +52,7 @@ func (m *AddAuditInternal) MarshalBinary() (data []byte, err error) {
 	return data, nil
 }
 
-func (m *AddAuditInternal) GetMsgHash() (rval interfaces.IHash) {
+func (m *AddAuditInternal) GetMsgHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "AddAuditInternal.GetMsgHash") }()
 
 	if m.MsgHash == nil {
@@ -84,14 +84,14 @@ func (m *AddAuditInternal) LogFields() log.Fields {
 	return log.Fields{"category": "message", "messagetype": "AddAuditInternal", "dbheight": m.DBHeight, "newleader": m.ServerID.String()[4:12]}
 }
 
-func (m *AddAuditInternal) GetRepeatHash() (rval interfaces.IHash) {
+func (m *AddAuditInternal) GetRepeatHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "AddAuditInternal.GetRepeatHash") }()
 
 	return m.GetMsgHash()
 }
 
 // We have to return the hash of the underlying message.
-func (m *AddAuditInternal) GetHash() (rval interfaces.IHash) {
+func (m *AddAuditInternal) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "AddAuditInternal.GetHash") }()
 
 	return m.GetMsgHash()

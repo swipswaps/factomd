@@ -25,9 +25,9 @@ const (
 type CommitChain struct {
 	Version     uint8                   `json:"version"`     // The version of the CommitChain, currently 0
 	MilliTime   *primitives.ByteSlice6  `json:"millitime"`   // The millisecond time stamp (0~=1970) this commit is created
-	ChainIDHash interfaces.IHash        `json:"chainidhash"` // The chain id hash is the double hash of the chain id
-	Weld        interfaces.IHash        `json:"weld"`        // The double hash of the concatonated (entry hash | chain id)
-	EntryHash   interfaces.IHash        `json:"entryhash"`   // SHA512+256 descriptor of the Entry to be the first in the Chain
+	ChainIDHash interfaces.*HashS        `json:"chainidhash"` // The chain id hash is the double hash of the chain id
+	Weld        interfaces.*HashS        `json:"weld"`        // The double hash of the concatonated (entry hash | chain id)
+	EntryHash   interfaces.*HashS        `json:"entryhash"`   // SHA512+256 descriptor of the Entry to be the first in the Chain
 	Credits     uint8                   `json:"credits"`     // number of entry credits to deduct for this entry, must be 10 < Credits <= 20
 	ECPubKey    *primitives.ByteSlice32 `json:"ecpubkey"`    // EC public key that will have balanced reduced
 	Sig         *primitives.ByteSlice64 `json:"sig"`         // signature of the chain commit by the public key
@@ -136,14 +136,14 @@ func NewCommitChain() *CommitChain {
 }
 
 // GetEntryHash returns the entry hash
-func (c *CommitChain) GetEntryHash() (rval interfaces.IHash) {
+func (c *CommitChain) GetEntryHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "CommitChain.GetEntryHash") }()
 
 	return c.EntryHash
 }
 
 // Hash marshals the object and computes the sha
-func (c *CommitChain) Hash() (rval interfaces.IHash) {
+func (c *CommitChain) Hash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "CommitChain.Hash") }()
 
 	bin, err := c.MarshalBinary()
@@ -198,7 +198,7 @@ func (c *CommitChain) IsValid() bool {
 }
 
 // GetHash marshals the entire object and computes the sha
-func (c *CommitChain) GetHash() (rval interfaces.IHash) {
+func (c *CommitChain) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "CommitChain.GetHash") }()
 
 	data, _ := c.MarshalBinary()
@@ -206,7 +206,7 @@ func (c *CommitChain) GetHash() (rval interfaces.IHash) {
 }
 
 // GetSigHash marshals the object covered by the signature, and computes its sha (version through entry credits hashed)
-func (c *CommitChain) GetSigHash() (rval interfaces.IHash) {
+func (c *CommitChain) GetSigHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "CommitChain.GetSigHash") }()
 
 	data := c.CommitMsg()

@@ -24,7 +24,7 @@ type NewCoinbaseCancelStruct struct {
 	//The second is the ASCII string "Coinbase Address".
 	FunctionName []byte //"Server Efficiency"
 	//The third is the root identity ChainID.
-	RootIdentityChainID interfaces.IHash
+	RootIdentityChainID interfaces.*HashS
 	//Forth is coinbase descriptor height
 	CoinbaseDescriptorHeight uint32
 	// Fifth is the descriptor index
@@ -65,7 +65,7 @@ func (ncas *NewCoinbaseCancelStruct) MarshalForSig() []byte {
 	return answer
 }
 
-func (ncas *NewCoinbaseCancelStruct) VerifySignature(key1 interfaces.IHash) error {
+func (ncas *NewCoinbaseCancelStruct) VerifySignature(key1 interfaces.*HashS) error {
 	bin := ncas.MarshalForSig()
 	pk := new(primitives.PublicKey)
 	err := pk.UnmarshalBinary(ncas.PreimageIdentityKey[1:])
@@ -145,7 +145,7 @@ func (ncas *NewCoinbaseCancelStruct) ToExternalIDs() [][]byte {
 	return extIDs
 }
 
-func (ncas *NewCoinbaseCancelStruct) GetChainID() (rval interfaces.IHash) {
+func (ncas *NewCoinbaseCancelStruct) GetChainID() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "NewCoinbaseCancelStruct.GetChainID") }()
 
 	extIDs := ncas.ToExternalIDs()

@@ -113,7 +113,7 @@ func LoadDatabase(s *State) {
 		s.Println("******* New Database **************")
 		s.Println("***********************************\n")
 
-		var customIdentity interfaces.IHash
+		var customIdentity interfaces.*HashS
 		if s.Network == "CUSTOM" {
 			customIdentity, err = primitives.HexToHash(s.CustomBootstrapIdentity)
 			if err != nil {
@@ -136,7 +136,7 @@ func LoadDatabase(s *State) {
 	fmt.Fprintf(os.Stderr, "%20s Loading complete %v.\n", s.FactomNodeName, blkCnt)
 }
 
-func GenerateGenesisBlocks(networkID uint32, bootstrapIdentity interfaces.IHash) (interfaces.IDirectoryBlock, interfaces.IAdminBlock, interfaces.IFBlock, interfaces.IEntryCreditBlock) {
+func GenerateGenesisBlocks(networkID uint32, bootstrapIdentity interfaces.*HashS) (interfaces.IDirectoryBlock, interfaces.IAdminBlock, interfaces.IFBlock, interfaces.IEntryCreditBlock) {
 	dblk := directoryBlock.NewDirectoryBlock(nil)
 	ablk := adminBlock.NewAdminBlock(nil)
 	fblk := factoid.GetGenesisFBlock(networkID)

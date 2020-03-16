@@ -27,13 +27,13 @@ type EOM struct {
 
 	DBHeight  uint32
 	SysHeight uint32
-	SysHash   interfaces.IHash
-	ChainID   interfaces.IHash
+	SysHash   interfaces.*HashS
+	ChainID   interfaces.*HashS
 	Signature interfaces.IFullSignature
 	FactoidVM bool
 
 	//Not marshalled
-	hash         interfaces.IHash
+	hash         interfaces.*HashS
 	MarkerSent   bool // If we have set EOM markers on blocks like Factoid blocks and such.
 	marshalCache []byte
 }
@@ -82,7 +82,7 @@ func (e *EOM) Process(dbheight uint32, state interfaces.IState) bool {
 }
 
 // Fix EOM hash to match and not have the sig so duplicates are not generated.
-func (m *EOM) GetRepeatHash() (rval interfaces.IHash) {
+func (m *EOM) GetRepeatHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "EOM.GetRepeatHash") }()
 
 	if m.RepeatHash == nil {
@@ -95,13 +95,13 @@ func (m *EOM) GetRepeatHash() (rval interfaces.IHash) {
 	return m.RepeatHash
 }
 
-func (m *EOM) GetHash() (rval interfaces.IHash) {
+func (m *EOM) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "EOM.GetHash") }()
 
 	return m.GetMsgHash()
 }
 
-func (m *EOM) GetMsgHash() (rval interfaces.IHash) {
+func (m *EOM) GetMsgHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "EOM.GetMsgHash") }()
 
 	if m.MsgHash == nil {

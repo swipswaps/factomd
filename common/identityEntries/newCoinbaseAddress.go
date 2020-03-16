@@ -22,9 +22,9 @@ type NewCoinbaseAddressStruct struct {
 	//The second is the ASCII string "Coinbase Address".
 	FunctionName []byte //"Server Efficiency"
 	//The third is the root identity ChainID.
-	RootIdentityChainID interfaces.IHash
+	RootIdentityChainID interfaces.*HashS
 	//Forth is the new coinbase address
-	CoinbaseAddress interfaces.IHash
+	CoinbaseAddress interfaces.*HashS
 	//5th is the timestamp with an 8 byte epoch time.
 	Timestamp []byte
 	//6th is the identity key preimage.
@@ -57,7 +57,7 @@ func (ncas *NewCoinbaseAddressStruct) MarshalForSig() []byte {
 	return answer
 }
 
-func (ncas *NewCoinbaseAddressStruct) VerifySignature(key1 interfaces.IHash) error {
+func (ncas *NewCoinbaseAddressStruct) VerifySignature(key1 interfaces.*HashS) error {
 	bin := ncas.MarshalForSig()
 	pk := new(primitives.PublicKey)
 	err := pk.UnmarshalBinary(ncas.PreimageIdentityKey[1:])
@@ -135,7 +135,7 @@ func (ncas *NewCoinbaseAddressStruct) ToExternalIDs() [][]byte {
 	return extIDs
 }
 
-func (ncas *NewCoinbaseAddressStruct) GetChainID() (rval interfaces.IHash) {
+func (ncas *NewCoinbaseAddressStruct) GetChainID() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "NewCoinbaseAddressStruct.GetChainID") }()
 
 	extIDs := ncas.ToExternalIDs()

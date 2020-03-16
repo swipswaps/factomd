@@ -69,10 +69,10 @@ func main() {
 }
 
 func FindHeads(f tools.Fetcher) {
-	chainHeads := make(map[string]interfaces.IHash)
+	chainHeads := make(map[string]interfaces.*HashS)
 
 	var allEblockLock sync.Mutex
-	allEblks := make(map[string]interfaces.IHash)
+	allEblks := make(map[string]interfaces.*HashS)
 
 	var err error
 	var dblock interfaces.IDirectoryBlock
@@ -172,7 +172,7 @@ func FindHeads(f tools.Fetcher) {
 						ch.String(), eblk.GetKeyMR().String(), eblk.GetChainID().String(), height)
 					errCount++
 					if FixIt {
-						f.SetChainHeads([]interfaces.IHash{eblk.GetKeyMR()}, []interfaces.IHash{eblk.GetChainID()})
+						f.SetChainHeads([]interfaces.*HashS{eblk.GetKeyMR()}, []interfaces.*HashS{eblk.GetChainID()})
 					}
 				}
 			}
@@ -196,7 +196,7 @@ func FindHeads(f tools.Fetcher) {
 	if CheckFloating {
 		fmt.Println("Checking all EBLK links")
 		for k, h := range chainHeads {
-			var prev interfaces.IHash
+			var prev interfaces.*HashS
 			prev = h
 			for {
 				if prev.IsZero() {

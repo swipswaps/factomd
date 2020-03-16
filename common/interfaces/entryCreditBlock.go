@@ -10,13 +10,13 @@ type IEntryCreditBlock interface {
 
 	GetHeader() IECBlockHeader
 	GetBody() IECBlockBody
-	GetHash() IHash
-	HeaderHash() (IHash, error)
-	GetFullHash() (IHash, error)
-	GetEntryHashes() []IHash
-	GetEntrySigHashes() []IHash
+	GetHash() *HashS
+	HeaderHash() (*HashS, error)
+	GetFullHash() (*HashS, error)
+	GetEntryHashes() []*HashS
+	GetEntrySigHashes() []*HashS
 	GetEntries() []IECBlockEntry
-	GetEntryByHash(hash IHash) IECBlockEntry
+	GetEntryByHash(hash *HashS) IECBlockEntry
 
 	UpdateState(IState) error
 	IsSameAs(IEntryCreditBlock) bool
@@ -27,15 +27,15 @@ type IECBlockHeader interface {
 	BinaryMarshallable
 
 	String() string
-	GetBodyHash() IHash
-	SetBodyHash(IHash)
-	GetPrevHeaderHash() IHash
-	SetPrevHeaderHash(IHash)
-	GetPrevFullHash() IHash
-	SetPrevFullHash(IHash)
+	GetBodyHash() *HashS
+	SetBodyHash(*HashS)
+	GetPrevHeaderHash() *HashS
+	SetPrevHeaderHash(*HashS)
+	GetPrevFullHash() *HashS
+	SetPrevFullHash(*HashS)
 	GetDBHeight() uint32
 	SetDBHeight(uint32)
-	GetECChainID() IHash
+	GetECChainID() *HashS
 	SetHeaderExpansionArea([]byte)
 	GetHeaderExpansionArea() []byte
 	GetObjectCount() uint64
@@ -61,10 +61,10 @@ type IECBlockEntry interface {
 	MarshalBinary() ([]byte, error)
 	UnmarshalBinary(data []byte) error
 	UnmarshalBinaryData(data []byte) ([]byte, error)
-	Hash() IHash
-	GetHash() IHash
-	GetEntryHash() IHash
-	GetSigHash() IHash
+	Hash() *HashS
+	GetHash() *HashS
+	GetEntryHash() *HashS
+	GetSigHash() *HashS
 	GetTimestamp() Timestamp
 	IsSameAs(IECBlockEntry) bool
 }

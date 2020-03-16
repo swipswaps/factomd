@@ -59,7 +59,7 @@ func TestBalanceHash(t *testing.T) {
 	s.FactoidBalancesP = map[[32]byte]int64{}
 	s.ECBalancesP = map[[32]byte]int64{}
 
-	var ec, fct []interfaces.IHash
+	var ec, fct []interfaces.*HashS
 	h := primitives.Sha([]byte("testing"))
 
 	for i := 1; i < 1000; i++ {
@@ -78,7 +78,7 @@ func TestBalanceHash(t *testing.T) {
 		t.Errorf("Expected %s but found %s", Expected, hbal.String())
 	}
 
-	x := func(addrArray []interfaces.IHash, balanceArray *map[[32]byte]int64) {
+	x := func(addrArray []interfaces.*HashS, balanceArray *map[[32]byte]int64) {
 
 		// Add a random address
 		for i := 1; i < 10; i++ {

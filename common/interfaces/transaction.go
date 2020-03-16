@@ -28,15 +28,15 @@ type ITransaction interface {
 	// RCDs are generally added at the same time.
 	AddRCD(rcd IRCD)
 
-	//GetTxID() IHash
+	//GetTxID() *HashS
 
 	// Get the hash of the signed portion (not including signatures)
 	// This is the TxID of a factoid transaction
-	GetSigHash() IHash
+	GetSigHash() *HashS
 
-	GetHash() IHash
+	GetHash() *HashS
 	// Get the full hash of the transaction (including signatures)
-	GetFullHash() IHash
+	GetFullHash() *HashS
 
 	// Accessors the inputs, outputs, and Entry Credit outputs (ecoutputs)
 	// to this transaction.
@@ -88,7 +88,7 @@ type ITransaction interface {
 }
 
 type IPendingTransaction struct {
-	TransactionID IHash           `json:"transactionid"`
+	TransactionID *HashS          `json:"transactionid"`
 	Status        string          `json:"status"`
 	Inputs        []ITransAddress `json:"inputs"`
 	Outputs       []ITransAddress `json:"outputs"`

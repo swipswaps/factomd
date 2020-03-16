@@ -19,9 +19,9 @@ type DBlockHeader struct {
 	Version   byte   `json:"version"`
 	NetworkID uint32 `json:"networkid"`
 
-	BodyMR       interfaces.IHash `json:"bodymr"`
-	PrevKeyMR    interfaces.IHash `json:"prevkeymr"`
-	PrevFullHash interfaces.IHash `json:"prevfullhash"`
+	BodyMR       interfaces.*HashS `json:"bodymr"`
+	PrevKeyMR    interfaces.*HashS `json:"prevkeymr"`
+	PrevFullHash interfaces.*HashS `json:"prevfullhash"`
 
 	Timestamp  uint32 `json:"timestamp"` //in minutes
 	DBHeight   uint32 `json:"dbheight"`
@@ -44,7 +44,7 @@ func (h *DBlockHeader) Init() {
 	}
 }
 
-func (b *DBlockHeader) GetHeaderHash() (interfaces.IHash, error) {
+func (b *DBlockHeader) GetHeaderHash() (interfaces.*HashS, error) {
 
 	binaryEBHeader, err := b.MarshalBinary()
 	if err != nil {
@@ -115,33 +115,33 @@ func (h *DBlockHeader) SetNetworkID(networkID uint32) {
 	h.NetworkID = networkID
 }
 
-func (h *DBlockHeader) GetBodyMR() (rval interfaces.IHash) {
+func (h *DBlockHeader) GetBodyMR() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "DBlockHeader.GetBodyMR") }()
 
 	return h.BodyMR
 }
 
-func (h *DBlockHeader) SetBodyMR(bodyMR interfaces.IHash) {
+func (h *DBlockHeader) SetBodyMR(bodyMR interfaces.*HashS) {
 	h.BodyMR = bodyMR
 }
 
-func (h *DBlockHeader) GetPrevKeyMR() (rval interfaces.IHash) {
+func (h *DBlockHeader) GetPrevKeyMR() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "DBlockHeader.GetPrevKeyMR") }()
 
 	return h.PrevKeyMR
 }
 
-func (h *DBlockHeader) SetPrevKeyMR(prevKeyMR interfaces.IHash) {
+func (h *DBlockHeader) SetPrevKeyMR(prevKeyMR interfaces.*HashS) {
 	h.PrevKeyMR = prevKeyMR
 }
 
-func (h *DBlockHeader) GetPrevFullHash() (rval interfaces.IHash) {
+func (h *DBlockHeader) GetPrevFullHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "DBlockHeader.GetPrevFullHash") }()
 
 	return h.PrevFullHash
 }
 
-func (h *DBlockHeader) SetPrevFullHash(PrevFullHash interfaces.IHash) {
+func (h *DBlockHeader) SetPrevFullHash(PrevFullHash interfaces.*HashS) {
 	h.PrevFullHash = PrevFullHash
 }
 

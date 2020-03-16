@@ -14,8 +14,8 @@ type ServerFault struct {
 	Timestamp   interfaces.Timestamp `json:"timestamp"`
 	// The following 4 fields represent the "Core" of the message
 	// This should match the Core of ServerFault messages
-	ServerID      interfaces.IHash `json:"serverid"`
-	AuditServerID interfaces.IHash `json:"auditserverid"`
+	ServerID      interfaces.*HashS `json:"serverid"`
+	AuditServerID interfaces.*HashS `json:"auditserverid"`
 	VMIndex       byte             `json:"vmindex"`
 	DBHeight      uint32           `json:"dbheight"`
 	Height        uint32           `json:"height"`
@@ -275,7 +275,7 @@ func (e *ServerFault) Interpret() string {
 	return ""
 }
 
-func (e *ServerFault) Hash() (rval interfaces.IHash) {
+func (e *ServerFault) Hash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "ServerFault.Hash") }()
 
 	bin, err := e.MarshalBinary()

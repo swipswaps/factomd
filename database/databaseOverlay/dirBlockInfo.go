@@ -44,7 +44,7 @@ func (db *Overlay) ProcessDirBlockInfoMultiBatch(block interfaces.IDirBlockInfo)
 }
 
 // FetchDirBlockInfoByHash gets a dirblock info block by hash from the database.
-func (db *Overlay) FetchDirBlockInfoByHash(hash interfaces.IHash) (interfaces.IDirBlockInfo, error) {
+func (db *Overlay) FetchDirBlockInfoByHash(hash interfaces.*HashS) (interfaces.IDirBlockInfo, error) {
 	block, err := db.FetchBlockBySecondaryIndex(DIRBLOCKINFO_SECONDARYINDEX, DIRBLOCKINFO_UNCONFIRMED, hash, dbInfo.NewDirBlockInfo())
 	if err != nil {
 		return nil, err
@@ -62,7 +62,7 @@ func (db *Overlay) FetchDirBlockInfoByHash(hash interfaces.IHash) (interfaces.ID
 }
 
 // FetchDirBlockInfoByKeyMR gets a dirblock info block by keyMR from the database.
-func (db *Overlay) FetchDirBlockInfoByKeyMR(hash interfaces.IHash) (interfaces.IDirBlockInfo, error) {
+func (db *Overlay) FetchDirBlockInfoByKeyMR(hash interfaces.*HashS) (interfaces.IDirBlockInfo, error) {
 	block, err := db.FetchBlock(DIRBLOCKINFO_UNCONFIRMED, hash, dbInfo.NewDirBlockInfo())
 	if err != nil {
 		return nil, err

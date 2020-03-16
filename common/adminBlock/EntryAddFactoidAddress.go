@@ -13,7 +13,7 @@ import (
 // AddFactoidAddress Entry -------------------------
 type AddFactoidAddress struct {
 	AdminIDType     uint32 `json:"adminidtype"`
-	IdentityChainID interfaces.IHash
+	IdentityChainID interfaces.*HashS
 	FactoidAddress  interfaces.IAddress
 }
 
@@ -65,7 +65,7 @@ func (c *AddFactoidAddress) UpdateState(state interfaces.IState) error {
 	return nil
 }
 
-func NewAddFactoidAddress(chainID interfaces.IHash, add interfaces.IAddress) (e *AddFactoidAddress) {
+func NewAddFactoidAddress(chainID interfaces.*HashS, add interfaces.IAddress) (e *AddFactoidAddress) {
 	e = new(AddFactoidAddress)
 	e.Init()
 	e.IdentityChainID = chainID
@@ -77,7 +77,7 @@ func (e *AddFactoidAddress) Type() byte {
 	return constants.TYPE_ADD_FACTOID_ADDRESS
 }
 
-func (e *AddFactoidAddress) SortedIdentity() (rval interfaces.IHash) {
+func (e *AddFactoidAddress) SortedIdentity() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "AddFactoidAddress.SortedIdentity") }()
 
 	return e.IdentityChainID
@@ -99,7 +99,7 @@ func (e *AddFactoidAddress) MarshalBinary() (rval []byte, err error) {
 
 	// Need the size of the body
 	var bodybuf primitives.Buffer
-	err = bodybuf.PushIHash(e.IdentityChainID)
+	err = bodybuf.Push*HashS(e.IdentityChainID)
 	if err != nil {
 		return nil, err
 	}
@@ -165,7 +165,7 @@ func (e *AddFactoidAddress) UnmarshalBinaryData(data []byte) ([]byte, error) {
 		return nil, fmt.Errorf("Unable to unmarshal body")
 	}
 
-	e.IdentityChainID, err = bodyBuf.PopIHash()
+	e.IdentityChainID, err = bodyBuf.Pop*HashS()
 	if err != nil {
 		return nil, err
 	}
@@ -201,7 +201,7 @@ func (e *AddFactoidAddress) Interpret() string {
 	return ""
 }
 
-func (e *AddFactoidAddress) Hash() (rval interfaces.IHash) {
+func (e *AddFactoidAddress) Hash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "AddFactoidAddress.Hash") }()
 
 	bin, err := e.MarshalBinary()

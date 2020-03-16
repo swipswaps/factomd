@@ -38,10 +38,10 @@ func FindHeads(f tools.Fetcher, conf CorrectChainHeadConfig) {
 	})
 	checkFloating := conf.CheckFloating
 	fix := conf.Fix
-	chainHeads := make(map[string]interfaces.IHash)
+	chainHeads := make(map[string]interfaces.*HashS)
 
 	var allEblockLock sync.Mutex
-	allEblks := make(map[[32]byte]interfaces.IHash)
+	allEblks := make(map[[32]byte]interfaces.*HashS)
 
 	var err error
 	var dblock interfaces.IDirectoryBlock
@@ -143,7 +143,7 @@ func FindHeads(f tools.Fetcher, conf CorrectChainHeadConfig) {
 			} else {
 				if !ch.IsSameAs(eblk.GetKeyMR()) {
 					if fix {
-						f.SetChainHeads([]interfaces.IHash{eblk.GetKeyMR()}, []interfaces.IHash{eblk.GetChainID()})
+						f.SetChainHeads([]interfaces.*HashS{eblk.GetKeyMR()}, []interfaces.*HashS{eblk.GetChainID()})
 						flog.Warnf("{FIXED!} Chainhead found: %s, Expected %s :: For Chain: %s at height %d",
 							ch.String(), eblk.GetKeyMR().String(), eblk.GetChainID().String(), height)
 					} else {
@@ -179,7 +179,7 @@ func FindHeads(f tools.Fetcher, conf CorrectChainHeadConfig) {
 	if checkFloating {
 		flog.Infof("Checking all EBLK links")
 		for k, h := range chainHeads {
-			var prev interfaces.IHash
+			var prev interfaces.*HashS
 			prev = h
 			for {
 				if prev.IsZero() {

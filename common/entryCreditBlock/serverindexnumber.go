@@ -60,7 +60,7 @@ func (e *ServerIndexNumber) String() string {
 }
 
 // Hash marshals this object and computes its sha
-func (e *ServerIndexNumber) Hash() (rval interfaces.IHash) {
+func (e *ServerIndexNumber) Hash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "ServerIndexNumber.Hash") }()
 
 	bin, err := e.MarshalBinary()
@@ -71,21 +71,21 @@ func (e *ServerIndexNumber) Hash() (rval interfaces.IHash) {
 }
 
 // GetHash returns the hash of this object
-func (e *ServerIndexNumber) GetHash() (rval interfaces.IHash) {
+func (e *ServerIndexNumber) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "ServerIndexNumber.GetHash") }()
 
 	return e.Hash()
 }
 
 // GetEntryHash always returns nil
-func (e *ServerIndexNumber) GetEntryHash() (rval interfaces.IHash) {
+func (e *ServerIndexNumber) GetEntryHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "ServerIndexNumber.GetEntryHash") }()
 
 	return nil
 }
 
 // GetSigHash always returns nil
-func (e *ServerIndexNumber) GetSigHash() (rval interfaces.IHash) {
+func (e *ServerIndexNumber) GetSigHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "ServerIndexNumber.GetSigHash") }()
 
 	return nil

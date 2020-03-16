@@ -177,7 +177,7 @@ func (e *CoinbaseDescriptor) Interpret() string {
 	return ""
 }
 
-func (e *CoinbaseDescriptor) Hash() (rval interfaces.IHash) {
+func (e *CoinbaseDescriptor) Hash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "CoinbaseDescriptor.Hash") }()
 
 	bin, err := e.MarshalBinary()

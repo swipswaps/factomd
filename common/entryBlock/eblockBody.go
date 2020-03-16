@@ -14,7 +14,7 @@ import (
 
 // EBlockBody is the series of Hashes that form the Entry Block Body.
 type EBlockBody struct {
-	EBEntries []interfaces.IHash `json:"ebentries"` // Array of entries from a single chain id associated with this entry block
+	EBEntries []interfaces.*HashS `json:"ebentries"` // Array of entries from a single chain id associated with this entry block
 }
 
 var _ interfaces.Printable = (*EBlockBody)(nil)
@@ -45,13 +45,13 @@ func (e *EBlockBody) IsSameAs(b interfaces.IEBlockBody) bool {
 // NewEBlockBody initializes an empty Entry Block Body.
 func NewEBlockBody() *EBlockBody {
 	e := new(EBlockBody)
-	e.EBEntries = make([]interfaces.IHash, 0)
+	e.EBEntries = make([]interfaces.*HashS, 0)
 	return e
 }
 
 // MR calculates the Merkle Root of the Entry Block Body. See func
-// primitives.BuildMerkleTreeStore(hashes []interfaces.IHash) (merkles []interfaces.IHash) in common/merkle.go.
-func (e *EBlockBody) MR() (rval interfaces.IHash) {
+// primitives.BuildMerkleTreeStore(hashes []interfaces.*HashS) (merkles []interfaces.*HashS) in common/merkle.go.
+func (e *EBlockBody) MR() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "EBlockBody.MR") }()
 
 	mrs := primitives.BuildMerkleTreeStore(e.EBEntries)
@@ -79,13 +79,13 @@ func (e *EBlockBody) String() string {
 }
 
 // GetEBEntries returns the hash array associated with the entry block
-func (e *EBlockBody) GetEBEntries() []interfaces.IHash {
+func (e *EBlockBody) GetEBEntries() []interfaces.*HashS {
 	return e.EBEntries[:]
 }
 
 // AddEBEntry creates a new Entry Block Entry from the provided Factom Entry
 // and adds it to the Entry Block Body.
-func (e *EBlockBody) AddEBEntry(entry interfaces.IHash) {
+func (e *EBlockBody) AddEBEntry(entry interfaces.*HashS) {
 	e.EBEntries = append(e.EBEntries, entry)
 }
 

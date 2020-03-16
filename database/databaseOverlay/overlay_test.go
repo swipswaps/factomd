@@ -420,9 +420,9 @@ var TestSecondaryIndexBucket []byte = []byte{0x03}
 type bareDBTestObject struct {
 	Data           []byte
 	DatabaseHeight uint32
-	PrimaryIndex   interfaces.IHash
-	SecondaryIndex interfaces.IHash
-	ChainID        interfaces.IHash
+	PrimaryIndex   interfaces.*HashS
+	SecondaryIndex interfaces.*HashS
+	ChainID        interfaces.*HashS
 }
 
 func NewBareDBTestObject() *bareDBTestObject {
@@ -438,9 +438,9 @@ func NewBareDBTestObject() *bareDBTestObject {
 type DBTestObject struct {
 	Data           []byte
 	DatabaseHeight uint32
-	PrimaryIndex   interfaces.IHash
-	SecondaryIndex interfaces.IHash
-	ChainID        interfaces.IHash
+	PrimaryIndex   interfaces.*HashS
+	SecondaryIndex interfaces.*HashS
+	ChainID        interfaces.*HashS
 }
 
 func NewDBTestObject() *DBTestObject {
@@ -459,19 +459,19 @@ func (d *DBTestObject) GetDatabaseHeight() uint32 {
 	return d.DatabaseHeight
 }
 
-func (d *DBTestObject) DatabasePrimaryIndex() (rval interfaces.IHash) {
+func (d *DBTestObject) DatabasePrimaryIndex() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "DBTestObject.DatabasePrimaryIndex") }()
 
 	return d.PrimaryIndex
 }
 
-func (d *DBTestObject) DatabaseSecondaryIndex() (rval interfaces.IHash) {
+func (d *DBTestObject) DatabaseSecondaryIndex() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "DBTestObject.DatabaseSecondaryIndex") }()
 
 	return d.SecondaryIndex
 }
 
-func (d *DBTestObject) GetChainID() (rval interfaces.IHash) {
+func (d *DBTestObject) GetChainID() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "DBTestObject.GetChainID") }()
 
 	return d.ChainID

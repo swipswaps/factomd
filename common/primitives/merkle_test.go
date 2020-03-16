@@ -160,7 +160,7 @@ func TestBuildMerkleBranch(t *testing.T) {
 	}
 }
 
-func generateHash(n int) interfaces.IHash {
+func generateHash(n int) interfaces.*HashS {
 	answer := ""
 	for i := 0; i < 64; i++ {
 		answer = answer + fmt.Sprintf("%v", n)
@@ -172,21 +172,21 @@ func generateHash(n int) interfaces.IHash {
 	return hash
 }
 
-func buildMerkleLeafs(n int) []interfaces.IHash {
-	list := make([]interfaces.IHash, n)
+func buildMerkleLeafs(n int) []interfaces.*HashS {
+	list := make([]interfaces.*HashS, n)
 	for i := 0; i < n; i++ {
 		list[i] = generateHash(i)
 	}
 	return list
 }
 
-func buildExpectedMerkleTree(hashes []interfaces.IHash) []interfaces.IHash {
+func buildExpectedMerkleTree(hashes []interfaces.*HashS) []interfaces.*HashS {
 	if len(hashes) < 2 {
 		return hashes
 	}
-	nextLevel := []interfaces.IHash{}
+	nextLevel := []interfaces.*HashS{}
 	for i := 0; i < len(hashes); i += 2 {
-		var node interfaces.IHash
+		var node interfaces.*HashS
 		if i+1 == len(hashes) {
 			node = HashMerkleBranches(hashes[i], hashes[i])
 		} else {

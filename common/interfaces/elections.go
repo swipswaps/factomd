@@ -1,7 +1,7 @@
 package interfaces
 
 type IElections interface {
-	GetFedID() IHash
+	GetFedID() *HashS
 	GetElecting() int
 	GetVMIndex() int
 	GetRound() []int
@@ -32,7 +32,7 @@ type IElectionAdapter interface {
 	IsStateProcessed() bool
 	SetStateProcessed(swapped bool)
 
-	GetAudits() []IHash
+	GetAudits() []*HashS
 }
 
 type IElectionMsg interface {
@@ -53,12 +53,12 @@ type ISignableElectionMsg interface {
 
 type IElectionsFactory interface {
 	// Messages
-	NewAddLeaderInternal(Name string, dbheight uint32, serverID IHash) IMsg
-	NewAddAuditInternal(name string, dbheight uint32, serverID IHash) IMsg
-	NewRemoveLeaderInternal(name string, dbheight uint32, serverID IHash) IMsg
-	NewRemoveAuditInternal(name string, dbheight uint32, serverID IHash) IMsg
-	NewEomSigInternal(name string, dbheight uint32, minute uint32, vmIndex int, height uint32, serverID IHash) IMsg
-	NewDBSigSigInternal(name string, dbheight uint32, minute uint32, vmIndex int, height uint32, serverID IHash) IMsg
+	NewAddLeaderInternal(Name string, dbheight uint32, serverID *HashS) IMsg
+	NewAddAuditInternal(name string, dbheight uint32, serverID *HashS) IMsg
+	NewRemoveLeaderInternal(name string, dbheight uint32, serverID *HashS) IMsg
+	NewRemoveAuditInternal(name string, dbheight uint32, serverID *HashS) IMsg
+	NewEomSigInternal(name string, dbheight uint32, minute uint32, vmIndex int, height uint32, serverID *HashS) IMsg
+	NewDBSigSigInternal(name string, dbheight uint32, minute uint32, vmIndex int, height uint32, serverID *HashS) IMsg
 	NewAuthorityListInternal(feds []IServer, auds []IServer, height uint32) IMsg
 
 	//

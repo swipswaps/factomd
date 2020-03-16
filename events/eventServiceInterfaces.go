@@ -7,7 +7,7 @@ import (
 
 type StateEventServices interface {
 	GetRunState() runstate.RunState
-	GetIdentityChainID() interfaces.IHash
+	GetIdentityChainID() interfaces.*HashS
 	IsRunLeader() bool
 	GetEventService() EventService
 }

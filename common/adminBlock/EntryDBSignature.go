@@ -12,7 +12,7 @@ import (
 // DB Signature Entry -------------------------
 type DBSignatureEntry struct {
 	AdminIDType          uint32               `json:"adminidtype"`
-	IdentityAdminChainID interfaces.IHash     `json:"identityadminchainid"`
+	IdentityAdminChainID interfaces.*HashS     `json:"identityadminchainid"`
 	PrevDBSig            primitives.Signature `json:"prevdbsig"`
 }
 
@@ -33,7 +33,7 @@ func (c *DBSignatureEntry) UpdateState(state interfaces.IState) error {
 }
 
 // Create a new DB Signature Entry
-func NewDBSignatureEntry(identityAdminChainID interfaces.IHash, sig interfaces.IFullSignature) (*DBSignatureEntry, error) {
+func NewDBSignatureEntry(identityAdminChainID interfaces.*HashS, sig interfaces.IFullSignature) (*DBSignatureEntry, error) {
 	if identityAdminChainID == nil {
 		return nil, fmt.Errorf("No identityAdminChainID provided")
 	}
@@ -138,7 +138,7 @@ func (e *DBSignatureEntry) Interpret() string {
 	return ""
 }
 
-func (e *DBSignatureEntry) Hash() (rval interfaces.IHash) {
+func (e *DBSignatureEntry) Hash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "DBSignatureEntry.Hash") }()
 
 	bin, err := e.MarshalBinary()

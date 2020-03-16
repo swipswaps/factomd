@@ -8,10 +8,10 @@ type IEBEntry interface {
 	DatabaseBatchable
 	Printable
 
-	GetHash() IHash
+	GetHash() *HashS
 	ExternalIDs() [][]byte
 	GetContent() []byte
-	GetChainIDHash() IHash
+	GetChainIDHash() *HashS
 	IsSameAs(IEBEntry) bool
 }
 
@@ -21,7 +21,7 @@ type IEntry interface {
 }
 
 type IPendingEntry struct {
-	EntryHash IHash  `json:"entryhash"`
-	ChainID   IHash  `json:"chainid"`
+	EntryHash *HashS `json:"entryhash"`
+	ChainID   *HashS `json:"chainid"`
 	Status    string `json:"status"`
 }

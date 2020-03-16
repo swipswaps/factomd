@@ -16,9 +16,9 @@ import (
 
 // ECBlockHeader contains information related to this EC block as well as the previous EC block
 type ECBlockHeader struct {
-	BodyHash            interfaces.IHash `json:"bodyhash"`            // The hash of the EC block's body
-	PrevHeaderHash      interfaces.IHash `json:"prevheaderhash"`      // The hash of the previous EC block's header
-	PrevFullHash        interfaces.IHash `json:"prevfullhash"`        // The full hash of the previous EC block
+	BodyHash            interfaces.*HashS `json:"bodyhash"`            // The hash of the EC block's body
+	PrevHeaderHash      interfaces.*HashS `json:"prevheaderhash"`      // The hash of the previous EC block's header
+	PrevFullHash        interfaces.*HashS `json:"prevfullhash"`        // The full hash of the previous EC block
 	DBHeight            uint32           `json:"dbheight"`            // The directory block height this EC block is in
 	HeaderExpansionArea []byte           `json:"headerexpansionarea"` // Future expansion area for data
 	ObjectCount         uint64           `json:"objectcount"`         // The number of entries in the EC block
@@ -130,19 +130,19 @@ func (e *ECBlockHeader) GetHeaderExpansionArea() (area []byte) {
 }
 
 // SetBodyHash sets the body hash to the input value
-func (e *ECBlockHeader) SetBodyHash(hash interfaces.IHash) {
+func (e *ECBlockHeader) SetBodyHash(hash interfaces.*HashS) {
 	e.BodyHash = hash
 }
 
 // GetBodyHash returns the body hash
-func (e *ECBlockHeader) GetBodyHash() (rval interfaces.IHash) {
+func (e *ECBlockHeader) GetBodyHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "ECBlockHeader.GetBodyHash") }()
 
 	return e.BodyHash
 }
 
 // GetECChainID returns the EC chain id (see constants.EC_CHAINID)
-func (e *ECBlockHeader) GetECChainID() (rval interfaces.IHash) {
+func (e *ECBlockHeader) GetECChainID() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "ECBlockHeader.GetECChainID") }()
 
 	h := primitives.NewZeroHash()
@@ -151,24 +151,24 @@ func (e *ECBlockHeader) GetECChainID() (rval interfaces.IHash) {
 }
 
 // SetPrevHeaderHash sets the previous header hash to the input value
-func (e *ECBlockHeader) SetPrevHeaderHash(prev interfaces.IHash) {
+func (e *ECBlockHeader) SetPrevHeaderHash(prev interfaces.*HashS) {
 	e.PrevHeaderHash = prev
 }
 
 // GetPrevHeaderHash returns the previous header hash
-func (e *ECBlockHeader) GetPrevHeaderHash() (rval interfaces.IHash) {
+func (e *ECBlockHeader) GetPrevHeaderHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "ECBlockHeader.GetPrevHeaderHash") }()
 
 	return e.PrevHeaderHash
 }
 
 // SetPrevFullHash sets the previous full hash to the input
-func (e *ECBlockHeader) SetPrevFullHash(prev interfaces.IHash) {
+func (e *ECBlockHeader) SetPrevFullHash(prev interfaces.*HashS) {
 	e.PrevFullHash = prev
 }
 
 // GetPrevFullHash returns the previous full hash
-func (e *ECBlockHeader) GetPrevFullHash() (rval interfaces.IHash) {
+func (e *ECBlockHeader) GetPrevFullHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "ECBlockHeader.GetPrevFullHash") }()
 
 	return e.PrevFullHash

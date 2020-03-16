@@ -224,7 +224,7 @@ func (db *Overlay) FetchBlockByHeight(heightBucket []byte, blockBucket []byte, b
 	return db.FetchBlock(blockBucket, index, dst)
 }
 
-func (db *Overlay) FetchBlockIndexByHeight(bucket []byte, blockHeight uint32) (interfaces.IHash, error) {
+func (db *Overlay) FetchBlockIndexByHeight(bucket []byte, blockHeight uint32) (interfaces.*HashS, error) {
 	key := make([]byte, 4)
 	binary.BigEndian.PutUint32(key, blockHeight)
 
@@ -235,10 +235,10 @@ func (db *Overlay) FetchBlockIndexByHeight(bucket []byte, blockHeight uint32) (i
 	if block == nil {
 		return nil, nil
 	}
-	return block.(interfaces.IHash), nil
+	return block.(interfaces.*HashS), nil
 }
 
-func (db *Overlay) FetchPrimaryIndexBySecondaryIndex(secondaryIndexBucket []byte, key interfaces.IHash) (interfaces.IHash, error) {
+func (db *Overlay) FetchPrimaryIndexBySecondaryIndex(secondaryIndexBucket []byte, key interfaces.*HashS) (interfaces.*HashS, error) {
 	block, err := db.Get(secondaryIndexBucket, key.Bytes(), new(primitives.Hash))
 	if err != nil {
 		return nil, err
@@ -246,10 +246,10 @@ func (db *Overlay) FetchPrimaryIndexBySecondaryIndex(secondaryIndexBucket []byte
 	if block == nil {
 		return nil, nil
 	}
-	return block.(interfaces.IHash), nil
+	return block.(interfaces.*HashS), nil
 }
 
-func (db *Overlay) FetchBlockBySecondaryIndex(secondaryIndexBucket, blockBucket []byte, index interfaces.IHash, dst interfaces.DatabaseBatchable) (interfaces.DatabaseBatchable, error) {
+func (db *Overlay) FetchBlockBySecondaryIndex(secondaryIndexBucket, blockBucket []byte, index interfaces.*HashS, dst interfaces.DatabaseBatchable) (interfaces.DatabaseBatchable, error) {
 	hash, err := db.FetchPrimaryIndexBySecondaryIndex(secondaryIndexBucket, index)
 	if err != nil {
 		return nil, err
@@ -260,7 +260,7 @@ func (db *Overlay) FetchBlockBySecondaryIndex(secondaryIndexBucket, blockBucket 
 	return db.FetchBlock(blockBucket, hash, dst)
 }
 
-func (db *Overlay) FetchBlock(bucket []byte, key interfaces.IHash, dst interfaces.DatabaseBatchable) (interfaces.DatabaseBatchable, error) {
+func (db *Overlay) FetchBlock(bucket []byte, key interfaces.*HashS, dst interfaces.DatabaseBatchable) (interfaces.DatabaseBatchable, error) {
 	if key == nil {
 		return nil, nil
 	}
@@ -283,18 +283,18 @@ func (db *Overlay) FetchAllBlocksFromBucket(bucket []byte, sample interfaces.Bin
 	return answer, nil
 }
 
-func (db *Overlay) FetchAllBlockKeysFromBucket(bucket []byte) ([]interfaces.IHash, error) {
+func (db *Overlay) FetchAllBlockKeysFromBucket(bucket []byte) ([]interfaces.*HashS, error) {
 	entries, err := db.ListAllKeys(bucket)
 	if err != nil {
 		return nil, err
 	}
-	answer := make([]interfaces.IHash, len(entries))
+	answer := make([]interfaces.*HashS, len(entries))
 	for i := range entries {
 		h, err := primitives.NewShaHash(entries[i])
 		if err != nil {
 			return nil, err
 		}
-		// be careful to not assign a nil hash to an IHash
+		// be careful to not assign a nil hash to an *HashS
 		if h != nil { // should always happen
 			answer[i] = h
 		} else {
@@ -430,7 +430,7 @@ func (db *Overlay) ProcessBlockMultiBatchWithoutHead(blockBucket, numberBucket, 
 }
 
 // FetchHeadMRByChainID gets an index of the highest block from the database.
-func (db *Overlay) FetchHeadIndexByChainID(chainID interfaces.IHash) (interfaces.IHash, error) {
+func (db *Overlay) FetchHeadIndexByChainID(chainID interfaces.*HashS) (interfaces.*HashS, error) {
 	if chainID == nil {
 		return nil, nil
 	}
@@ -446,10 +446,10 @@ func (db *Overlay) FetchHeadIndexByChainID(chainID interfaces.IHash) (interfaces
 		return nil, nil
 	}
 
-	return block.(interfaces.IHash), nil
+	return block.(interfaces.*HashS), nil
 }
 
-func (db *Overlay) FetchChainHeadByChainID(bucket []byte, chainID interfaces.IHash, dst interfaces.DatabaseBatchable) (interfaces.DatabaseBatchable, error) {
+func (db *Overlay) FetchChainHeadByChainID(bucket []byte, chainID interfaces.*HashS, dst interfaces.DatabaseBatchable) (interfaces.DatabaseBatchable, error) {
 	blockHash, err := db.FetchHeadIndexByChainID(chainID)
 	if err != nil {
 		return nil, err
@@ -461,7 +461,7 @@ func (db *Overlay) FetchChainHeadByChainID(bucket []byte, chainID interfaces.IHa
 }
 
 //Use endHeight of -1 (or other negative numbers) to fetch all / as many entries as possibe
-func (db *Overlay) FetchBlockIndexesInHeightRange(numberBucket []byte, startHeight, endHeight int64) ([]interfaces.IHash, error) {
+func (db *Overlay) FetchBlockIndexesInHeightRange(numberBucket []byte, startHeight, endHeight int64) ([]interfaces.*HashS, error) {
 	var endidx int64
 	if endHeight < 0 {
 		endidx = startHeight + constants.MaxBlocksPerMsg
@@ -469,7 +469,7 @@ func (db *Overlay) FetchBlockIndexesInHeightRange(numberBucket []byte, startHeig
 		endidx = endHeight
 	}
 
-	shalist := make([]interfaces.IHash, 0, endidx-startHeight)
+	shalist := make([]interfaces.*HashS, 0, endidx-startHeight)
 	for height := startHeight; height < endidx; height++ {
 		dbhash, err := db.FetchBlockIndexByHeight(numberBucket, uint32(height))
 		if err != nil {
@@ -489,7 +489,7 @@ func (db *Overlay) DoesKeyExist(bucket, key []byte) (bool, error) {
 	return db.DB.DoesKeyExist(bucket, key)
 }
 
-func (db *Overlay) GetEntryType(hash interfaces.IHash) (interfaces.IHash, error) {
+func (db *Overlay) GetEntryType(hash interfaces.*HashS) (interfaces.*HashS, error) {
 	if hash == nil {
 		return nil, nil
 	}
@@ -651,7 +651,7 @@ func (db *Overlay) FetchBlockSetByHeightWithEntries(dbheight uint32) (*BlockSet,
 	return bs, nil
 }
 
-func (db *Overlay) SetChainHeads(primaryIndexes, chainIDs []interfaces.IHash) error {
+func (db *Overlay) SetChainHeads(primaryIndexes, chainIDs []interfaces.*HashS) error {
 	if len(primaryIndexes) != len(chainIDs) {
 		return fmt.Errorf("Mismatched array lengths - %v vs %v", len(primaryIndexes), len(chainIDs))
 	}

@@ -75,7 +75,7 @@ type ProcessList struct {
 	DirectoryBlock   interfaces.IDirectoryBlock
 
 	// Number of Servers acknowledged by Factom
-	Matryoshka   []interfaces.IHash   // Reverse Hash
+	Matryoshka   []interfaces.*HashS   // Reverse Hash
 	AuditServers []interfaces.IServer // List of Audit Servers
 	FedServers   []interfaces.IServer // List of Federated Servers
 
@@ -98,7 +98,7 @@ var _ interfaces.IProcessList = (*ProcessList)(nil)
 
 // Data needed to add to admin block
 type DBSig struct {
-	ChainID   interfaces.IHash
+	ChainID   interfaces.*HashS
 	Signature interfaces.IFullSignature
 	VMIndex   int
 }
@@ -338,7 +338,7 @@ func FedServerVM(serverMap [10][64]int, numberOfFedServers int, minute int, fedI
 	return -1
 }
 
-func (p *ProcessList) GetVirtualServers(minute int, identityChainID interfaces.IHash) (found bool, index int) {
+func (p *ProcessList) GetVirtualServers(minute int, identityChainID interfaces.*HashS) (found bool, index int) {
 	//fmt.Fprintf(os.Stderr, "GetVirtualServers(%d,%x)", minute, identityChainID.Bytes()[3:6])
 	found, fedIndex := p.GetFedServerIndexHash(identityChainID)
 	if !found {
@@ -361,7 +361,7 @@ func (p *ProcessList) GetVirtualServers(minute int, identityChainID interfaces.I
 }
 
 // Returns true and the index of this server, or false and the insertion point for this server
-func (p *ProcessList) GetFedServerIndexHash(identityChainID interfaces.IHash) (bool, int) {
+func (p *ProcessList) GetFedServerIndexHash(identityChainID interfaces.*HashS) (bool, int) {
 	if p == nil {
 		return false, 0
 	}
@@ -384,7 +384,7 @@ func (p *ProcessList) GetFedServerIndexHash(identityChainID interfaces.IHash) (b
 }
 
 // Returns true and the index of this server, or false and the insertion point for this server
-func (p *ProcessList) GetAuditServerIndexHash(identityChainID interfaces.IHash) (bool, int) {
+func (p *ProcessList) GetAuditServerIndexHash(identityChainID interfaces.*HashS) (bool, int) {
 	if p == nil {
 		return false, 0
 	}
@@ -472,7 +472,7 @@ func (p *ProcessList) SetStartingAuthoritySet() {
 
 // Add the given serverChain to this processlist as a Federated Server, and return
 // the server index number of the added server
-func (p *ProcessList) AddFedServer(identityChainID interfaces.IHash) int {
+func (p *ProcessList) AddFedServer(identityChainID interfaces.*HashS) int {
 	p.SortFedServers()
 	found, i := p.GetFedServerIndexHash(identityChainID)
 	if found {
@@ -518,7 +518,7 @@ func (p *ProcessList) AddFedServer(identityChainID interfaces.IHash) int {
 
 // Add the given serverChain to this processlist as an Audit Server, and return
 // the server index number of the added server
-func (p *ProcessList) AddAuditServer(identityChainID interfaces.IHash) int {
+func (p *ProcessList) AddAuditServer(identityChainID interfaces.*HashS) int {
 	found, i := p.GetAuditServerIndexHash(identityChainID)
 	if found {
 		//p.State.AddStatus(fmt.Sprintf("ProcessList.AddAuditServer Server already there %x at height %d", identityChainID.Bytes()[2:6], p.DBHeight))
@@ -547,7 +547,7 @@ func (p *ProcessList) AddAuditServer(identityChainID interfaces.IHash) int {
 }
 
 // Remove the given serverChain from this processlist's Federated Servers
-func (p *ProcessList) RemoveFedServerHash(identityChainID interfaces.IHash) {
+func (p *ProcessList) RemoveFedServerHash(identityChainID interfaces.*HashS) {
 	found, i := p.GetFedServerIndexHash(identityChainID)
 	if !found {
 		p.RemoveAuditServerHash(identityChainID) // SOF-201
@@ -567,7 +567,7 @@ func (p *ProcessList) RemoveFedServerHash(identityChainID interfaces.IHash) {
 }
 
 // Remove the given serverChain from this processlist's Audit Servers
-func (p *ProcessList) RemoveAuditServerHash(identityChainID interfaces.IHash) {
+func (p *ProcessList) RemoveAuditServerHash(identityChainID interfaces.*HashS) {
 	found, i := p.GetAuditServerIndexHash(identityChainID)
 	if !found {
 		return
@@ -586,8 +586,8 @@ func (p *ProcessList) RemoveAuditServerHash(identityChainID interfaces.IHash) {
 
 func (p *ProcessList) CountFederatedServersAddedAndRemoved() (added int, removed int) {
 	startingFeds := p.StartingFedServers
-	var containsServerChainID func([]interfaces.IServer, interfaces.IHash) bool
-	containsServerChainID = func(haystack []interfaces.IServer, needle interfaces.IHash) bool {
+	var containsServerChainID func([]interfaces.IServer, interfaces.*HashS) bool
+	containsServerChainID = func(haystack []interfaces.IServer, needle interfaces.*HashS) bool {
 		for _, hay := range haystack {
 			if needle.IsSameAs(hay.GetChainID()) {
 				return true
@@ -648,7 +648,7 @@ func (p *ProcessList) AddOldMsgs(m interfaces.IMsg) {
 	p.OldMsgs[m.GetHash().Fixed()] = m
 }
 
-func (p *ProcessList) GetOldAck(key interfaces.IHash) interfaces.IMsg {
+func (p *ProcessList) GetOldAck(key interfaces.*HashS) interfaces.IMsg {
 	if p == nil {
 		return nil
 	}
@@ -661,19 +661,19 @@ func (p *ProcessList) GetOldAck(key interfaces.IHash) interfaces.IMsg {
 	return a
 }
 
-func (p *ProcessList) AddNewEBlocks(key interfaces.IHash, value interfaces.IEntryBlock) {
+func (p *ProcessList) AddNewEBlocks(key interfaces.*HashS, value interfaces.IEntryBlock) {
 	p.neweblockslock.Lock()
 	defer p.neweblockslock.Unlock()
 	p.NewEBlocks[key.Fixed()] = value
 }
 
-func (p *ProcessList) GetNewEBlocks(key interfaces.IHash) interfaces.IEntryBlock {
+func (p *ProcessList) GetNewEBlocks(key interfaces.*HashS) interfaces.IEntryBlock {
 	p.neweblockslock.Lock()
 	defer p.neweblockslock.Unlock()
 	return p.NewEBlocks[key.Fixed()]
 }
 
-func (p *ProcessList) AddNewEntry(key interfaces.IHash, value interfaces.IEntry) {
+func (p *ProcessList) AddNewEntry(key interfaces.*HashS, value interfaces.IEntry) {
 	p.NewEntriesMutex.Lock()
 	defer p.NewEntriesMutex.Unlock()
 	p.NewEntries[key.Fixed()] = value
@@ -848,7 +848,7 @@ func (p *ProcessList) processVM(vm *VM) (progress bool) {
 
 		//todo: Need to re-validate the signatures of the message and ACK at this point to make sure they are current federated servers
 
-		var expectedSerialHash interfaces.IHash
+		var expectedSerialHash interfaces.*HashS
 		var err error
 
 		if vm.Height == 0 {
@@ -1171,7 +1171,7 @@ func (p *ProcessList) AddToProcessList(s *State, ack *messages.Ack, m interfaces
 	s.EventService.EmitStateChangeEvent(m, eventmessages.EntityState_ACCEPTED)
 }
 
-func (p *ProcessList) ContainsDBSig(serverID interfaces.IHash) bool {
+func (p *ProcessList) ContainsDBSig(serverID interfaces.*HashS) bool {
 	for _, dbsig := range p.DBSignatures {
 		if dbsig.ChainID.IsSameAs(serverID) {
 			return true
@@ -1180,7 +1180,7 @@ func (p *ProcessList) ContainsDBSig(serverID interfaces.IHash) bool {
 	return false
 }
 
-func (p *ProcessList) AddDBSig(serverID interfaces.IHash, sig interfaces.IFullSignature) {
+func (p *ProcessList) AddDBSig(serverID interfaces.*HashS, sig interfaces.IFullSignature) {
 	found, _ := p.GetFedServerIndexHash(serverID)
 	if !found || p.ContainsDBSig(serverID) {
 		return // Duplicate, or not a federated server
@@ -1389,7 +1389,7 @@ func NewProcessList(state interfaces.IState, previous *ProcessList, dbheight uin
 }
 
 // IsPendingChainHead returns if a chainhead is about to be updated (In PL)
-func (p *ProcessList) IsPendingChainHead(chainid interfaces.IHash) bool {
+func (p *ProcessList) IsPendingChainHead(chainid interfaces.*HashS) bool {
 	if p.PendingChainHeads.Get(chainid.Fixed()) != nil {
 		return true
 	}

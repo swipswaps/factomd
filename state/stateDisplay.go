@@ -36,7 +36,7 @@ type DisplayState struct {
 	LastDirectoryBlock  interfaces.IDirectoryBlock
 
 	// Identity Info
-	IdentityChainID interfaces.IHash
+	IdentityChainID interfaces.*HashS
 	Identities      []*Identity
 	Authorities     []*Authority
 	PublicKey       *primitives.PublicKey

@@ -175,7 +175,7 @@ func (a *AuthSet) New() {
 	a.PriorityToIdentityMap = make(map[int]Identity)
 }
 
-func (a *AuthSet) AddHash(id interfaces.IHash, status int) int {
+func (a *AuthSet) AddHash(id interfaces.*HashS, status int) int {
 	return a.Add(Identity(id.Fixed()), status)
 }
 

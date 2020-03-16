@@ -37,10 +37,10 @@ type DBState struct {
 
 	SaveStruct *SaveState
 
-	DBHash interfaces.IHash
-	ABHash interfaces.IHash
-	FBHash interfaces.IHash
-	ECHash interfaces.IHash
+	DBHash interfaces.*HashS
+	ABHash interfaces.*HashS
+	FBHash interfaces.*HashS
+	ECHash interfaces.*HashS
 
 	DirectoryBlock   interfaces.IDirectoryBlock
 	AdminBlock       interfaces.IAdminBlock
@@ -765,7 +765,7 @@ func containsServer(haystack []interfaces.IServer, needle interfaces.IServer) bo
 }
 
 // does a set of servers contain a server with a given chain id
-func containsServerWithChainID(haystack []interfaces.IServer, needle interfaces.IHash) bool {
+func containsServerWithChainID(haystack []interfaces.IServer, needle interfaces.*HashS) bool {
 	for _, hay := range haystack {
 		if needle.IsSameAs(hay.GetChainID()) {
 			return true

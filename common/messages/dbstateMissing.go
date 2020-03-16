@@ -49,19 +49,19 @@ func (a *DBStateMissing) IsSameAs(b *DBStateMissing) bool {
 	return true
 }
 
-func (m *DBStateMissing) GetRepeatHash() (rval interfaces.IHash) {
+func (m *DBStateMissing) GetRepeatHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "DBStateMissing.GetRepeatHash") }()
 
 	return m.GetMsgHash()
 }
 
-func (m *DBStateMissing) GetHash() (rval interfaces.IHash) {
+func (m *DBStateMissing) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "DBStateMissing.GetHash") }()
 
 	return m.GetMsgHash()
 }
 
-func (m *DBStateMissing) GetMsgHash() (rval interfaces.IHash) {
+func (m *DBStateMissing) GetMsgHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "DBStateMissing.GetMsgHash") }()
 
 	if m.MsgHash == nil {

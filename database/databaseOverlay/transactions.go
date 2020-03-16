@@ -6,7 +6,7 @@ import (
 	"github.com/FactomProject/factomd/common/interfaces"
 )
 
-func (db *Overlay) FetchFactoidTransaction(hash interfaces.IHash) (interfaces.ITransaction, error) {
+func (db *Overlay) FetchFactoidTransaction(hash interfaces.*HashS) (interfaces.ITransaction, error) {
 	in, err := db.FetchIncludedIn(hash)
 	if err != nil {
 		return nil, err
@@ -33,7 +33,7 @@ func (db *Overlay) FetchFactoidTransaction(hash interfaces.IHash) (interfaces.IT
 	return nil, fmt.Errorf("Transaction not found in block, should not happen")
 }
 
-func (db *Overlay) FetchECTransaction(hash interfaces.IHash) (interfaces.IECBlockEntry, error) {
+func (db *Overlay) FetchECTransaction(hash interfaces.*HashS) (interfaces.IECBlockEntry, error) {
 	in, err := db.FetchIncludedIn(hash)
 	if err != nil {
 		return nil, err

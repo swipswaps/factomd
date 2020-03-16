@@ -770,7 +770,7 @@ func HandleV2Anchors(state interfaces.IState, params interface{}) (interface{}, 
 		return nil, NewInvalidParamsError()
 	}
 
-	var hash interfaces.IHash
+	var hash interfaces.*HashS
 	var directoryBlockHeight uint32
 	dbo := state.GetDB()
 	if request.Height != nil {
@@ -875,7 +875,7 @@ func HandleV2Anchors(state interfaces.IState, params interface{}) (interface{}, 
 			eth.BlockHash = anchorRecord.Ethereum.BlockHash
 			eth.TxIndex = anchorRecord.Ethereum.TxIndex
 
-			var allWindowKeyMRs []interfaces.IHash
+			var allWindowKeyMRs []interfaces.*HashS
 			for i := eth.DBHeightMin; i <= eth.DBHeightMax; i++ {
 				keyMR, err := dbo.FetchDBKeyMRByHeight(uint32(i))
 				if err != nil {

@@ -101,7 +101,7 @@ func (e *IncreaseServerCount) Interpret() string {
 	return ""
 }
 
-func (e *IncreaseServerCount) Hash() (rval interfaces.IHash) {
+func (e *IncreaseServerCount) Hash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "IncreaseServerCount.Hash") }()
 
 	bin, err := e.MarshalBinary()

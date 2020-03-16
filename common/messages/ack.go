@@ -28,20 +28,20 @@ type Ack struct {
 	Timestamp   interfaces.Timestamp // Timestamp of Ack by Leader
 	Salt        [8]byte              // Eight bytes of the salt
 	SaltNumber  uint32               // Secret Number used to detect multiple servers with the same ID
-	MessageHash interfaces.IHash     // Hash of message acknowledged
+	MessageHash interfaces.*HashS     // Hash of message acknowledged
 	DBHeight    uint32               // Directory Block Height that owns this ack
 	Height      uint32               // Height of this ack in this process list
-	SerialHash  interfaces.IHash     // Serial hash including previous ack
+	SerialHash  interfaces.*HashS     // Serial hash including previous ack
 
 	DataAreaSize uint64 // Size of the Data Area
 	DataArea     []byte // Data Area
 
 	Signature interfaces.IFullSignature
 	//Not marshalled
-	hash         interfaces.IHash
+	hash         interfaces.*HashS
 	authvalid    bool
 	Response     bool // A response to a missing data request
-	BalanceHash  interfaces.IHash
+	BalanceHash  interfaces.*HashS
 	marshalCache []byte
 }
 
@@ -49,20 +49,20 @@ var _ interfaces.IMsg = (*Ack)(nil)
 var _ interfaces.Signable = (*Ack)(nil)
 var AckBalanceHash = true
 
-func (m *Ack) GetRepeatHash() (rval interfaces.IHash) {
+func (m *Ack) GetRepeatHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "Ack.GetRepeatHash") }()
 
 	return m.GetMsgHash()
 }
 
 // We have to return the hash of the underlying message.
-func (m *Ack) GetHash() (rval interfaces.IHash) {
+func (m *Ack) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "Ack.GetHash") }()
 
 	return m.MessageHash
 }
 
-func (m *Ack) GetMsgHash() (rval interfaces.IHash) {
+func (m *Ack) GetMsgHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "Ack.GetMsgHash") }()
 
 	if m.MsgHash == nil {

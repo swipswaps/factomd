@@ -50,7 +50,7 @@ func (m *TimeoutInternal) MarshalBinary() (data []byte, err error) {
 	return data, nil
 }
 
-func (m *TimeoutInternal) GetMsgHash() (rval interfaces.IHash) {
+func (m *TimeoutInternal) GetMsgHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "TimeoutInternal.GetMsgHash") }()
 
 	if m.MsgHash == nil {
@@ -240,7 +240,7 @@ func (m *TimeoutInternal) ElectionProcess(is interfaces.IState, elect interfaces
 
 }
 
-func (m *TimeoutInternal) GetServerID() (rval interfaces.IHash) {
+func (m *TimeoutInternal) GetServerID() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "TimeoutInternal.GetServerID") }()
 
 	return nil
@@ -250,14 +250,14 @@ func (m *TimeoutInternal) LogFields() log.Fields {
 	return log.Fields{"category": "message", "messagetype": "TimeoutInternal", "dbheight": m.DBHeight}
 }
 
-func (m *TimeoutInternal) GetRepeatHash() (rval interfaces.IHash) {
+func (m *TimeoutInternal) GetRepeatHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "TimeoutInternal.GetRepeatHash") }()
 
 	return m.GetMsgHash()
 }
 
 // We have to return the hash of the underlying message.
-func (m *TimeoutInternal) GetHash() (rval interfaces.IHash) {
+func (m *TimeoutInternal) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "TimeoutInternal.GetHash") }()
 
 	return m.GetMsgHash()

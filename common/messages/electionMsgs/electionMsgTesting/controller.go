@@ -205,10 +205,10 @@ func (c *Controller) routeSingleNode(msg interfaces.IMsg, node int) {
 }
 
 // indexToAudID will take the human legible "Audit 1" and get the correct identity.
-func (c *Controller) indexToAudID(index int) (rval interfaces.IHash) {
+func (c *Controller) indexToAudID(index int) (rval interfaces.*HashS) {
 	defer func() {
 		if rval == nil {
-			primitives.LogNilHashBug("Controller.indexToAudID() returned a nil for IHash")
+			primitives.LogNilHashBug("Controller.indexToAudID() returned a nil for *HashS")
 		} else if reflect.ValueOf(rval).IsNil() {
 			primitives.LogNilHashBug("Controller.indexToAudID() returned an interface  nil")
 			rval = nil // convert an interface that is nil to a nil interface
@@ -220,7 +220,7 @@ func (c *Controller) indexToAudID(index int) (rval interfaces.IHash) {
 
 }
 
-func (c *Controller) fedIDtoIndex(id interfaces.IHash) int {
+func (c *Controller) fedIDtoIndex(id interfaces.*HashS) int {
 	for i, f := range c.feds {
 		if f.GetChainID().IsSameAs(id) {
 			return i
@@ -230,10 +230,10 @@ func (c *Controller) fedIDtoIndex(id interfaces.IHash) int {
 }
 
 // indexToFedID will take the human legible "Leader 1" and get the correct identity
-func (c *Controller) indexToFedID(index int) (rval interfaces.IHash) {
+func (c *Controller) indexToFedID(index int) (rval interfaces.*HashS) {
 	defer func() {
 		if rval == nil {
-			primitives.LogNilHashBug("Controller.indexToFedID() returned a nil for IHash")
+			primitives.LogNilHashBug("Controller.indexToFedID() returned a nil for *HashS")
 		} else if reflect.ValueOf(rval).IsNil() {
 			primitives.LogNilHashBug("Controller.indexToFedID() returned an interface  nil")
 			rval = nil // convert an interface that is nil to a nil interface

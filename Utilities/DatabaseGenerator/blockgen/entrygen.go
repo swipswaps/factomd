@@ -188,7 +188,7 @@ type IEntryGenerator interface {
 	AllEntries(height uint32, time interfaces.Timestamp) ([]*entryBlock.EBlock, []*entryBlock.Entry, []*entryCreditBlock.CommitEntry, int)
 	NewEblock(height uint32, time interfaces.Timestamp) (*entryBlock.EBlock, []*entryBlock.Entry, []*entryCreditBlock.CommitEntry, int)
 	NewChainHead() *entryBlock.Entry
-	NewEntry(chain interfaces.IHash) *entryBlock.Entry
+	NewEntry(chain interfaces.*HashS) *entryBlock.Entry
 
 	GetECKey() primitives.PrivateKey
 	Name() string

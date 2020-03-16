@@ -20,11 +20,11 @@ type IdentityChainStructure struct {
 	//The second element is ASCII bytes "Identity Chain".
 	FunctionName []byte //"Identity Chain"
 	//The third element is the level 1 identity key in binary form.
-	Key1 interfaces.IHash
+	Key1 interfaces.*HashS
 	//Elements 4-6 are levels 2-4.
-	Key2 interfaces.IHash
-	Key3 interfaces.IHash
-	Key4 interfaces.IHash
+	Key2 interfaces.*HashS
+	Key3 interfaces.*HashS
+	Key4 interfaces.*HashS
 	//The 7th element is a nonce which is iterated until the first 3 bytes match 0x888888.
 	Nonce []byte
 }
@@ -96,7 +96,7 @@ func (ics *IdentityChainStructure) ToExternalIDs() [][]byte {
 	return extIDs
 }
 
-func (ics *IdentityChainStructure) GetChainID() (rval interfaces.IHash) {
+func (ics *IdentityChainStructure) GetChainID() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "IdentityChainStructure.GetChainID") }()
 
 	extIDs := ics.ToExternalIDs()

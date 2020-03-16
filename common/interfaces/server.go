@@ -10,11 +10,11 @@ type IServer interface {
 	BinaryMarshallable
 	Printable
 
-	GetChainID() IHash
+	GetChainID() *HashS
 	GetName() string
 	IsOnline() bool
 	SetOnline(bool)
-	LeaderToReplace() IHash
-	SetReplace(IHash)
+	LeaderToReplace() *HashS
+	SetReplace(*HashS)
 	IsSameAs(b IServer) bool
 }

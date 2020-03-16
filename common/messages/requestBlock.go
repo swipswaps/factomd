@@ -24,7 +24,7 @@ type RequestBlock struct {
 	//TODO: figure whether this should be signed or not?
 
 	//Not marshalled
-	hash interfaces.IHash
+	hash interfaces.*HashS
 }
 
 var _ interfaces.IMsg = (*RequestBlock)(nil)
@@ -44,13 +44,13 @@ func (a *RequestBlock) IsSameAs(b *RequestBlock) bool {
 
 func (m *RequestBlock) Process(uint32, interfaces.IState) bool { return true }
 
-func (m *RequestBlock) GetRepeatHash() (rval interfaces.IHash) {
+func (m *RequestBlock) GetRepeatHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "RequestBlock.GetRepeatHash") }()
 
 	return m.GetMsgHash()
 }
 
-func (m *RequestBlock) GetHash() (rval interfaces.IHash) {
+func (m *RequestBlock) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "RequestBlock.GetHash") }()
 
 	if m.hash == nil {
@@ -63,7 +63,7 @@ func (m *RequestBlock) GetHash() (rval interfaces.IHash) {
 	return m.hash
 }
 
-func (m *RequestBlock) GetMsgHash() (rval interfaces.IHash) {
+func (m *RequestBlock) GetMsgHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "RequestBlock.GetMsgHash") }()
 
 	if m.MsgHash == nil {

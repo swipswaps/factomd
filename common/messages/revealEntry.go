@@ -28,7 +28,7 @@ type RevealEntryMsg struct {
 	//No signature!
 
 	//Not marshalled
-	chainIDHash  interfaces.IHash
+	chainIDHash  interfaces.*HashS
 	IsEntry      bool
 	CommitChain  *CommitChainMsg
 	commitEntry  *CommitEntryMsg
@@ -52,25 +52,25 @@ func (m *RevealEntryMsg) Process(dbheight uint32, state interfaces.IState) bool 
 	return state.ProcessRevealEntry(dbheight, m)
 }
 
-func (m *RevealEntryMsg) GetRepeatHash() (rval interfaces.IHash) {
+func (m *RevealEntryMsg) GetRepeatHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "RevealEntryMsg.GetRepeatHash") }()
 
 	return m.Entry.GetHash()
 }
 
-func (m *RevealEntryMsg) GetHash() (rval interfaces.IHash) {
+func (m *RevealEntryMsg) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "RevealEntryMsg.GetHash") }()
 
 	return m.Entry.GetHash()
 }
 
-func (m *RevealEntryMsg) GetMsgHash() (rval interfaces.IHash) {
+func (m *RevealEntryMsg) GetMsgHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "RevealEntryMsg.GetMsgHash") }()
 
 	return m.Entry.GetHash()
 }
 
-func (m *RevealEntryMsg) GetChainIDHash() (rval interfaces.IHash) {
+func (m *RevealEntryMsg) GetChainIDHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "RevealEntryMsg.GetChainIDHash") }()
 
 	if m.chainIDHash == nil {

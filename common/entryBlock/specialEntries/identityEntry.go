@@ -193,7 +193,7 @@ func CheckExternalIDsLength(extIDs [][]byte, reqLengths []int) bool {
 		}
 
 
-func RegisterFactomIdentity(entry interfaces.IEBEntry, chainID interfaces.IHash, height uint32, st *State) error {
+func RegisterFactomIdentity(entry interfaces.IEBEntry, chainID interfaces.*HashS, height uint32, st *State) error {
 	extIDs := entry.ExternalIDs()
 	if len(extIDs) == 0 {
 		return errors.New("Identity Error Register Identity: Invalid external ID length")

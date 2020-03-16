@@ -25,7 +25,7 @@ const (
 type CommitEntry struct {
 	Version   uint8                   `json:"version"`   // Version, must be 0
 	MilliTime *primitives.ByteSlice6  `json:"millitime"` // Millisecond time stamp for this entry's creation (0~=1970)
-	EntryHash interfaces.IHash        `json:"entryhash"` // SHA512+256 descriptor of the Entry to be paid for
+	EntryHash interfaces.*HashS        `json:"entryhash"` // SHA512+256 descriptor of the Entry to be paid for
 	Credits   uint8                   `json:"credits"`   // number of entry credits to deduct for this entry, must be 0 < Credits <= 10
 	ECPubKey  *primitives.ByteSlice32 `json:"ecpubkey"`  // EC public key that will have balanced reduced
 	Sig       *primitives.ByteSlice64 `json:"sig"`       // signature of the entry commit by the public key
@@ -116,7 +116,7 @@ func (e *CommitEntry) String() string {
 }
 
 // GetEntryHash returns the entry's hash
-func (e *CommitEntry) GetEntryHash() (rval interfaces.IHash) {
+func (e *CommitEntry) GetEntryHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "CommitEntry.GetEntryHash") }()
 
 	return e.EntryHash
@@ -132,7 +132,7 @@ func NewCommitEntry() *CommitEntry {
 }
 
 // Hash marshals the object and computes the sha
-func (e *CommitEntry) Hash() (rval interfaces.IHash) {
+func (e *CommitEntry) Hash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "CommitEntry.Hash") }()
 
 	bin, err := e.MarshalBinary()
@@ -185,7 +185,7 @@ func (e *CommitEntry) IsValid() bool {
 }
 
 // GetHash marshals the object and computes the sha of the data
-func (e *CommitEntry) GetHash() (rval interfaces.IHash) {
+func (e *CommitEntry) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "CommitEntry.GetHash") }()
 
 	h, _ := e.MarshalBinary()
@@ -193,7 +193,7 @@ func (e *CommitEntry) GetHash() (rval interfaces.IHash) {
 }
 
 // GetSigHash computes the hash of the partially marshalled object: (version through entry credits hashed)
-func (e *CommitEntry) GetSigHash() (rval interfaces.IHash) {
+func (e *CommitEntry) GetSigHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "CommitEntry.GetSigHash") }()
 
 	data := e.CommitMsg()

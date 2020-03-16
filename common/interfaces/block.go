@@ -7,19 +7,19 @@ package interfaces
 type IFBlock interface {
 	BinaryMarshallable
 	Printable
-	GetHash() IHash // Returns the hash of the object
+	GetHash() *HashS // Returns the hash of the object
 
 	//DatabaseBlockWithEntries
 	GetDatabaseHeight() uint32
-	DatabasePrimaryIndex() IHash   //block.KeyMR()
-	DatabaseSecondaryIndex() IHash //block.GetHash()
+	DatabasePrimaryIndex() *HashS   //block.KeyMR()
+	DatabaseSecondaryIndex() *HashS //block.GetHash()
 	New() BinaryMarshallableAndCopyable
-	GetEntryHashes() []IHash
-	GetEntrySigHashes() []IHash
-	GetTransactionByHash(hash IHash) ITransaction
+	GetEntryHashes() []*HashS
+	GetEntrySigHashes() []*HashS
+	GetTransactionByHash(hash *HashS) ITransaction
 
 	// Get the ChainID. This is a constant for all Factoids.
-	GetChainID() IHash
+	GetChainID() *HashS
 	// Validation functions
 	Validate() error
 	ValidateTransaction(int, ITransaction) error
@@ -38,15 +38,15 @@ type IFBlock interface {
 	CalculateHashes()
 	// Hash accessors
 	// Get Key MR() hashes the header with the GetBodyMR() of the transactions
-	GetKeyMR() IHash
+	GetKeyMR() *HashS
 	// Get the MR for the list of transactions
-	GetBodyMR() IHash
+	GetBodyMR() *HashS
 	// Get the KeyMR of the previous block.
-	GetPrevKeyMR() IHash
-	SetPrevKeyMR(IHash)
-	GetLedgerKeyMR() IHash
-	GetPrevLedgerKeyMR() IHash
-	SetPrevLedgerKeyMR(IHash)
+	GetPrevKeyMR() *HashS
+	SetPrevKeyMR(*HashS)
+	GetLedgerKeyMR() *HashS
+	GetPrevLedgerKeyMR() *HashS
+	SetPrevLedgerKeyMR(*HashS)
 	// Accessors for the Directory Block Height
 	SetDBHeight(uint32)
 	GetDBHeight() uint32

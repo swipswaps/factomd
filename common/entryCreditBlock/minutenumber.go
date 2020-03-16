@@ -52,7 +52,7 @@ func (e *MinuteNumber) IsSameAs(b interfaces.IECBlockEntry) bool {
 }
 
 // Hash marshals this object and computes its sha
-func (e *MinuteNumber) Hash() (rval interfaces.IHash) {
+func (e *MinuteNumber) Hash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "MinuteNumber.Hash") }()
 
 	bin, err := e.MarshalBinary()
@@ -63,21 +63,21 @@ func (e *MinuteNumber) Hash() (rval interfaces.IHash) {
 }
 
 // GetHash marshals this object and computes its hash
-func (e *MinuteNumber) GetHash() (rval interfaces.IHash) {
+func (e *MinuteNumber) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "MinuteNumber.GetHash") }()
 
 	return e.Hash()
 }
 
 // GetSigHash always returns nil
-func (e *MinuteNumber) GetSigHash() (rval interfaces.IHash) {
+func (e *MinuteNumber) GetSigHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "MinuteNumber.GetSigHash") }()
 
 	return nil
 }
 
 // GetEntryHash always returns nil
-func (e *MinuteNumber) GetEntryHash() (rval interfaces.IHash) {
+func (e *MinuteNumber) GetEntryHash() (rval interfaces.*HashS) {
 	return nil
 }
 

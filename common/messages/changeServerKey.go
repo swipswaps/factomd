@@ -23,11 +23,11 @@ import (
 type ChangeServerKeyMsg struct {
 	msgbase.MessageBase
 	Timestamp        interfaces.Timestamp // Message Timestamp
-	IdentityChainID  interfaces.IHash     // ChainID of new server
+	IdentityChainID  interfaces.*HashS     // ChainID of new server
 	AdminBlockChange byte
 	KeyType          byte
 	KeyPriority      byte
-	Key              interfaces.IHash
+	Key              interfaces.*HashS
 
 	Signature interfaces.IFullSignature
 }
@@ -35,19 +35,19 @@ type ChangeServerKeyMsg struct {
 var _ interfaces.IMsg = (*ChangeServerKeyMsg)(nil)
 var _ interfaces.Signable = (*ChangeServerKeyMsg)(nil)
 
-func (m *ChangeServerKeyMsg) GetRepeatHash() (rval interfaces.IHash) {
+func (m *ChangeServerKeyMsg) GetRepeatHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "ChangeServerKeyMsg.GetRepeatHash") }()
 
 	return m.GetMsgHash()
 }
 
-func (m *ChangeServerKeyMsg) GetHash() (rval interfaces.IHash) {
+func (m *ChangeServerKeyMsg) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "ChangeServerKeyMsg.GetHash") }()
 
 	return m.GetMsgHash()
 }
 
-func (m *ChangeServerKeyMsg) GetMsgHash() (rval interfaces.IHash) {
+func (m *ChangeServerKeyMsg) GetMsgHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "ChangeServerKeyMsg.GetMsgHash") }()
 
 	if m.MsgHash == nil {
@@ -325,7 +325,7 @@ func (m *ChangeServerKeyMsg) IsSameAs(b *ChangeServerKeyMsg) bool {
 	return true
 }
 
-func NewChangeServerKeyMsg(state interfaces.IState, identityChain interfaces.IHash, adminChange byte, keyPriority byte, keyType byte, key interfaces.IHash) interfaces.IMsg {
+func NewChangeServerKeyMsg(state interfaces.IState, identityChain interfaces.*HashS, adminChange byte, keyPriority byte, keyType byte, key interfaces.*HashS) interfaces.IMsg {
 	msg := new(ChangeServerKeyMsg)
 	msg.IdentityChainID = identityChain
 	msg.AdminBlockChange = adminChange

@@ -25,13 +25,13 @@ type FaultId struct {
 }
 
 type Elections struct {
-	FedID     interfaces.IHash
+	FedID     interfaces.*HashS
 	Name      string
 	Sync      []bool // List of servers that have Synced
 	Federated []interfaces.IServer
 	Audit     []interfaces.IServer
-	FPriority []interfaces.IHash
-	APriority []interfaces.IHash
+	FPriority []interfaces.*HashS
+	APriority []interfaces.*HashS
 	DBHeight  int               // Height of this election
 	SigType   bool              // False for dbsig, true for EOM
 	Minute    int               // Minute of this election (-1 for a DBSig)
@@ -46,7 +46,7 @@ type Elections struct {
 	Msg       interfaces.IMsg // The missing message as supplied by the volunteer
 	Ack       interfaces.IMsg // The missing ack for the message as supplied by the volunteer
 
-	Sigs [][]interfaces.IHash // Signatures from the Federated Servers for a given round.
+	Sigs [][]interfaces.*HashS // Signatures from the Federated Servers for a given round.
 
 	Adapter interfaces.IElectionAdapter
 
@@ -61,7 +61,7 @@ type Elections struct {
 	Waiting chan interfaces.IElectionMsg
 }
 
-func (e *Elections) GetFedID() interfaces.IHash {
+func (e *Elections) GetFedID() interfaces.*HashS {
 	return e.FedID
 }
 
@@ -178,7 +178,7 @@ func (e *Elections) GetAdapter() interfaces.IElectionAdapter {
 }
 
 // Add the given sig list to the list of signatures for the given round.
-func (e *Elections) AddSigs(round int, sigs []interfaces.IHash) {
+func (e *Elections) AddSigs(round int, sigs []interfaces.*HashS) {
 	for len(e.Sigs) <= round {
 		e.Sigs = append(e.Sigs)
 	}
@@ -255,7 +255,7 @@ func (e *Elections) Print() {
 }
 
 // Returns the index of the given server. -1 if it isn't a Federated Server
-func (e *Elections) LeaderIndex(server interfaces.IHash) int {
+func (e *Elections) LeaderIndex(server interfaces.*HashS) int {
 	for i, b := range e.Federated {
 		if server.IsSameAs(b.GetChainID()) {
 			return i
@@ -265,7 +265,7 @@ func (e *Elections) LeaderIndex(server interfaces.IHash) int {
 }
 
 // Returns the index of the given server. -1 if it isn't a Audit Server
-func (e *Elections) AuditIndex(server interfaces.IHash) int {
+func (e *Elections) AuditIndex(server interfaces.*HashS) int {
 	for i, b := range e.Audit {
 		if server.IsSameAs(b.GetChainID()) {
 			return i
@@ -275,7 +275,7 @@ func (e *Elections) AuditIndex(server interfaces.IHash) int {
 	return -1
 }
 
-func (e *Elections) AuditAdapterIndex(server interfaces.IHash) int {
+func (e *Elections) AuditAdapterIndex(server interfaces.*HashS) int {
 	if e.Adapter == nil {
 		return -1
 	}
@@ -427,15 +427,15 @@ func CheckAuthSetsMatch(caller string, e *Elections, s *state.State) {
 	//}
 }
 
-func (e *Elections) IsSafeToReplaceFed(chainID interfaces.IHash) bool {
+func (e *Elections) IsSafeToReplaceFed(chainID interfaces.*HashS) bool {
 	s := e.State.(*state.State)
 	pl := s.ProcessLists.Get(uint32(e.DBHeight))
 	startingFeds := pl.StartingFedServers
 	currentFeds := pl.FedServers
 	currentAuds := pl.AuditServers
 
-	var containsServer func([]interfaces.IServer, interfaces.IHash) bool
-	containsServer = func(haystack []interfaces.IServer, needle interfaces.IHash) bool {
+	var containsServer func([]interfaces.IServer, interfaces.*HashS) bool
+	containsServer = func(haystack []interfaces.IServer, needle interfaces.*HashS) bool {
 		for _, hay := range haystack {
 			if needle.IsSameAs(hay.GetChainID()) {
 				return true

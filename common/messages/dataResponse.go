@@ -26,7 +26,7 @@ type DataResponse struct {
 	Timestamp interfaces.Timestamp
 
 	DataType   int // 0 = Entry, 1 = EntryBlock
-	DataHash   interfaces.IHash
+	DataHash   interfaces.*HashS
 	DataObject interfaces.BinaryMarshallable //Entry or EntryBlock
 
 	//Not signed!
@@ -73,19 +73,19 @@ func (a *DataResponse) IsSameAs(b *DataResponse) bool {
 	return true
 }
 
-func (m *DataResponse) GetRepeatHash() (rval interfaces.IHash) {
+func (m *DataResponse) GetRepeatHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "DataResponse.GetRepeatHash") }()
 
 	return m.GetMsgHash()
 }
 
-func (m *DataResponse) GetHash() (rval interfaces.IHash) {
+func (m *DataResponse) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "DataResponse.GetHash") }()
 
 	return m.GetMsgHash()
 }
 
-func (m *DataResponse) GetMsgHash() (rval interfaces.IHash) {
+func (m *DataResponse) GetMsgHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "DataResponse.GetMsgHash") }()
 
 	if m.MsgHash == nil {
@@ -111,7 +111,7 @@ func (m *DataResponse) GetTimestamp() interfaces.Timestamp {
 //  0   -- Cannot tell if message is Valid
 //  1   -- Message is valid
 func (m *DataResponse) Validate(state interfaces.IState) int {
-	var dataHash interfaces.IHash
+	var dataHash interfaces.*HashS
 	var err error
 	switch m.DataType {
 	case 0: // DataType = entry
@@ -296,7 +296,7 @@ func (m *DataResponse) LogFields() log.Fields {
 
 func NewDataResponse(state interfaces.IState, dataObject interfaces.BinaryMarshallable,
 	dataType int,
-	dataHash interfaces.IHash) interfaces.IMsg {
+	dataHash interfaces.*HashS) interfaces.IMsg {
 	msg := new(DataResponse)
 
 	msg.Peer2Peer = true

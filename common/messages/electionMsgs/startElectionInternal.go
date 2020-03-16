@@ -24,7 +24,7 @@ type StartElectionInternal struct {
 
 	VMHeight       int
 	DBHeight       uint32
-	PreviousDBHash interfaces.IHash
+	PreviousDBHash interfaces.*HashS
 	SigType        bool
 	IsLeader       bool
 }
@@ -104,7 +104,7 @@ func (m *StartElectionInternal) MarshalBinary() (data []byte, err error) {
 	return nil, fmt.Errorf("Not implmented for StartElectionInternal")
 }
 
-func (m *StartElectionInternal) GetMsgHash() (rval interfaces.IHash) {
+func (m *StartElectionInternal) GetMsgHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "StartElectionInternal.GetMsgHash") }()
 
 	// Internal messages don't have marshal code. Give them some hash to be happy
@@ -118,14 +118,14 @@ func (m *StartElectionInternal) LogFields() log.Fields {
 	return log.Fields{"category": "message", "messagetype": "StartElectionInternal", "dbheight": m.DBHeight}
 }
 
-func (m *StartElectionInternal) GetRepeatHash() (rval interfaces.IHash) {
+func (m *StartElectionInternal) GetRepeatHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "StartElectionInternal.GetRepeatHash") }()
 
 	return m.GetMsgHash()
 }
 
 // We have to return the hash of the underlying message.
-func (m *StartElectionInternal) GetHash() (rval interfaces.IHash) {
+func (m *StartElectionInternal) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "StartElectionInternal.GetHash") }()
 
 	return m.GetMsgHash()

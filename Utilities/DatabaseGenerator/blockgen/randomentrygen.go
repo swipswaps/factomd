@@ -36,6 +36,6 @@ func (r *RandomEntryGenerator) NewEblock(height uint32, time interfaces.Timestam
 func (r *RandomEntryGenerator) NewChainHead() *entryBlock.Entry {
 	return r.EntryGenCore.NewChainHead()
 }
-func (r *RandomEntryGenerator) NewEntry(chain interfaces.IHash) *entryBlock.Entry {
+func (r *RandomEntryGenerator) NewEntry(chain interfaces.*HashS) *entryBlock.Entry {
 	return r.EntryGenCore.NewEntry(chain)
 }

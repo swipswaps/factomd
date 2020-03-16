@@ -77,7 +77,7 @@ func TestMapEntryBlocks(t *testing.T) {
 }
 
 func TestMapEntryBlockHashes(t *testing.T) {
-	entries := []interfaces.IHash{primitives.NewZeroHash()}
+	entries := []interfaces.*HashS{primitives.NewZeroHash()}
 	entryBlockHashes := mapEntryBlockHashes(entries)
 
 	assert.NotNil(t, entryBlockHashes)

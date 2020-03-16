@@ -157,7 +157,7 @@ func TestAddDBSig(t *testing.T) {
 }
 
 func TestAddFedServer(t *testing.T) {
-	testVector := []interfaces.IHash{}
+	testVector := []interfaces.*HashS{}
 	for i := 0; i < 1000; i++ {
 		testVector = append(testVector, primitives.RandomHash())
 	}
@@ -181,7 +181,7 @@ func TestAddFedServer(t *testing.T) {
 }
 
 func TestAddAuditServer(t *testing.T) {
-	testVector := []interfaces.IHash{}
+	testVector := []interfaces.*HashS{}
 	for i := 0; i < 1000; i++ {
 		testVector = append(testVector, primitives.RandomHash())
 	}
@@ -205,7 +205,7 @@ func TestAddAuditServer(t *testing.T) {
 }
 
 func TestRemoveFederatedServer(t *testing.T) {
-	testVector := []interfaces.IHash{}
+	testVector := []interfaces.*HashS{}
 	for i := 0; i < 1000; i++ {
 		testVector = append(testVector, primitives.RandomHash())
 	}

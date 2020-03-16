@@ -20,7 +20,7 @@ type ServerManagementStructure struct {
 	//The second is the ASCII string "Server Management".
 	FunctionName []byte //"Server Management"
 	//The 3rd consists of the root identity chainID.
-	RootIdentityChainID interfaces.IHash
+	RootIdentityChainID interfaces.*HashS
 	////The 4th is a nonce which makes the first 6 bytes of the chainID match 0x888888.
 	Nonce []byte
 }
@@ -74,7 +74,7 @@ func (sm *ServerManagementStructure) ToExternalIDs() [][]byte {
 	return extIDs
 }
 
-func (sm *ServerManagementStructure) GetChainID() (rval interfaces.IHash) {
+func (sm *ServerManagementStructure) GetChainID() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "ServerManagementStructure.GetChainID") }()
 
 	extIDs := sm.ToExternalIDs()

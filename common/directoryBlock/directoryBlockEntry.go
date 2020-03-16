@@ -15,8 +15,8 @@ import (
 var _ = fmt.Print
 
 type DBEntry struct {
-	ChainID interfaces.IHash `json:"chainid"`
-	KeyMR   interfaces.IHash `json:"keymr"` // Different MR in EBlockHeader
+	ChainID interfaces.*HashS `json:"chainid"`
+	KeyMR   interfaces.*HashS `json:"keymr"` // Different MR in EBlockHeader
 }
 
 var _ interfaces.Printable = (*DBEntry)(nil)
@@ -49,23 +49,23 @@ func (a *DBEntry) IsSameAs(b interfaces.IDBEntry) bool {
 	return true
 }
 
-func (c *DBEntry) GetChainID() (rval interfaces.IHash) {
+func (c *DBEntry) GetChainID() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "DBEntry.GetChainID") }()
 
 	return c.ChainID
 }
 
-func (c *DBEntry) SetChainID(chainID interfaces.IHash) {
+func (c *DBEntry) SetChainID(chainID interfaces.*HashS) {
 	c.ChainID = chainID
 }
 
-func (c *DBEntry) GetKeyMR() (rval interfaces.IHash) {
+func (c *DBEntry) GetKeyMR() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "DBEntry.GetKeyMR") }()
 
 	return c.KeyMR
 }
 
-func (c *DBEntry) SetKeyMR(keyMR interfaces.IHash) {
+func (c *DBEntry) SetKeyMR(keyMR interfaces.*HashS) {
 	c.KeyMR = keyMR
 }
 
@@ -113,7 +113,7 @@ func (e *DBEntry) UnmarshalBinary(data []byte) (err error) {
 	return
 }
 
-func (e *DBEntry) ShaHash() (rval interfaces.IHash) {
+func (e *DBEntry) ShaHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "DBEntry.ShaHash") }()
 
 	byteArray, _ := e.MarshalBinary()

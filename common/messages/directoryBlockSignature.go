@@ -27,7 +27,7 @@ type DirectoryBlockSignature struct {
 	Timestamp             interfaces.Timestamp
 	DBHeight              uint32
 	DirectoryBlockHeader  interfaces.IDirectoryBlockHeader
-	ServerIdentityChainID interfaces.IHash
+	ServerIdentityChainID interfaces.*HashS
 
 	Signature interfaces.IFullSignature
 
@@ -35,13 +35,13 @@ type DirectoryBlockSignature struct {
 	// Signature of directory block header
 	DBSignature interfaces.IFullSignature
 	SysHeight   uint32
-	SysHash     interfaces.IHash
+	SysHash     interfaces.*HashS
 
 	//Not marshalled
 	Matches      bool
-	hash         interfaces.IHash
+	hash         interfaces.*HashS
 	marshalCache []byte
-	dbsHash      interfaces.IHash
+	dbsHash      interfaces.*HashS
 }
 
 var _ interfaces.IMsg = (*DirectoryBlockSignature)(nil)
@@ -93,7 +93,7 @@ func (e *DirectoryBlockSignature) Process(dbheight uint32, state interfaces.ISta
 	return state.ProcessDBSig(dbheight, e)
 }
 
-func (m *DirectoryBlockSignature) GetRepeatHash() (rval interfaces.IHash) {
+func (m *DirectoryBlockSignature) GetRepeatHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "DirectoryBlockSignature.GetRepeatHash") }()
 
 	if m.RepeatHash == nil {
@@ -106,13 +106,13 @@ func (m *DirectoryBlockSignature) GetRepeatHash() (rval interfaces.IHash) {
 	return m.RepeatHash
 }
 
-func (m *DirectoryBlockSignature) GetHash() (rval interfaces.IHash) {
+func (m *DirectoryBlockSignature) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "DirectoryBlockSignature.GetHash") }()
 
 	return m.GetMsgHash()
 }
 
-func (m *DirectoryBlockSignature) GetMsgHash() (rval interfaces.IHash) {
+func (m *DirectoryBlockSignature) GetMsgHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "DirectoryBlockSignature.GetMsgHash") }()
 
 	if m.MsgHash == nil {

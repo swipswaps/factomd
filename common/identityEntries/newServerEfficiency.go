@@ -23,7 +23,7 @@ type NewServerEfficiencyStruct struct {
 	//The second is the ASCII string "Server Efficiency".
 	FunctionName []byte //"Server Efficiency"
 	//The third is the root identity ChainID.
-	RootIdentityChainID interfaces.IHash
+	RootIdentityChainID interfaces.*HashS
 	//Forth is the new efficiency
 	Efficiency uint16
 	//5th is the timestamp with an 8 byte epoch time.
@@ -60,7 +60,7 @@ func (nses *NewServerEfficiencyStruct) MarshalForSig() []byte {
 	return answer
 }
 
-func (nses *NewServerEfficiencyStruct) VerifySignature(key1 interfaces.IHash) error {
+func (nses *NewServerEfficiencyStruct) VerifySignature(key1 interfaces.*HashS) error {
 	bin := nses.MarshalForSig()
 	pk := new(primitives.PublicKey)
 	err := pk.UnmarshalBinary(nses.PreimageIdentityKey[1:])
@@ -136,7 +136,7 @@ func (nses *NewServerEfficiencyStruct) ToExternalIDs() [][]byte {
 	return extIDs
 }
 
-func (nses *NewServerEfficiencyStruct) GetChainID() (rval interfaces.IHash) {
+func (nses *NewServerEfficiencyStruct) GetChainID() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "NewServerEfficiencyStruct.GetChainID") }()
 
 	extIDs := nses.ToExternalIDs()

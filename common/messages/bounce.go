@@ -48,14 +48,14 @@ func (m *Bounce) AddData(dataSize int) {
 	}
 }
 
-func (m *Bounce) GetRepeatHash() (rval interfaces.IHash) {
+func (m *Bounce) GetRepeatHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "Bounce.GetRepeatHash") }()
 
 	return m.GetMsgHash()
 }
 
 // We have to return the hash of the underlying message.
-func (m *Bounce) GetHash() (rval interfaces.IHash) {
+func (m *Bounce) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "Bounce.GetHash") }()
 
 	return m.GetMsgHash()
@@ -66,7 +66,7 @@ func (m *Bounce) SizeOf() int {
 	return m.size
 }
 
-func (m *Bounce) GetMsgHash() (rval interfaces.IHash) {
+func (m *Bounce) GetMsgHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "Bounce.GetMsgHash") }()
 
 	data, err := m.MarshalForSignature()

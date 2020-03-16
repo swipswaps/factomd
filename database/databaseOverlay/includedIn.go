@@ -5,7 +5,7 @@ import (
 	"github.com/FactomProject/factomd/common/primitives"
 )
 
-func (db *Overlay) SaveIncludedIn(entry, block interfaces.IHash) error {
+func (db *Overlay) SaveIncludedIn(entry, block interfaces.*HashS) error {
 	if entry == nil || block == nil {
 		return nil
 	}
@@ -37,7 +37,7 @@ func (db *Overlay) SaveIncludedInMultiFromBlock(block interfaces.DatabaseBlockWi
 	return db.SaveIncludedInMulti(entries, hash, checkForDuplicateEntries)
 }
 
-func (db *Overlay) SaveIncludedInMultiMultiBatch(entries []interfaces.IHash, block interfaces.IHash, checkForDuplicateEntries bool) error {
+func (db *Overlay) SaveIncludedInMultiMultiBatch(entries []interfaces.*HashS, block interfaces.*HashS, checkForDuplicateEntries bool) error {
 	if entries == nil || block == nil {
 		return nil
 	}
@@ -64,7 +64,7 @@ func (db *Overlay) SaveIncludedInMultiMultiBatch(entries []interfaces.IHash, blo
 	return nil
 }
 
-func (db *Overlay) SaveIncludedInMulti(entries []interfaces.IHash, block interfaces.IHash, checkForDuplicateEntries bool) error {
+func (db *Overlay) SaveIncludedInMulti(entries []interfaces.*HashS, block interfaces.*HashS, checkForDuplicateEntries bool) error {
 	if entries == nil || block == nil {
 		return nil
 	}
@@ -91,7 +91,7 @@ func (db *Overlay) SaveIncludedInMulti(entries []interfaces.IHash, block interfa
 	return nil
 }
 
-func (db *Overlay) FetchIncludedIn(hash interfaces.IHash) (interfaces.IHash, error) {
+func (db *Overlay) FetchIncludedIn(hash interfaces.*HashS) (interfaces.*HashS, error) {
 	block, err := db.DB.Get(INCLUDED_IN, hash.Bytes(), new(primitives.Hash))
 	if err != nil {
 		return nil, err
@@ -99,5 +99,5 @@ func (db *Overlay) FetchIncludedIn(hash interfaces.IHash) (interfaces.IHash, err
 	if block == nil {
 		return nil, nil
 	}
-	return block.(interfaces.IHash), nil
+	return block.(interfaces.*HashS), nil
 }

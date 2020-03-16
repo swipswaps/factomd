@@ -24,7 +24,7 @@ type MissingMsg struct {
 	msgbase.MessageBase
 
 	Timestamp         interfaces.Timestamp
-	Asking            interfaces.IHash
+	Asking            interfaces.*HashS
 	DBHeight          uint32
 	SystemHeight      uint32 // Might as well check for a missing Server Fault
 	ProcessListHeight []uint32
@@ -32,7 +32,7 @@ type MissingMsg struct {
 	//No signature!
 
 	//Not marshalled
-	hash interfaces.IHash
+	hash interfaces.*HashS
 }
 
 var _ interfaces.IMsg = (*MissingMsg)(nil)
@@ -69,13 +69,13 @@ func (m *MissingMsg) Process(uint32, interfaces.IState) bool {
 	panic("MissingMsg should not have its Process() method called")
 }
 
-func (m *MissingMsg) GetRepeatHash() (rval interfaces.IHash) {
+func (m *MissingMsg) GetRepeatHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "MissingMsg.GetRepeatHash") }()
 
 	return m.GetMsgHash()
 }
 
-func (m *MissingMsg) GetHash() (rval interfaces.IHash) {
+func (m *MissingMsg) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "MissingMsg.GetHash") }()
 
 	if m.hash == nil {
@@ -88,7 +88,7 @@ func (m *MissingMsg) GetHash() (rval interfaces.IHash) {
 	return m.hash
 }
 
-func (m *MissingMsg) GetMsgHash() (rval interfaces.IHash) {
+func (m *MissingMsg) GetMsgHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "MissingMsg.GetMsgHash") }()
 
 	if m.MsgHash == nil {

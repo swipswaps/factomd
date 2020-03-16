@@ -285,7 +285,7 @@ func (r *Replay) Valid(mask int, hash [32]byte, timestamp interfaces.Timestamp, 
 // have seen this hash before, then it is not valid.  To that end,
 // this code remembers hashes tested in the past, and rejects the
 // second submission of the same hash.
-func (r *Replay) IsTSValid(mask int, hash interfaces.IHash, timestamp interfaces.Timestamp) bool {
+func (r *Replay) IsTSValid(mask int, hash interfaces.*HashS, timestamp interfaces.Timestamp) bool {
 	return r.IsTSValidAndUpdateState(mask, hash.Fixed(), timestamp, primitives.NewTimestampNow())
 }
 

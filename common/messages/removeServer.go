@@ -24,7 +24,7 @@ import (
 type RemoveServerMsg struct {
 	msgbase.MessageBase
 	Timestamp     interfaces.Timestamp // Message Timestamp
-	ServerChainID interfaces.IHash     // ChainID of new server
+	ServerChainID interfaces.*HashS     // ChainID of new server
 	ServerType    int                  // 0 = Federated, 1 = Audit
 
 	Signature interfaces.IFullSignature
@@ -33,19 +33,19 @@ type RemoveServerMsg struct {
 var _ interfaces.IMsg = (*RemoveServerMsg)(nil)
 var _ interfaces.Signable = (*RemoveServerMsg)(nil)
 
-func (m *RemoveServerMsg) GetRepeatHash() (rval interfaces.IHash) {
+func (m *RemoveServerMsg) GetRepeatHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "RemoveServerMsg.GetRepeatHash") }()
 
 	return m.GetMsgHash()
 }
 
-func (m *RemoveServerMsg) GetHash() (rval interfaces.IHash) {
+func (m *RemoveServerMsg) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "RemoveServerMsg.GetHash") }()
 
 	return m.GetMsgHash()
 }
 
-func (m *RemoveServerMsg) GetMsgHash() (rval interfaces.IHash) {
+func (m *RemoveServerMsg) GetMsgHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "RemoveServerMsg.GetMsgHash") }()
 
 	if m.MsgHash == nil {
@@ -279,7 +279,7 @@ func (m *RemoveServerMsg) IsSameAs(b *RemoveServerMsg) bool {
 	return true
 }
 
-func NewRemoveServerMsg(state interfaces.IState, chainId interfaces.IHash, serverType int) interfaces.IMsg {
+func NewRemoveServerMsg(state interfaces.IState, chainId interfaces.*HashS, serverType int) interfaces.IMsg {
 	msg := new(RemoveServerMsg)
 	msg.ServerChainID = chainId
 	msg.ServerType = serverType

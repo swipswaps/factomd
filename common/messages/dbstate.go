@@ -110,13 +110,13 @@ func (a *DBStateMsg) IsSameAs(b *DBStateMsg) bool {
 	return true
 }
 
-func (m *DBStateMsg) GetRepeatHash() (rval interfaces.IHash) {
+func (m *DBStateMsg) GetRepeatHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "DBStateMsg.GetRepeatHash") }()
 
 	return m.DirectoryBlock.GetHash()
 }
 
-func (m *DBStateMsg) GetHash() (rval interfaces.IHash) {
+func (m *DBStateMsg) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "DBStateMsg.GetHash") }()
 
 	//	data, _ := m.MarshalBinary()
@@ -126,7 +126,7 @@ func (m *DBStateMsg) GetHash() (rval interfaces.IHash) {
 	return m.GetMsgHash()
 }
 
-func (m *DBStateMsg) GetMsgHash() (rval interfaces.IHash) {
+func (m *DBStateMsg) GetMsgHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "DBStateMsg.GetMsgHash") }()
 
 	if m.MsgHash == nil {
@@ -204,8 +204,8 @@ func (m *DBStateMsg) Validate(state interfaces.IState) int {
 	startingFedsCount := len(startingFeds)
 	startingFedsRemaining := startingFedsCount
 	newFedsAdded := 0
-	var containsServerChainID func([]interfaces.IServer, interfaces.IHash) bool
-	containsServerChainID = func(haystack []interfaces.IServer, needle interfaces.IHash) bool {
+	var containsServerChainID func([]interfaces.IServer, interfaces.*HashS) bool
+	containsServerChainID = func(haystack []interfaces.IServer, needle interfaces.*HashS) bool {
 		for _, hay := range haystack {
 			if needle.IsSameAs(hay.GetChainID()) {
 				return true

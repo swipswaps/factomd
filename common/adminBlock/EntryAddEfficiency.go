@@ -12,7 +12,7 @@ import (
 // AddEfficiency Entry -------------------------
 type AddEfficiency struct {
 	AdminIDType     uint32 `json:"adminidtype"`
-	IdentityChainID interfaces.IHash
+	IdentityChainID interfaces.*HashS
 	Efficiency      uint16
 }
 
@@ -42,7 +42,7 @@ func (a *AddEfficiency) IsSameAs(b *AddEfficiency) bool {
 	return true
 }
 
-func (e *AddEfficiency) SortedIdentity() (rval interfaces.IHash) {
+func (e *AddEfficiency) SortedIdentity() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "AddEfficiency.SortedIdentity") }()
 
 	return e.IdentityChainID
@@ -66,7 +66,7 @@ func (c *AddEfficiency) UpdateState(state interfaces.IState) error {
 	return nil
 }
 
-func NewAddEfficiency(chainID interfaces.IHash, efficiency uint16) (e *AddEfficiency) {
+func NewAddEfficiency(chainID interfaces.*HashS, efficiency uint16) (e *AddEfficiency) {
 	e = new(AddEfficiency)
 	e.Init()
 	e.IdentityChainID = chainID
@@ -97,7 +97,7 @@ func (e *AddEfficiency) MarshalBinary() (rval []byte, err error) {
 
 	// Need the size of the body
 	var bodybuf primitives.Buffer
-	err = bodybuf.PushIHash(e.IdentityChainID)
+	err = bodybuf.Push*HashS(e.IdentityChainID)
 	if err != nil {
 		return nil, err
 	}
@@ -164,7 +164,7 @@ func (e *AddEfficiency) UnmarshalBinaryData(data []byte) ([]byte, error) {
 		return nil, fmt.Errorf("Unable to unmarshal body")
 	}
 
-	e.IdentityChainID, err = bodyBuf.PopIHash()
+	e.IdentityChainID, err = bodyBuf.Pop*HashS()
 	if err != nil {
 		return nil, err
 	}
@@ -200,7 +200,7 @@ func (e *AddEfficiency) Interpret() string {
 	return ""
 }
 
-func (e *AddEfficiency) Hash() (rval interfaces.IHash) {
+func (e *AddEfficiency) Hash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "AddEfficiency.Hash") }()
 
 	bin, err := e.MarshalBinary()

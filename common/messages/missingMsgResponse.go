@@ -29,7 +29,7 @@ type MissingMsgResponse struct {
 	//No signature!
 
 	//Not marshalled
-	hash interfaces.IHash
+	hash interfaces.*HashS
 }
 
 var General interfaces.IGeneralMsg
@@ -62,13 +62,13 @@ func (m *MissingMsgResponse) Process(uint32, interfaces.IState) bool {
 	return true
 }
 
-func (m *MissingMsgResponse) GetRepeatHash() (rval interfaces.IHash) {
+func (m *MissingMsgResponse) GetRepeatHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "MissingMsgResponse.GetRepeatHash") }()
 
 	return m.GetMsgHash()
 }
 
-func (m *MissingMsgResponse) GetHash() (rval interfaces.IHash) {
+func (m *MissingMsgResponse) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "MissingMsgResponse.GetHash") }()
 
 	if m.hash == nil {
@@ -81,7 +81,7 @@ func (m *MissingMsgResponse) GetHash() (rval interfaces.IHash) {
 	return m.hash
 }
 
-func (m *MissingMsgResponse) GetMsgHash() (rval interfaces.IHash) {
+func (m *MissingMsgResponse) GetMsgHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "MissingMsgResponse.GetMsgHash") }()
 
 	if m.MsgHash == nil {

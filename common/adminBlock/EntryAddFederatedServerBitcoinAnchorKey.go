@@ -12,7 +12,7 @@ import (
 // DB Signature Entry -------------------------
 type AddFederatedServerBitcoinAnchorKey struct {
 	AdminIDType     uint32                 `json:"adminidtype"`
-	IdentityChainID interfaces.IHash       `json:"identitychainid"`
+	IdentityChainID interfaces.*HashS       `json:"identitychainid"`
 	KeyPriority     byte                   `json:"keypriority"`
 	KeyType         byte                   `json:"keytype"` //0=P2PKH 1=P2SH
 	ECDSAPublicKey  primitives.ByteSlice20 `json:"ecdsapublickey"`
@@ -28,7 +28,7 @@ func (e *AddFederatedServerBitcoinAnchorKey) Init() {
 	e.AdminIDType = uint32(e.Type())
 }
 
-func (e *AddFederatedServerBitcoinAnchorKey) SortedIdentity() (rval interfaces.IHash) {
+func (e *AddFederatedServerBitcoinAnchorKey) SortedIdentity() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "AddFederatedServerBitcoinAnchorKey.SortedIdentity") }()
 
 	return e.IdentityChainID
@@ -53,7 +53,7 @@ func (c *AddFederatedServerBitcoinAnchorKey) UpdateState(state interfaces.IState
 }
 
 // Create a new DB Signature Entry
-func NewAddFederatedServerBitcoinAnchorKey(identityChainID interfaces.IHash, keyPriority byte, keyType byte, ecdsaPublicKey primitives.ByteSlice20) (e *AddFederatedServerBitcoinAnchorKey) {
+func NewAddFederatedServerBitcoinAnchorKey(identityChainID interfaces.*HashS, keyPriority byte, keyType byte, ecdsaPublicKey primitives.ByteSlice20) (e *AddFederatedServerBitcoinAnchorKey) {
 	e = new(AddFederatedServerBitcoinAnchorKey)
 	e.IdentityChainID = identityChainID
 	e.KeyPriority = keyPriority
@@ -154,7 +154,7 @@ func (e *AddFederatedServerBitcoinAnchorKey) Interpret() string {
 	return ""
 }
 
-func (e *AddFederatedServerBitcoinAnchorKey) Hash() (rval interfaces.IHash) {
+func (e *AddFederatedServerBitcoinAnchorKey) Hash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "AddFederatedServerBitcoinAnchorKey.Hash") }()
 
 	bin, err := e.MarshalBinary()

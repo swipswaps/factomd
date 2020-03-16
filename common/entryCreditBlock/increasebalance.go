@@ -16,7 +16,7 @@ import (
 // IncreaseBalance is an entry credit block entry type which increases the entry credit balance at an address
 type IncreaseBalance struct {
 	ECPubKey *primitives.ByteSlice32 `json:"ecpubkey"` // EC public key that will have balanced increased
-	TXID     interfaces.IHash        `json:"txid"`     // The transaction id associated with this balance increase
+	TXID     interfaces.*HashS        `json:"txid"`     // The transaction id associated with this balance increase
 	Index    uint64                  `json:"index"`    // The index into the transaction's purchase field for this balance increase
 	NumEC    uint64                  `json:"numec"`    // The number of entry credits added to the address (based on current exchange rate)
 }
@@ -91,14 +91,14 @@ func NewIncreaseBalance() *IncreaseBalance {
 }
 
 // GetEntryHash always returns nil
-func (e *IncreaseBalance) GetEntryHash() (rval interfaces.IHash) {
+func (e *IncreaseBalance) GetEntryHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "IncreaseBalance.GetEntryHash") }()
 
 	return nil
 }
 
 // Hash marshals the object and computes its sha
-func (e *IncreaseBalance) Hash() (rval interfaces.IHash) {
+func (e *IncreaseBalance) Hash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "IncreaseBalance.Hash") }()
 
 	bin, err := e.MarshalBinary()
@@ -109,14 +109,14 @@ func (e *IncreaseBalance) Hash() (rval interfaces.IHash) {
 }
 
 // GetHash marshals the object and computes its sha
-func (e *IncreaseBalance) GetHash() (rval interfaces.IHash) {
+func (e *IncreaseBalance) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "IncreaseBalance.GetHash") }()
 
 	return e.Hash()
 }
 
 // GetSigHash always returns nil
-func (e *IncreaseBalance) GetSigHash() (rval interfaces.IHash) {
+func (e *IncreaseBalance) GetSigHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "IncreaseBalance.GetSigHash") }()
 
 	return nil

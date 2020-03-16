@@ -19,7 +19,7 @@ var _ = debug.PrintStack
 
 type Transaction struct {
 	// Not marshalled in MarshalBinary()
-	Txid        interfaces.IHash `json:"txid"`
+	Txid        interfaces.*HashS `json:"txid"`
 	BlockHeight uint32           `json:"blockheight"`
 	sigValid    bool
 
@@ -120,13 +120,13 @@ func (*Transaction) GetVersion() uint64 {
 	return 2
 }
 
-func (t *Transaction) GetTxID() (rval interfaces.IHash) {
+func (t *Transaction) GetTxID() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "Transaction.GetTxID") }()
 
 	return t.GetSigHash()
 }
 
-func (t *Transaction) GetHash() (rval interfaces.IHash) {
+func (t *Transaction) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "Transaction.GetHash") }()
 
 	m, err := t.MarshalBinary()
@@ -136,7 +136,7 @@ func (t *Transaction) GetHash() (rval interfaces.IHash) {
 	return primitives.Sha(m)
 }
 
-func (t Transaction) GetFullHash() interfaces.IHash {
+func (t Transaction) GetFullHash() interfaces.*HashS {
 	m, err := t.MarshalBinary()
 	if err != nil {
 		return nil
@@ -144,7 +144,7 @@ func (t Transaction) GetFullHash() interfaces.IHash {
 	return primitives.Sha(m)
 }
 
-func (t Transaction) GetSigHash() interfaces.IHash {
+func (t Transaction) GetSigHash() interfaces.*HashS {
 	m, err := t.MarshalBinarySig()
 	if err != nil {
 		return nil

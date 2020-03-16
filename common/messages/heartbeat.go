@@ -25,13 +25,13 @@ type Heartbeat struct {
 	Timestamp       interfaces.Timestamp
 	SecretNumber    uint32
 	DBHeight        uint32
-	DBlockHash      interfaces.IHash //Hash of last Directory Block
-	IdentityChainID interfaces.IHash //Identity Chain ID
+	DBlockHash      interfaces.*HashS //Hash of last Directory Block
+	IdentityChainID interfaces.*HashS //Identity Chain ID
 
 	Signature interfaces.IFullSignature
 
 	//Not marshalled
-	hash         interfaces.IHash
+	hash         interfaces.*HashS
 	sigvalid     bool
 	marshalCache []byte
 }
@@ -81,13 +81,13 @@ func (m *Heartbeat) Process(uint32, interfaces.IState) bool {
 	return true
 }
 
-func (m *Heartbeat) GetRepeatHash() (rval interfaces.IHash) {
+func (m *Heartbeat) GetRepeatHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "Heartbeat.GetRepeatHash") }()
 
 	return m.GetMsgHash()
 }
 
-func (m *Heartbeat) GetHash() (rval interfaces.IHash) {
+func (m *Heartbeat) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "Heartbeat.GetHash") }()
 
 	if m.hash == nil {
@@ -100,7 +100,7 @@ func (m *Heartbeat) GetHash() (rval interfaces.IHash) {
 	return m.hash
 }
 
-func (m *Heartbeat) GetMsgHash() (rval interfaces.IHash) {
+func (m *Heartbeat) GetMsgHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "Heartbeat.GetMsgHash") }()
 
 	if m.MsgHash == nil {

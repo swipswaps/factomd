@@ -37,7 +37,7 @@ func (m *AuthorityListInternal) MarshalBinary() (data []byte, err error) {
 
 var msgCount int
 
-func (m *AuthorityListInternal) GetMsgHash() (rval interfaces.IHash) {
+func (m *AuthorityListInternal) GetMsgHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "AuthorityListInternal.GetMsgHash") }()
 
 	// because this is an internal only message it has no serialization so no real hash. make a fake hash so it
@@ -64,14 +64,14 @@ func (m *AuthorityListInternal) LogFields() log.Fields {
 	return log.Fields{"category": "message", "messagetype": "AuthorityListInternal", "dbheight": m.DBHeight}
 }
 
-func (m *AuthorityListInternal) GetRepeatHash() (rval interfaces.IHash) {
+func (m *AuthorityListInternal) GetRepeatHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "AuthorityListInternal.GetRepeatHash") }()
 
 	return m.GetMsgHash()
 }
 
 // We have to return the hash of the underlying message.
-func (m *AuthorityListInternal) GetHash() (rval interfaces.IHash) {
+func (m *AuthorityListInternal) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "AuthorityListInternal.GetHash") }()
 
 	return m.GetMsgHash()

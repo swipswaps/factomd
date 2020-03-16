@@ -159,7 +159,7 @@ func (r *EntryGenCore) NewChainHead() *entryBlock.Entry {
 	return head
 }
 
-func (r *EntryGenCore) NewEntry(chain interfaces.IHash) *entryBlock.Entry {
+func (r *EntryGenCore) NewEntry(chain interfaces.*HashS) *entryBlock.Entry {
 	conf := r.Config
 	bytes := rand.Intn(conf.EntrySize.Amount())
 

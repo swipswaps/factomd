@@ -36,13 +36,13 @@ func FundWalletTOFF(st *state.State, timeOffsetInMilliseconds int64, amt uint64)
 }
 
 // FundECWallet get the current time in ms, add to it the offset provided (usually zero, except for tests)
-func FundECWallet(st *state.State, inSec interfaces.IHash, outEC interfaces.IHash, amt uint64) (error, string) {
+func FundECWallet(st *state.State, inSec interfaces.*HashS, outEC interfaces.*HashS, amt uint64) (error, string) {
 	ts := primitives.NewTimestampFromMilliseconds(uint64(primitives.NewTimestampNow().GetTimeMilli()))
 	return fundECWallet(st, inSec, outEC, ts, amt)
 }
 
 // fundEDWallet() buys EC credits adds fee on top of amt
-func fundECWallet(st *state.State, inSec interfaces.IHash, outEC interfaces.IHash, timeInMilliseconds *primitives.Timestamp, amt uint64) (error, string) {
+func fundECWallet(st *state.State, inSec interfaces.*HashS, outEC interfaces.*HashS, timeInMilliseconds *primitives.Timestamp, amt uint64) (error, string) {
 
 	trans, err := ComposeEcTransaction(inSec, outEC, timeInMilliseconds, amt, st.GetFactoshisPerEC())
 	if err != nil {
@@ -105,7 +105,7 @@ func NewTransaction(amt uint64, userSecretIn string, userPublicOut string, ecPri
 
 // create a transaction to transfer FCT between addresses
 // adds EC fee on top of input amount
-func ComposeFctTransaction(amt uint64, inSec interfaces.IHash, outPub interfaces.IHash, ecPrice uint64) (*factoid.Transaction, error) {
+func ComposeFctTransaction(amt uint64, inSec interfaces.*HashS, outPub interfaces.*HashS, ecPrice uint64) (*factoid.Transaction, error) {
 
 	var sec [64]byte
 	copy(sec[:32], inSec.Bytes())   // pass 32 byte key in a 64 byte field for the crypto library
@@ -151,7 +151,7 @@ func ComposeFctTransaction(amt uint64, inSec interfaces.IHash, outPub interfaces
 
 // create a transaction to buy Entry Credits
 // this adds the EC fee on top of the input amount
-func ComposeEcTransaction(inSec interfaces.IHash, outEC interfaces.IHash, timeInMilliseconds *primitives.Timestamp, amt uint64, ecPrice uint64) (*factoid.Transaction, error) {
+func ComposeEcTransaction(inSec interfaces.*HashS, outEC interfaces.*HashS, timeInMilliseconds *primitives.Timestamp, amt uint64, ecPrice uint64) (*factoid.Transaction, error) {
 	var sec [64]byte
 	copy(sec[:32], inSec.Bytes())   // pass 32 byte key in a 64 byte field for the crypto library
 	pub := ed.GetPublicKey(&sec)    // get the public key for our FCT source address

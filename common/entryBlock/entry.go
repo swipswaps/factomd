@@ -22,12 +22,12 @@ import (
 // https://github.com/FactomProject/FactomDocs/blob/master/factomDataStructureDetails.md#entry
 type Entry struct {
 	Version uint8                  `json:"version"` // The entry version, only currently supported number is 0
-	ChainID interfaces.IHash       `json:"chainid"` // The chain id associated with this entry
+	ChainID interfaces.*HashS       `json:"chainid"` // The chain id associated with this entry
 	ExtIDs  []primitives.ByteSlice `json:"extids"`  // External ids used to create the chain id above ( see ExternalIDsToChainID() )
 	Content primitives.ByteSlice   `json:"content"` // BytesSlice for holding generic data for this entry
 
 	// cache
-	hash interfaces.IHash
+	hash interfaces.*HashS
 }
 
 var _ interfaces.IEBEntry = (*Entry)(nil)
@@ -119,7 +119,7 @@ func (c *Entry) GetWeld() []byte {
 }
 
 // GetWeldHash returns the doble sha of the entry's hash and chain id appended ('welded') together
-func (c *Entry) GetWeldHash() (rval interfaces.IHash) {
+func (c *Entry) GetWeldHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "Entry.GetWeldHash") }()
 
 	hash := primitives.NewZeroHash()
@@ -128,21 +128,21 @@ func (c *Entry) GetWeldHash() (rval interfaces.IHash) {
 }
 
 // GetChainID returns the chain id of this entry
-func (c *Entry) GetChainID() (rval interfaces.IHash) {
+func (c *Entry) GetChainID() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "Entry.GetChainID") }()
 
 	return c.ChainID
 }
 
 // DatabasePrimaryIndex returns the hash of the entry object
-func (c *Entry) DatabasePrimaryIndex() (rval interfaces.IHash) {
+func (c *Entry) DatabasePrimaryIndex() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "Entry.DatabasePrimaryIndex") }()
 
 	return c.GetHash()
 }
 
 // DatabaseSecondaryIndex always returns nil (ie, no secondary index)
-func (c *Entry) DatabaseSecondaryIndex() (rval interfaces.IHash) {
+func (c *Entry) DatabaseSecondaryIndex() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "Entry.DatabaseSecondaryIndex") }()
 
 	return nil
@@ -150,13 +150,13 @@ func (c *Entry) DatabaseSecondaryIndex() (rval interfaces.IHash) {
 
 // NewChainID generates a ChainID from an entry. ChainID = primitives.Sha(Sha(ExtIDs[0]) +
 // Sha(ExtIDs[1] + ... + Sha(ExtIDs[n]))
-func NewChainID(e interfaces.IEBEntry) interfaces.IHash {
+func NewChainID(e interfaces.IEBEntry) interfaces.*HashS {
 	return ExternalIDsToChainID(e.ExternalIDs())
 }
 
 // ExternalIDsToChainID converts the input external ids into a chain id. ChainID = primitives.Sha(Sha(ExtIDs[0]) +
 // Sha(ExtIDs[1] + ... + Sha(ExtIDs[n]))
-func ExternalIDsToChainID(extIDs [][]byte) interfaces.IHash {
+func ExternalIDsToChainID(extIDs [][]byte) interfaces.*HashS {
 	id := new(primitives.Hash)
 	sum := sha256.New()
 	for _, v := range extIDs {
@@ -174,7 +174,7 @@ func (c *Entry) GetContent() []byte {
 }
 
 // GetChainIDHash returns the chain id associated with this entry
-func (c *Entry) GetChainIDHash() (rval interfaces.IHash) {
+func (c *Entry) GetChainIDHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "Entry.GetChainIDHash") }()
 
 	return c.ChainID
@@ -206,7 +206,7 @@ func (c *Entry) IsValid() bool {
 }
 
 // GetHash returns the hash of the entry: sha256(append(sha512(data),data))
-func (c *Entry) GetHash() (rval interfaces.IHash) {
+func (c *Entry) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "Entry.GetHash") }()
 
 	if c.hash == nil || c.hash.PFixed() == nil {

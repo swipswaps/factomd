@@ -219,7 +219,7 @@ func TestDBStateDataValidate(t *testing.T) {
 //		Half Sign
 func TestSignedDBStateValidate(t *testing.T) {
 	type SmallIdentity struct {
-		ID  interfaces.IHash
+		ID  interfaces.*HashS
 		Key primitives.PrivateKey
 	}
 
@@ -357,7 +357,7 @@ func TestDBStateValidateReplaceFeds(t *testing.T) {
 	t.Skip("This test times out")
 
 	type SmallIdentity struct {
-		ID  interfaces.IHash
+		ID  interfaces.*HashS
 		Key primitives.PrivateKey
 	}
 
@@ -488,7 +488,7 @@ func TestDBStateValidateReplaceFeds(t *testing.T) {
 //		Random # of them Removed
 func TestPropSignedDBStateValidate(t *testing.T) {
 	type SmallIdentity struct {
-		ID  interfaces.IHash
+		ID  interfaces.*HashS
 		Key primitives.PrivateKey
 	}
 

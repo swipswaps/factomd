@@ -55,13 +55,13 @@ func (db *Overlay) ProcessDBlockMultiBatch(dblock interfaces.DatabaseBlockWithEn
 // heights.  Fetch is inclusive of the start height and exclusive of the
 // ending height. To fetch all hashes from the start height until no
 // more are present, use -1 as endHeight.
-func (db *Overlay) FetchDBlockHeightRange(startHeight, endHeight int64) ([]interfaces.IHash, error) {
+func (db *Overlay) FetchDBlockHeightRange(startHeight, endHeight int64) ([]interfaces.*HashS, error) {
 	return db.FetchBlockIndexesInHeightRange(DIRECTORYBLOCK_NUMBER, startHeight, endHeight)
 }
 
 // FetchBlockHeightByKeyMR returns the block height for the given hash.  This is
 // part of the database.Db interface implementation.
-func (db *Overlay) FetchDBlockHeightByKeyMR(sha interfaces.IHash) (int64, error) {
+func (db *Overlay) FetchDBlockHeightByKeyMR(sha interfaces.*HashS) (int64, error) {
 	dblk, err := db.FetchDBlock(sha)
 	if err != nil {
 		return -1, err
@@ -75,7 +75,7 @@ func (db *Overlay) FetchDBlockHeightByKeyMR(sha interfaces.IHash) (int64, error)
 	return height, nil
 }
 
-func (db *Overlay) FetchDBlock(hash interfaces.IHash) (interfaces.IDirectoryBlock, error) {
+func (db *Overlay) FetchDBlock(hash interfaces.*HashS) (interfaces.IDirectoryBlock, error) {
 	block, err := db.FetchDBlockByPrimary(hash)
 	if err != nil {
 		return nil, err
@@ -87,7 +87,7 @@ func (db *Overlay) FetchDBlock(hash interfaces.IHash) (interfaces.IDirectoryBloc
 }
 
 // FetchDBlock gets an entry by hash from the database.
-func (db *Overlay) FetchDBlockByPrimary(keyMR interfaces.IHash) (interfaces.IDirectoryBlock, error) {
+func (db *Overlay) FetchDBlockByPrimary(keyMR interfaces.*HashS) (interfaces.IDirectoryBlock, error) {
 	block, err := db.FetchBlock(DIRECTORYBLOCK, keyMR, new(directoryBlock.DirectoryBlock))
 	if err != nil {
 		return nil, err
@@ -99,7 +99,7 @@ func (db *Overlay) FetchDBlockByPrimary(keyMR interfaces.IHash) (interfaces.IDir
 }
 
 // FetchDBlockByMR gets a directory block by merkle root from the database.
-func (db *Overlay) FetchDBlockBySecondary(dBMR interfaces.IHash) (interfaces.IDirectoryBlock, error) {
+func (db *Overlay) FetchDBlockBySecondary(dBMR interfaces.*HashS) (interfaces.IDirectoryBlock, error) {
 	block, err := db.FetchBlockBySecondaryIndex(DIRECTORYBLOCK_SECONDARYINDEX, DIRECTORYBLOCK, dBMR, new(directoryBlock.DirectoryBlock))
 	if err != nil {
 		return nil, err
@@ -123,12 +123,12 @@ func (db *Overlay) FetchDBlockByHeight(dBlockHeight uint32) (interfaces.IDirecto
 }
 
 // FetchDBKeyMRByHeight gets a dBlock KeyMR from the database.
-func (db *Overlay) FetchDBKeyMRByHeight(dBlockHeight uint32) (interfaces.IHash, error) {
+func (db *Overlay) FetchDBKeyMRByHeight(dBlockHeight uint32) (interfaces.*HashS, error) {
 	return db.FetchBlockIndexByHeight(DIRECTORYBLOCK_NUMBER, dBlockHeight)
 }
 
 // FetchDBKeyMRByHash gets a DBlock KeyMR by hash.
-func (db *Overlay) FetchDBKeyMRByHash(hash interfaces.IHash) (interfaces.IHash, error) {
+func (db *Overlay) FetchDBKeyMRByHash(hash interfaces.*HashS) (interfaces.*HashS, error) {
 	return db.FetchPrimaryIndexBySecondaryIndex(DIRECTORYBLOCK_SECONDARYINDEX, hash)
 }
 
@@ -141,7 +141,7 @@ func (db *Overlay) FetchAllDBlocks() ([]interfaces.IDirectoryBlock, error) {
 	return toDBlocksList(list), nil
 }
 
-func (db *Overlay) FetchAllDBlockKeys() ([]interfaces.IHash, error) {
+func (db *Overlay) FetchAllDBlockKeys() ([]interfaces.*HashS, error) {
 	return db.FetchAllBlockKeysFromBucket(DIRECTORYBLOCK)
 }
 

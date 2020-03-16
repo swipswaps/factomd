@@ -17,7 +17,7 @@ import (
 )
 
 type MessageBase struct {
-	FullMsgHash interfaces.IHash
+	FullMsgHash interfaces.*HashS
 
 	Origin        int    // Set and examined on a server, not marshalled with the message
 	NetworkOrigin string // Hash of the network peer/connection where the message is from
@@ -29,9 +29,9 @@ type MessageBase struct {
 	NoResend  bool // Don't resend this message if true.
 	ResendCnt int  // Put a limit on resends
 
-	LeaderChainID interfaces.IHash
-	MsgHash       interfaces.IHash // Cache of the hash of a message
-	RepeatHash    interfaces.IHash // Cache of the hash of a message
+	LeaderChainID interfaces.*HashS
+	MsgHash       interfaces.*HashS // Cache of the hash of a message
+	RepeatHash    interfaces.*HashS // Cache of the hash of a message
 	VMIndex       int              // The Index of the VM responsible for this message.
 	VMHash        []byte           // Basis for selecting a VMIndex
 	Minute        byte
@@ -262,7 +262,7 @@ func (m *MessageBase) SetStall(b bool) {
 	m.Stalled = b
 }
 
-func (m *MessageBase) GetFullMsgHash() (rval interfaces.IHash) {
+func (m *MessageBase) GetFullMsgHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "MessageBase.GetFullMsgHash") }()
 
 	if m.FullMsgHash == nil {
@@ -271,7 +271,7 @@ func (m *MessageBase) GetFullMsgHash() (rval interfaces.IHash) {
 	return m.FullMsgHash
 }
 
-func (m *MessageBase) SetFullMsgHash(hash interfaces.IHash) {
+func (m *MessageBase) SetFullMsgHash(hash interfaces.*HashS) {
 	m.GetFullMsgHash().SetBytes(hash.Bytes())
 }
 
@@ -323,7 +323,7 @@ func (m *MessageBase) IsFullBroadcast() bool {
 func (m *MessageBase) SetFullBroadcast(v bool) {
 	m.FullBroadcast = v
 }
-func (m *MessageBase) GetLeaderChainID() (rval interfaces.IHash) {
+func (m *MessageBase) GetLeaderChainID() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "MessageBase.GetLeaderChainID") }()
 
 	if m.LeaderChainID == nil {
@@ -332,7 +332,7 @@ func (m *MessageBase) GetLeaderChainID() (rval interfaces.IHash) {
 	return m.LeaderChainID
 }
 
-func (m *MessageBase) SetLeaderChainID(hash interfaces.IHash) {
+func (m *MessageBase) SetLeaderChainID(hash interfaces.*HashS) {
 	m.LeaderChainID = hash
 }
 

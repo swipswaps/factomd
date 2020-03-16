@@ -11,10 +11,10 @@ import (
 // EBlockHeader holds relevant metadata about the Entry Block and the data
 // necessary to verify the previous block in the Entry Block Chain.
 type EBlockHeader struct {
-	ChainID      interfaces.IHash `json:"chainid"`      // The chain id associated with this entry block's entries (hash array)
-	BodyMR       interfaces.IHash `json:"bodymr"`       // The Merkle root of the Entry block's entries (hash array)
-	PrevKeyMR    interfaces.IHash `json:"prevkeymr"`    // The Merkle root of the previous entry block for this chain id
-	PrevFullHash interfaces.IHash `json:"prevfullhash"` // The full hash of the previous entry block for this chain id
+	ChainID      interfaces.*HashS `json:"chainid"`      // The chain id associated with this entry block's entries (hash array)
+	BodyMR       interfaces.*HashS `json:"bodymr"`       // The Merkle root of the Entry block's entries (hash array)
+	PrevKeyMR    interfaces.*HashS `json:"prevkeymr"`    // The Merkle root of the previous entry block for this chain id
+	PrevFullHash interfaces.*HashS `json:"prevfullhash"` // The full hash of the previous entry block for this chain id
 	EBSequence   uint32           `json:"ebsequence"`   // Entry block sequence number: ie 7 = the seventh entry block for this chain id
 	DBHeight     uint32           `json:"dbheight"`     // The directory block height this entry block is located in
 	EntryCount   uint32           `json:"entrycount"`   // How many entries are in the hash array for this entry block
@@ -111,50 +111,50 @@ func (e *EBlockHeader) String() string {
 }
 
 // GetChainID returns the chain id of this entry block
-func (e *EBlockHeader) GetChainID() (rval interfaces.IHash) {
+func (e *EBlockHeader) GetChainID() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "EBlockHeader.GetChainID") }()
 
 	return e.ChainID
 }
 
 // SetChainID sets the chain id associated with this entry block's entries
-func (e *EBlockHeader) SetChainID(chainID interfaces.IHash) {
+func (e *EBlockHeader) SetChainID(chainID interfaces.*HashS) {
 	e.ChainID = chainID
 }
 
 // GetBodyMR returns the Merkle root of the entry blocks body (the hash array)
-func (e *EBlockHeader) GetBodyMR() (rval interfaces.IHash) {
+func (e *EBlockHeader) GetBodyMR() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "EBlockHeader.GetBodyMR") }()
 
 	return e.BodyMR
 }
 
 // SetBodyMR sets the body Merkle root to th einput value
-func (e *EBlockHeader) SetBodyMR(bodyMR interfaces.IHash) {
+func (e *EBlockHeader) SetBodyMR(bodyMR interfaces.*HashS) {
 	e.BodyMR = bodyMR
 }
 
 // GetPrevKeyMR return the previous entry blocks Merkle root
-func (e *EBlockHeader) GetPrevKeyMR() (rval interfaces.IHash) {
+func (e *EBlockHeader) GetPrevKeyMR() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "EBlockHeader.GetPrevKeyMR") }()
 
 	return e.PrevKeyMR
 }
 
 // SetPrevKeyMR sets the previous entry block key Merkle root to the input value
-func (e *EBlockHeader) SetPrevKeyMR(prevKeyMR interfaces.IHash) {
+func (e *EBlockHeader) SetPrevKeyMR(prevKeyMR interfaces.*HashS) {
 	e.PrevKeyMR = prevKeyMR
 }
 
 // GetPrevFullHash returns the previous entry blocks full hash associated with this chain id
-func (e *EBlockHeader) GetPrevFullHash() (rval interfaces.IHash) {
+func (e *EBlockHeader) GetPrevFullHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "EBlockHeader.GetPrevFullHash") }()
 
 	return e.PrevFullHash
 }
 
 // SetPrevFullHash sets the previous entry blocks full hash associated with this chain id
-func (e *EBlockHeader) SetPrevFullHash(prevFullHash interfaces.IHash) {
+func (e *EBlockHeader) SetPrevFullHash(prevFullHash interfaces.*HashS) {
 	e.PrevFullHash = prevFullHash
 }
 

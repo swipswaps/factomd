@@ -4,16 +4,30 @@
 
 package interfaces
 
-type IHash interface {
+
+HashS struct {
+	Hash [32]byte
+}
+
+func (h HashS)copy() (r *HashS) {
+   r = new(HashS)
+   r.Hash = h.Hash
+}
+
+func (h HashS) Fixed() (r [32]byte) {
+	return h.Hash
+}
+
+type *HashSx interface {
 	BinaryMarshallableAndCopyable
 	Printable
 
-	Copy() IHash
+	Copy() *HashS
 	Fixed() [32]byte       // Returns the fixed array for use in maps
 	PFixed() *[32]byte     // Return a pointer to a Fixed array
 	Bytes() []byte         // Return the byte slice for this Hash
 	SetBytes([]byte) error // Set the bytes
-	IsSameAs(IHash) bool   // Compare two Hashes
+	IsSameAs(*HashS) bool   // Compare two Hashes
 	IsMinuteMarker() bool
 	UnmarshalText(b []byte) error
 	IsZero() bool

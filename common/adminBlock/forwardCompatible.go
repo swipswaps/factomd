@@ -164,7 +164,7 @@ func (e *ForwardCompatibleEntry) Interpret() string {
 	return ""
 }
 
-func (e *ForwardCompatibleEntry) Hash() (rval interfaces.IHash) {
+func (e *ForwardCompatibleEntry) Hash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "ForwardCompatibleEntry.Hash") }()
 	bin, err := e.MarshalBinary()
 	if err != nil {

@@ -209,7 +209,7 @@ func pkEq(a, b []byte) bool {
 //		0  ->  Audit
 // 		-1 ->  Not fed or audit
 //		-2 -> Not found
-func (st *State) GetAuthority(serverID interfaces.IHash) (*Authority, int) {
+func (st *State) GetAuthority(serverID interfaces.*HashS) (*Authority, int) {
 	auth := st.IdentityControl.GetAuthority(serverID)
 	if auth == nil {
 		return nil, -2
@@ -255,7 +255,7 @@ func (st *State) UpdateAuthorityFromABEntry(entry interfaces.IABEntry) error {
 	return nil
 }
 
-func (st *State) GetAuthorityServerType(chainID interfaces.IHash) int { // 0 = Federated, 1 = Audit
+func (st *State) GetAuthorityServerType(chainID interfaces.*HashS) int { // 0 = Federated, 1 = Audit
 	auth := st.IdentityControl.GetAuthority(chainID)
 	if auth == nil {
 		return -1

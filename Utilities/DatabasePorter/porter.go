@@ -255,7 +255,7 @@ func SaveBlocksLoop(input chan []interfaces.IDirectoryBlock, done chan int) {
 						eBlockEntries := eblock.GetEntryHashes()
 						c2 := make(chan int, len(eBlockEntries))
 						for _, eHash := range eBlockEntries {
-							go func(ehash interfaces.IHash) {
+							go func(ehash interfaces.*HashS) {
 								defer func() {
 									c2 <- 1
 								}()

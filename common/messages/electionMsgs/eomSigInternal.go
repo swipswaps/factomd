@@ -26,7 +26,7 @@ type EomSigInternal struct {
 	msgbase.MessageBase
 	NName    string
 	SigType  bool             // True of EOM, False if DBSig
-	ServerID interfaces.IHash // Hash of message acknowledged
+	ServerID interfaces.*HashS // Hash of message acknowledged
 	DBHeight uint32           // Directory Block Height that owns this ack
 	Height   uint32           // Height of this ack in this process list
 }
@@ -53,7 +53,7 @@ func (m *EomSigInternal) MarshalBinary() (data []byte, err error) {
 	if err = buf.PushByte(constants.INTERNALEOMSIG); err != nil {
 		return nil, err
 	}
-	if e := buf.PushIHash(m.ServerID); e != nil {
+	if e := buf.Push*HashS(m.ServerID); e != nil {
 		return nil, e
 	}
 	if e := buf.PushInt(int(m.DBHeight)); e != nil {
@@ -69,7 +69,7 @@ func (m *EomSigInternal) MarshalBinary() (data []byte, err error) {
 	return data, nil
 }
 
-func (m *EomSigInternal) GetMsgHash() (rval interfaces.IHash) {
+func (m *EomSigInternal) GetMsgHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "EomSigInternal.GetMsgHash") }()
 
 	if m.MsgHash == nil {
@@ -218,7 +218,7 @@ func (m *EomSigInternal) ElectionProcess(is interfaces.IState, elect interfaces.
 	e.Round = e.Round[:0] // Get rid of any previous round counting.
 }
 
-func (m *EomSigInternal) GetServerID() (rval interfaces.IHash) {
+func (m *EomSigInternal) GetServerID() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "EomSigInternal.GetServerID") }()
 
 	return m.ServerID
@@ -228,14 +228,14 @@ func (m *EomSigInternal) LogFields() log.Fields {
 	return log.Fields{"category": "message", "messagetype": "EomSigInternal", "dbheight": m.DBHeight, "newleader": m.ServerID.String()[4:12]}
 }
 
-func (m *EomSigInternal) GetRepeatHash() (rval interfaces.IHash) {
+func (m *EomSigInternal) GetRepeatHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "EomSigInternal.GetRepeatHash") }()
 
 	return m.GetMsgHash()
 }
 
 // We have to return the hash of the underlying message.
-func (m *EomSigInternal) GetHash() (rval interfaces.IHash) {
+func (m *EomSigInternal) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "EomSigInternal.GetHash") }()
 
 	return m.GetMsgHash()

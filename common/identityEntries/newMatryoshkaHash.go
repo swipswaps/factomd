@@ -21,9 +21,9 @@ type NewMatryoshkaHashStructure struct {
 	//and the text "New Matryoshka Hash".
 	FunctionName []byte //"New Matryoshka Hash"
 	//Next is the root identity chainID.
-	RootIdentityChainID interfaces.IHash
+	RootIdentityChainID interfaces.*HashS
 	//Forth is the outermost M-hash.
-	OutermostMHash interfaces.IHash
+	OutermostMHash interfaces.*HashS
 	//Fifth is a timestamp.
 	Timestamp []byte
 	//Sixth is the root identity key preimage.
@@ -51,7 +51,7 @@ func (nmh *NewMatryoshkaHashStructure) MarshalForSig() []byte {
 	return answer
 }
 
-func (nmh *NewMatryoshkaHashStructure) VerifySignature(key1 interfaces.IHash) error {
+func (nmh *NewMatryoshkaHashStructure) VerifySignature(key1 interfaces.*HashS) error {
 	bin := nmh.MarshalForSig()
 	pk := new(primitives.PublicKey)
 	err := pk.UnmarshalBinary(nmh.PreimageIdentityKey[1:])
@@ -128,7 +128,7 @@ func (nmh *NewMatryoshkaHashStructure) ToExternalIDs() [][]byte {
 	return extIDs
 }
 
-func (nmh *NewMatryoshkaHashStructure) GetChainID() (rval interfaces.IHash) {
+func (nmh *NewMatryoshkaHashStructure) GetChainID() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "NewMatryoshkaHashStructure.GetChainID") }()
 
 	extIDs := nmh.ToExternalIDs()

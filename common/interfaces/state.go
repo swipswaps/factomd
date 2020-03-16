@@ -42,8 +42,8 @@ type IState interface {
 	LoadConfig(filename string, networkFlag string)
 	Init()
 	String() string
-	GetIdentityChainID() IHash
-	SetIdentityChainID(IHash)
+	GetIdentityChainID() *HashS
+	SetIdentityChainID(*HashS)
 	Sign([]byte) IFullSignature
 	Log(level string, message string)
 	Logf(level string, format string, args ...interface{})
@@ -57,10 +57,10 @@ type IState interface {
 	GetFactomdVersion() string
 	GetDBHeightComplete() uint32
 	GetDBHeightAtBoot() uint32
-	DatabaseContains(hash IHash) bool
+	DatabaseContains(hash *HashS) bool
 	SetOut(bool)  // Output is turned on if set to true
 	GetOut() bool // Return true if Print or Println write output
-	LoadDataByHash(requestedHash IHash) (BinaryMarshallable, int, error)
+	LoadDataByHash(requestedHash *HashS) (BinaryMarshallable, int, error)
 	LoadDBState(dbheight uint32) (IMsg, error)
 	LoadSpecificMsg(dbheight uint32, vm int, plistheight uint32) (IMsg, error)
 	LoadSpecificMsgAndAck(dbheight uint32, vm int, plistheight uint32) (IMsg, IMsg, error)
@@ -69,12 +69,12 @@ type IState interface {
 	GetStatus() []string
 	AddStatus(status string)
 
-	AddDBSig(dbheight uint32, chainID IHash, sig IFullSignature)
+	AddDBSig(dbheight uint32, chainID *HashS, sig IFullSignature)
 	AddPrefix(string)
-	AddFedServer(uint32, IHash) int
+	AddFedServer(uint32, *HashS) int
 	GetFedServers(uint32) []IServer
-	RemoveFedServer(uint32, IHash)
-	AddAuditServer(uint32, IHash) int
+	RemoveFedServer(uint32, *HashS)
+	AddAuditServer(uint32, *HashS) int
 	GetAuditServers(uint32) []IServer
 	GetOnlineAuditServers(uint32) []IServer
 
@@ -133,13 +133,13 @@ type IState interface {
 	// =====
 	GetAuditHeartBeats() []IMsg // The checklist of HeartBeats for this period
 
-	GetNewEBlocks(dbheight uint32, hash IHash) IEntryBlock
-	PutNewEBlocks(dbheight uint32, hash IHash, eb IEntryBlock)
-	PutNewEntries(dbheight uint32, hash IHash, eb IEntry)
+	GetNewEBlocks(dbheight uint32, hash *HashS) IEntryBlock
+	PutNewEBlocks(dbheight uint32, hash *HashS, eb IEntryBlock)
+	PutNewEntries(dbheight uint32, hash *HashS, eb IEntry)
 
 	GetPendingEntries(interface{}) []IPendingEntry
-	NextCommit(hash IHash) IMsg
-	PutCommit(hash IHash, msg IMsg)
+	NextCommit(hash *HashS) IMsg
+	PutCommit(hash *HashS, msg IMsg)
 
 	IncEntryChains()
 	IncEntries()
@@ -156,18 +156,18 @@ type IState interface {
 	GetNetworkID() uint32
 
 	// Bootstrap Identity Information is dependent on Network
-	GetNetworkBootStrapKey() IHash
-	GetNetworkBootStrapIdentity() IHash
+	GetNetworkBootStrapKey() *HashS
+	GetNetworkBootStrapIdentity() *HashS
 
 	// Skeleton Identity Information.
-	GetNetworkSkeletonIdentity() IHash
-	GetNetworkSkeletonKey() IHash
+	GetNetworkSkeletonIdentity() *HashS
+	GetNetworkSkeletonKey() *HashS
 	IntiateNetworkSkeletonIdentity() error
 
 	// Getting info about an identity
-	GetSigningKey(id IHash) (IHash, int)
+	GetSigningKey(id *HashS) (*HashS, int)
 
-	GetMatryoshka(dbheight uint32) IHash // Reverse Hash
+	GetMatryoshka(dbheight uint32) *HashS // Reverse Hash
 
 	// These are methods run by the consensus algorithm to track what servers are the leaders
 	// and what lists they are responsible for.
@@ -176,14 +176,14 @@ type IState interface {
 	IsRunLeader() bool              // Returns true if the node is finished syncing up it's database
 	GetLeaderVM() int               // Get the Leader VM (only good within a minute)
 	// Returns the list of VirtualServers at a given directory block height and minute
-	GetVirtualServers(dbheight uint32, minute int, identityChainID IHash) (found bool, index int)
+	GetVirtualServers(dbheight uint32, minute int, identityChainID *HashS) (found bool, index int)
 	// Returns true if between minutes
 
 	// Get the message for the given vm index, dbheight, and height.  Returns nil if I
 	// have no such message.
 	GetMsg(vmIndex int, dbheight int, height int) (IMsg, error)
 
-	GetEBlockKeyMRFromEntryHash(entryHash IHash) IHash
+	GetEBlockKeyMRFromEntryHash(entryHash *HashS) *HashS
 	GetAnchor() IAnchor
 
 	// Database
@@ -263,7 +263,7 @@ type IState interface {
 
 	// No Entry Yet returns true if no Entry Hash is found in the Replay structs.
 	// Returns false if we have seen an Entry Replay in the current period.
-	NoEntryYet(IHash, Timestamp) bool
+	NoEntryYet(*HashS, Timestamp) bool
 
 	// Calculates the transaction rate this node is seeing.
 	//		totalTPS	: Total transactions / total time node running
@@ -272,23 +272,23 @@ type IState interface {
 	CalculateTransactionRate() (totalTPS float64, instantTPS float64)
 
 	//For ACK
-	GetACKStatus(hash IHash) (int, IHash, Timestamp, Timestamp, error)
-	GetSpecificACKStatus(hash IHash) (int, IHash, Timestamp, Timestamp, error)
+	GetACKStatus(hash *HashS) (int, *HashS, Timestamp, Timestamp, error)
+	GetSpecificACKStatus(hash *HashS) (int, *HashS, Timestamp, Timestamp, error)
 
 	// Acks with ChainIDs so you can select which hash type
-	GetEntryCommitAckByEntryHash(hash IHash) (status int, commit IMsg)
-	GetEntryRevealAckByEntryHash(hash IHash) (status int, blktime Timestamp, commit IMsg)
-	GetEntryCommitAckByTXID(hash IHash) (status int, blktime Timestamp, commit IMsg, entryhash IHash)
-	IsNewOrPendingEBlocks(dbheight uint32, hash IHash) bool
+	GetEntryCommitAckByEntryHash(hash *HashS) (status int, commit IMsg)
+	GetEntryRevealAckByEntryHash(hash *HashS) (status int, blktime Timestamp, commit IMsg)
+	GetEntryCommitAckByTXID(hash *HashS) (status int, blktime Timestamp, commit IMsg, entryhash *HashS)
+	IsNewOrPendingEBlocks(dbheight uint32, hash *HashS) bool
 
 	// Used in API to reject commits properly and inform user
-	IsHighestCommit(hash IHash, msg IMsg) bool
+	IsHighestCommit(hash *HashS, msg IMsg) bool
 
-	FetchPaidFor(hash IHash) (IHash, error)
-	FetchFactoidTransactionByHash(hash IHash) (ITransaction, error)
-	FetchECTransactionByHash(hash IHash) (IECBlockEntry, error)
-	FetchEntryByHash(IHash) (IEBEntry, error)
-	FetchEntryHashFromProcessListsByTxID(string) (IHash, error)
+	FetchPaidFor(hash *HashS) (*HashS, error)
+	FetchFactoidTransactionByHash(hash *HashS) (ITransaction, error)
+	FetchECTransactionByHash(hash *HashS) (IECBlockEntry, error)
+	FetchEntryByHash(*HashS) (IEBEntry, error)
+	FetchEntryHashFromProcessListsByTxID(string) (*HashS, error)
 
 	// FER section
 	ProcessRecentFERChainEntries()
@@ -297,18 +297,18 @@ type IState interface {
 	GetPredictiveFER() uint64
 
 	// Identity Section
-	VerifyIsAuthority(cid IHash) bool // True if is authority
+	VerifyIsAuthority(cid *HashS) bool // True if is authority
 	UpdateAuthorityFromABEntry(entry IABEntry) error
 	VerifyAuthoritySignature(Message []byte, signature *[64]byte, dbheight uint32) (int, error)
 	FastVerifyAuthoritySignature(Message []byte, signature IFullSignature, dbheight uint32) (int, error)
 	UpdateAuthSigningKeys(height uint32)
-	AddIdentityFromChainID(cid IHash) error
+	AddIdentityFromChainID(cid *HashS) error
 
 	AddAuthorityDelta(changeString string)
 
 	GetElections() IElections
 	GetAuthorities() []IAuthority
-	GetAuthorityInterface(chainid IHash) IAuthority
+	GetAuthorityInterface(chainid *HashS) IAuthority
 	GetLeaderPL() IProcessList
 	GetLLeaderHeight() uint32
 	GetEntryDBHeightComplete() uint32
@@ -330,7 +330,7 @@ type IState interface {
 	IsSyncingEOMs() bool
 	IsSyncingDBSigs() bool
 	DidCreateLastBlockFromDBState() bool
-	GetUnsyncedServers() (ids []IHash, vms []int)
+	GetUnsyncedServers() (ids []*HashS, vms []int)
 	Validate(msg IMsg) (validToSend int, validToExecute int)
 	GetIgnoreDone() bool
 

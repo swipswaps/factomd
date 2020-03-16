@@ -38,7 +38,7 @@ var (
 //			-1	--> Follower
 //			0 	--> Audit Server
 //			1	--> Federated
-func (st *State) GetSigningKey(id interfaces.IHash) (interfaces.IHash, int) {
+func (st *State) GetSigningKey(id interfaces.*HashS) (interfaces.*HashS, int) {
 	getReturnStatInt := func(stat uint8) int {
 		if stat == constants.IDENTITY_PENDING_FEDERATED_SERVER || stat == constants.IDENTITY_FEDERATED_SERVER {
 			return 1
@@ -65,7 +65,7 @@ func (st *State) GetSigningKey(id interfaces.IHash) (interfaces.IHash, int) {
 	return nil, -1
 }
 
-func (st *State) GetNetworkSkeletonKey() (rval interfaces.IHash) {
+func (st *State) GetNetworkSkeletonKey() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "State.GetNetworkSkeletonKey") }()
 
 	id := st.IdentityControl.GetIdentity(st.GetNetworkSkeletonIdentity())
@@ -150,7 +150,7 @@ func (st *State) LoadIdentityByEntry(ent interfaces.IEBEntry, height uint32, dbl
 }
 
 // Called by AddServer Message
-func ProcessIdentityToAdminBlock(st *State, chainID interfaces.IHash, servertype int) bool {
+func ProcessIdentityToAdminBlock(st *State, chainID interfaces.*HashS, servertype int) bool {
 	flog := identLogger.WithFields(st.Logger.Data).WithField("func", "ProcessIdentityToAdminBlock")
 
 	err := st.AddIdentityFromChainID(chainID)
@@ -202,12 +202,12 @@ func ProcessIdentityToAdminBlock(st *State, chainID interfaces.IHash, servertype
 
 // Verifies if is authority
 //		Return true if authority, false if not
-func (st *State) VerifyIsAuthority(cid interfaces.IHash) bool {
+func (st *State) VerifyIsAuthority(cid interfaces.*HashS) bool {
 	return st.IdentityControl.GetAuthority(cid) != nil
 }
 
 // AddIdentityFromChainID will add an identity to our list to watch and sync it.
-func (st *State) AddIdentityFromChainID(cid interfaces.IHash) error {
+func (st *State) AddIdentityFromChainID(cid interfaces.*HashS) error {
 	id := st.IdentityControl.GetIdentity(cid)
 	if id == nil {
 		id = NewIdentity()
@@ -329,7 +329,7 @@ SyncIdentitiesLoop:
 }
 
 // AddIdentityEblocks will find all eblocks for a root/management chain and add them to the sync list
-func (st *State) AddIdentityEblocks(cid interfaces.IHash, rootChain bool) error {
+func (st *State) AddIdentityEblocks(cid interfaces.*HashS, rootChain bool) error {
 	id := st.IdentityControl.GetIdentity(cid)
 	if id == nil {
 		return fmt.Errorf("[%s] identity not found", cid.String()[:10])
@@ -403,7 +403,7 @@ func (st *State) AddNewIdentityEblocks(eblocks []interfaces.IEntryBlock, dblockT
  *************************/
 
 // FetchIdentityChainEntriesInCreateOrder will grab all entries in a chain for an identity in the order they were created.
-func (s *State) FetchIdentityChainEntriesInCreateOrder(chainid interfaces.IHash) ([]IdentityEntry, error) {
+func (s *State) FetchIdentityChainEntriesInCreateOrder(chainid interfaces.*HashS) ([]IdentityEntry, error) {
 	head, err := s.DB.FetchHeadIndexByChainID(chainid)
 	if err != nil {
 		return nil, err
@@ -461,7 +461,7 @@ func (s *State) FetchIdentityChainEntriesInCreateOrder(chainid interfaces.IHash)
 	return entries, nil
 }
 
-func (st *State) LookupIdentityInBlockchainByChainID(cid interfaces.IHash) error {
+func (st *State) LookupIdentityInBlockchainByChainID(cid interfaces.*HashS) error {
 	identityRegisterChain, _ := primitives.HexToHash(MAIN_FACTOM_IDENTITY_LIST)
 
 	// No root entries, means no identity

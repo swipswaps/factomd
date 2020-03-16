@@ -60,12 +60,12 @@ func (e *EBlock) IsSameAs(b interfaces.IEntryBlock) bool {
 }
 
 // GetEntryHashes returns the cumulative entries into a single chain for this 10 minute block
-func (e *EBlock) GetEntryHashes() []interfaces.IHash {
+func (e *EBlock) GetEntryHashes() []interfaces.*HashS {
 	return e.GetBody().GetEBEntries()
 }
 
 // GetEntrySigHashes always returns nil
-func (e *EBlock) GetEntrySigHashes() []interfaces.IHash {
+func (e *EBlock) GetEntrySigHashes() []interfaces.*HashS {
 	return nil
 }
 
@@ -80,7 +80,7 @@ func (e *EBlock) GetDatabaseHeight() uint32 {
 }
 
 // GetChainID returns the chain id associated with this entry block
-func (e *EBlock) GetChainID() (rval interfaces.IHash) {
+func (e *EBlock) GetChainID() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "EBlock.GetChainID") }()
 
 	return e.GetHeader().GetChainID()
@@ -92,7 +92,7 @@ func (e *EBlock) GetHashOfChainID() []byte {
 }
 
 // GetHashOfChainIDHash returns the double sha of the chain id
-func (e *EBlock) GetHashOfChainIDHash() (rval interfaces.IHash) {
+func (e *EBlock) GetHashOfChainIDHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "EBlock.GetHashOfChainIDHash") }()
 
 	hash := primitives.NewZeroHash()
@@ -101,7 +101,7 @@ func (e *EBlock) GetHashOfChainIDHash() (rval interfaces.IHash) {
 }
 
 // DatabasePrimaryIndex returns the key Merkle root of the entry block
-func (e *EBlock) DatabasePrimaryIndex() (rval interfaces.IHash) {
+func (e *EBlock) DatabasePrimaryIndex() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "EBlock.DatabasePrimaryIndex") }()
 
 	key, _ := e.KeyMR()
@@ -109,7 +109,7 @@ func (e *EBlock) DatabasePrimaryIndex() (rval interfaces.IHash) {
 }
 
 // DatabaseSecondaryIndex returns the single sha of the marshalled object
-func (e *EBlock) DatabaseSecondaryIndex() (rval interfaces.IHash) {
+func (e *EBlock) DatabaseSecondaryIndex() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "EBlock.DatabaseSecondaryIndex") }()
 
 	h, _ := e.Hash()
@@ -161,7 +161,7 @@ func (e *EBlock) BuildHeader() error {
 }
 
 // GetHash returns the single sha of the marshalled object
-func (e *EBlock) GetHash() (rval interfaces.IHash) {
+func (e *EBlock) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "EBlock.GetHash") }()
 
 	h, _ := e.Hash()
@@ -170,7 +170,7 @@ func (e *EBlock) GetHash() (rval interfaces.IHash) {
 
 // Hash returns the simple Sha256 hash of the serialized Entry Block. Hash is
 // used to provide the PrevFullHash to the next Entry Block in a Chain.
-func (e *EBlock) Hash() (interfaces.IHash, error) {
+func (e *EBlock) Hash() (interfaces.*HashS, error) {
 	p, err := e.MarshalBinary()
 	if err != nil {
 		return nil, err
@@ -179,7 +179,7 @@ func (e *EBlock) Hash() (interfaces.IHash, error) {
 }
 
 // HeaderHash returns the single sha of the marshalled header object
-func (e *EBlock) HeaderHash() (interfaces.IHash, error) {
+func (e *EBlock) HeaderHash() (interfaces.*HashS, error) {
 	e.BuildHeader()
 	header, err := e.GetHeader().MarshalBinary()
 	if err != nil {
@@ -190,7 +190,7 @@ func (e *EBlock) HeaderHash() (interfaces.IHash, error) {
 }
 
 // BodyKeyMR updates the entry header with its current state, and then returns the body Merkle root
-func (e *EBlock) BodyKeyMR() (rval interfaces.IHash) {
+func (e *EBlock) BodyKeyMR() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "EBlock.BodyKeyMR") }()
 
 	e.BuildHeader()
@@ -201,7 +201,7 @@ func (e *EBlock) BodyKeyMR() (rval interfaces.IHash) {
 // with 2) the Merkle Root of the Entry Block Body. The Body Merkle Root is
 // calculated by the func (e *EBlockBody) MR() which is called by the func
 // (e *EBlock) BuildHeader().
-func (e *EBlock) KeyMR() (interfaces.IHash, error) {
+func (e *EBlock) KeyMR() (interfaces.*HashS, error) {
 	// Sha(Sha(header) + BodyMR)
 	e.BuildHeader()
 	h, err := e.HeaderHash()

@@ -42,8 +42,8 @@ type ElectionAdapter struct {
 	// We need these to expand our own votes
 	Volunteers map[[32]byte]*FedVoteVolunteerMsg
 
-	// Audits kept as IHash for easy access (cache)
-	AuditServerList   []interfaces.IHash
+	// Audits kept as *HashS for easy access (cache)
+	AuditServerList   []interfaces.*HashS
 	SimulatedElection *election.Election
 }
 
@@ -66,7 +66,7 @@ func (ea *ElectionAdapter) Status() string {
 	return fmt.Sprintf("Election-  DBHeight: %d, Minut: %d, Electing %d\n%s", ea.DBHeight, ea.Minute, ea.Electing, ea.SimulatedElection.Display.String())
 }
 
-func (ea *ElectionAdapter) GetAudits() []interfaces.IHash {
+func (ea *ElectionAdapter) GetAudits() []interfaces.*HashS {
 	return ea.AuditServerList
 }
 
@@ -88,7 +88,7 @@ func maskId(mask, b primitives.Identity) primitives.Identity {
 	return b
 }
 
-func buildPriorityOrder(audits []interfaces.IServer, dbHash interfaces.IHash, minute int, vm int) (arr []primitives.Identity) {
+func buildPriorityOrder(audits []interfaces.IServer, dbHash interfaces.*HashS, minute int, vm int) (arr []primitives.Identity) {
 	// find a randomizing mask
 	mask := sha256.Sum256(append(dbHash.Bytes(), byte(minute), byte(vm)))
 
@@ -113,7 +113,7 @@ func buildPriorityOrder(audits []interfaces.IServer, dbHash interfaces.IHash, mi
 	return arr
 }
 
-func NewElectionAdapter(e *elections.Elections, dbHash interfaces.IHash) *ElectionAdapter {
+func NewElectionAdapter(e *elections.Elections, dbHash interfaces.*HashS) *ElectionAdapter {
 	ea := new(ElectionAdapter)
 	ea.tagedMessages = make(map[[32]byte]interfaces.IMsg)
 	ea.Volunteers = make(map[[32]byte]*FedVoteVolunteerMsg)
@@ -165,7 +165,7 @@ func (ea *ElectionAdapter) Execute(msg interfaces.IMsg) interfaces.IMsg {
 		//return nil
 	}
 
-	//var from interfaces.IHash
+	//var from interfaces.*HashS
 	//
 	//switch msg.(type) {
 	//case *FedVoteVolunteerMsg:

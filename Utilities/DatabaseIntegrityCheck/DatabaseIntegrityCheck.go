@@ -383,7 +383,7 @@ type BlockSet struct {
 	//EBlocks
 }
 
-func FetchBlockSet(dbo interfaces.DBOverlay, dBlockHash interfaces.IHash) *BlockSet {
+func FetchBlockSet(dbo interfaces.DBOverlay, dBlockHash interfaces.*HashS) *BlockSet {
 	bs := new(BlockSet)
 
 	dBlock, err := dbo.FetchDBlock(dBlockHash)

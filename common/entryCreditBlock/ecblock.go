@@ -82,7 +82,7 @@ func (e *ECBlock) GetEntries() []interfaces.IECBlockEntry {
 
 // GetEntryByHash returns the entry whose hash matches the input hash, or whose signature hash matches the input hash.
 // If no hash is found, returns nil
-func (e *ECBlock) GetEntryByHash(hash interfaces.IHash) interfaces.IECBlockEntry {
+func (e *ECBlock) GetEntryByHash(hash interfaces.*HashS) interfaces.IECBlockEntry {
 	if hash == nil {
 		return nil
 	}
@@ -100,9 +100,9 @@ func (e *ECBlock) GetEntryByHash(hash interfaces.IHash) interfaces.IECBlockEntry
 }
 
 // GetEntryHashes returns a list of hashes for each entry in the ECBlock that is either a balance increase, chain commit, or entry commit
-func (e *ECBlock) GetEntryHashes() []interfaces.IHash {
+func (e *ECBlock) GetEntryHashes() []interfaces.*HashS {
 	entries := e.GetBody().GetEntries()
-	answer := make([]interfaces.IHash, 0, len(entries))
+	answer := make([]interfaces.*HashS, 0, len(entries))
 	for _, entry := range entries {
 		if entry.ECID() == constants.ECIDBalanceIncrease ||
 			entry.ECID() == constants.ECIDChainCommit ||
@@ -115,9 +115,9 @@ func (e *ECBlock) GetEntryHashes() []interfaces.IHash {
 
 // GetEntrySigHashes returns a list of signature hashes for each entry in the ECBlock that is either a balance increase, chain commit,
 // or entry commit
-func (e *ECBlock) GetEntrySigHashes() []interfaces.IHash {
+func (e *ECBlock) GetEntrySigHashes() []interfaces.*HashS {
 	entries := e.GetBody().GetEntries()
-	answer := make([]interfaces.IHash, 0, len(entries))
+	answer := make([]interfaces.*HashS, 0, len(entries))
 	for _, entry := range entries {
 		if entry.ECID() == constants.ECIDBalanceIncrease ||
 			entry.ECID() == constants.ECIDChainCommit ||
@@ -155,14 +155,14 @@ func (e *ECBlock) GetDatabaseHeight() uint32 {
 }
 
 // GetChainID returns the chain id of this EC block
-func (e *ECBlock) GetChainID() (rval interfaces.IHash) {
+func (e *ECBlock) GetChainID() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "ECBlock.GetChainID") }()
 
 	return e.GetHeader().GetECChainID()
 }
 
 // DatabasePrimaryIndex returns the hash of the header
-func (e *ECBlock) DatabasePrimaryIndex() (rval interfaces.IHash) {
+func (e *ECBlock) DatabasePrimaryIndex() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "ECBlock.DatabasePrimaryIndex") }()
 
 	key, _ := e.HeaderHash()
@@ -170,7 +170,7 @@ func (e *ECBlock) DatabasePrimaryIndex() (rval interfaces.IHash) {
 }
 
 // DatabaseSecondaryIndex returns the full hash (header and body) of the object
-func (e *ECBlock) DatabaseSecondaryIndex() (rval interfaces.IHash) {
+func (e *ECBlock) DatabaseSecondaryIndex() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "ECBlock.DatabaseSecondaryIndex") }()
 
 	key, _ := e.GetFullHash()
@@ -183,7 +183,7 @@ func (e *ECBlock) AddEntry(entries ...interfaces.IECBlockEntry) {
 }
 
 // GetHash returns the full hash (header and body) of the object
-func (e *ECBlock) GetHash() (rval interfaces.IHash) {
+func (e *ECBlock) GetHash() (rval interfaces.*HashS) {
 	defer func() { rval = primitives.CheckNil(rval, "ECBlock.GetHash") }()
 
 	h, _ := e.GetFullHash()
@@ -191,7 +191,7 @@ func (e *ECBlock) GetHash() (rval interfaces.IHash) {
 }
 
 // GetFullHash returns the full hash (header and body) of the object
-func (e *ECBlock) GetFullHash() (interfaces.IHash, error) {
+func (e *ECBlock) GetFullHash() (interfaces.*HashS, error) {
 	p, err := e.MarshalBinary()
 	if err != nil {
 		return nil, err
@@ -200,7 +200,7 @@ func (e *ECBlock) GetFullHash() (interfaces.IHash, error) {
 }
 
 // HeaderHash returns the hash of the header
-func (e *ECBlock) HeaderHash() (interfaces.IHash, error) {
+func (e *ECBlock) HeaderHash() (interfaces.*HashS, error) {
 	if err := e.BuildHeader(); err != nil {
 		return nil, err
 	}
