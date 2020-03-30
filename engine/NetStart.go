@@ -26,6 +26,7 @@ import (
 	llog "github.com/FactomProject/factomd/log"
 	controlpanel "github.com/FactomProject/factomd/modules/controlPanel"
 	"github.com/FactomProject/factomd/modules/debugsettings"
+	"github.com/FactomProject/factomd/modules/fsmount"
 	"github.com/FactomProject/factomd/modules/leader"
 	"github.com/FactomProject/factomd/modules/registry"
 	"github.com/FactomProject/factomd/modules/worker"
@@ -371,6 +372,9 @@ func makeServer(w *worker.Thread, p *globals.FactomParams) (node *fnode.FactomNo
 		initAnchors(node.State, p.ReparseAnchorChains)
 		echoConfig(node.State, p) // print the config only once
 		// Init settings
+
+		// Setup FS interaction via using FUSE
+		fsmount.Start(w, node.State)
 	})
 
 	if state.EnableLeaderThread {
