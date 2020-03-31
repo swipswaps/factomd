@@ -13,6 +13,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/FactomProject/factomd/modules/debugsettings"
+
 	"github.com/FactomProject/factomd/common"
 	"github.com/FactomProject/factomd/common/constants"
 	"github.com/FactomProject/factomd/common/globals"
@@ -25,8 +27,7 @@ import (
 	"github.com/FactomProject/factomd/fnode"
 	llog "github.com/FactomProject/factomd/log"
 	controlpanel "github.com/FactomProject/factomd/modules/controlPanel"
-	"github.com/FactomProject/factomd/modules/debugsettings"
-	"github.com/FactomProject/factomd/modules/fsmount"
+	"github.com/FactomProject/factomd/modules/ipfs"
 	"github.com/FactomProject/factomd/modules/leader"
 	"github.com/FactomProject/factomd/modules/registry"
 	"github.com/FactomProject/factomd/modules/worker"
@@ -365,29 +366,27 @@ func makeServer(w *worker.Thread, p *globals.FactomParams) (node *fnode.FactomNo
 	node.State.NameInit(node, node.State.GetFactomNodeName()+"STATE", reflect.TypeOf(node.State).String())
 	node.State.BuildPubRegistry()
 
+	{ // setup logging and debug
+		debugsettings.NewNode(node.State.GetFactomNodeName())
+		node.State.Logger = log.WithFields(log.Fields{"node-name": node.State.GetFactomNodeName(), "identity": node.State.GetIdentityChainID().String()})
+		if p.UseLogstash {
+			hookLogstash(node.State, p.LogstashURL)
+		}
+
+	}
+
 	state0Init.Do(func() {
 		logPort = p.LogPort
 		setupFirstAuthority(node.State)
 		initEntryHeight(node.State, p.Sync2)
 		initAnchors(node.State, p.ReparseAnchorChains)
 		echoConfig(node.State, p) // print the config only once
-		// Init settings
-
-		// Setup FS interaction via using FUSE
-		fsmount.Start(w, node.State)
+		ipfs.Start(w, node.State) // IPFS replication
 	})
 
 	if state.EnableLeaderThread {
 		l := leader.New(node.State)
 		l.Start(w)
-	}
-
-	// TODO: Init any settings from the config
-	debugsettings.NewNode(node.State.GetFactomNodeName())
-
-	node.State.Logger = log.WithFields(log.Fields{"node-name": node.State.GetFactomNodeName(), "identity": node.State.GetIdentityChainID().String()})
-	if p.UseLogstash {
-		hookLogstash(node.State, p.LogstashURL)
 	}
 
 	return node

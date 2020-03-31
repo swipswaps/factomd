@@ -1,8 +1,8 @@
-package fsmount
+package ipfs
 
 import (
 	"github.com/FactomProject/factomd/common/interfaces"
-	"github.com/FactomProject/factomd/modules/fsmount/entryfs"
+	"github.com/FactomProject/factomd/modules/ipfs/entryfs"
 	"github.com/FactomProject/factomd/modules/worker"
 )
 
