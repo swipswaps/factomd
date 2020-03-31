@@ -1,9 +1,13 @@
 package ipfs
 
 import (
+	"fmt"
 	"github.com/FactomProject/factomd/common/interfaces"
 	"github.com/FactomProject/factomd/modules/ipfs/entryfs"
 	"github.com/FactomProject/factomd/modules/worker"
+	shell "github.com/ipfs/go-ipfs-api"
+	"os"
+	"strings"
 )
 
 // KLUDGE: fs mount location is hardcoded
@@ -24,4 +28,17 @@ func Start(w *worker.Thread, s interfaces.IState) {
 			server.Unmount()
 		})
 	})
+}
+
+func _main() {
+	// Where your local node is running on localhost:5001
+	sh := shell.NewShell("localhost:5001")
+	shell.AddOpts()
+	sh.Add()
+	cid, err := sh.Add(strings.NewReader("hello world!"))
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: %s", err)
+		os.Exit(1)
+	}
+	fmt.Printf("added %s", cid)
 }
