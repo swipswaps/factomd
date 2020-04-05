@@ -1,0 +1,11 @@
+syntax = "proto3";
+package eventmessages;
+option java_package = "com.factom.factomd.eventLog";
+
+import "eventmessages/factomEvents.proto";
+
+
+// add a streaming service based on live feed data structures
+service EventLog {
+  rpc EventStreamRPC (stream FactomEvent) returns (stream FactomEvent) {}
+}
