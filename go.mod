@@ -23,7 +23,7 @@ require (
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dustin/go-humanize v1.0.0
-	github.com/gogo/protobuf v1.3.1-0.20190908201246-8a5ed79f6888
+	github.com/gogo/protobuf v1.3.1
 	github.com/golang/protobuf v1.3.2
 	github.com/gorilla/mux v1.7.4-0.20190720201435-e67b3c02c719
 	github.com/hinshun/vt10x v0.0.0-20180809195222-d55458df857c // indirect

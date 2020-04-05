@@ -155,7 +155,7 @@ func NetStart(w *worker.Thread, p *globals.FactomParams, listenToStdin bool) {
 	}
 	startNetwork(w, p)
 	startFnodes(w)
-	startLiveFeed(w, p)
+	startEventLogs(w, p)
 	startWebserver(w)
 	startControlPanel(w)
 	simulation.StartSimControl(w, p.ListenTo, listenToStdin)
@@ -200,15 +200,12 @@ func initAnchors(s *state.State, reparse bool) {
 }
 
 // start live feed service (for fnode 0 only)
-func startLiveFeed(w *worker.Thread, p *globals.FactomParams) {
+func startLiveFeed(p *globals.FactomParams) {
 	state0 := fnode.Get(0).State
 	config := state0.Cfg.(*util.FactomdConfig)
 
 	if config.LiveFeedAPI.EnableLiveFeedAPI || p.EnableLiveFeedAPI {
 		state0.LiveFeedService.Start(state0, config, p)
-		if p.UseLogstash {
-			eventForward(w)
-		}
 	}
 }
 
@@ -395,6 +392,7 @@ func makeServer(w *worker.Thread, p *globals.FactomParams) (node *fnode.FactomNo
 	debugsettings.NewNode(node.State.GetFactomNodeName())
 
 	node.State.Logger = log.WithFields(log.Fields{"node-name": node.State.GetFactomNodeName(), "identity": node.State.GetIdentityChainID().String()})
+
 	if p.UseLogstash {
 		hookLogstash(node.State, p.LogstashURL)
 	}
@@ -459,8 +457,7 @@ func AddNode() {
 	p.WaitForRunning()
 }
 
-// enable output to logstash
-func hookLogstash(s *state.State, logStashURL string) error {
+func hookLogstashLogger(logger *log.Logger, logStashURL string) error {
 	hook, err := logrustash.NewAsyncHook("tcp", logStashURL, "factomdLogs")
 	if err != nil {
 		fmt.Printf("Failed to connect to logstash %v", err)
@@ -471,18 +468,36 @@ func hookLogstash(s *state.State, logStashURL string) error {
 	hook.ReconnectDelayMultiplier = 2
 	hook.MaxReconnectRetries = 10
 
-	s.Logger.Logger.Hooks.Add(hook)
+	logger.Hooks.Add(hook)
 	return nil
+
 }
 
-// forward live feed events to logstash
-// NOTE set env var 'EVENTLOG' to enable
-func eventForward(w *worker.Thread) {
+func hookLogstash(s *state.State, logStashURL string) error {
+	if _, enabled := os.LookupEnv("EVENTLOG"); !enabled {
+		return nil
+	}
+	return hookLogstashLogger(s.Logger.Logger, logStashURL)
+}
+
+// Forward only live feed events to Logstash
+func startEventLogs(w *worker.Thread, p *globals.FactomParams) {
+	// KLUDGE: rather than expose via command line options - set an ENV var
 	if _, enabled := os.LookupEnv("EVENTLOG"); !enabled {
 		return
 	}
+
+	if p.LogstashURL == "" {
+		panic("must set live feed url")
+	}
+
+	startLiveFeed(p) // FIXME: check to see it's already running
+
 	w.Spawn("LiveFeed Logs", func(w *worker.Thread) {
+		// TODO refactor threaded logger
 		threadLogger := log.WithFields(log.Fields{"thread": w.ID, "process": w.PID})
+		hookLogstashLogger(threadLogger.Logger, p.LogstashURL)
+
 		var feed *pubsub.SubChannel
 		w.OnReady(func() {
 			feed = pubsub.SubFactory.Channel(5000).Subscribe("/live-feed")
