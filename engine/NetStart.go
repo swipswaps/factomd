@@ -505,20 +505,103 @@ func startEventLogs(w *worker.Thread, p *globals.FactomParams) {
 		w.OnRun(func() {
 			for {
 				select {
-				case v, ok := <-feed.Updates:
-					if !ok {
+				case v, open := <-feed.Updates:
+					if !open {
 						return
 					}
 					evt := v.(*eventmessages.FactomEvent)
-					data, err := json.Marshal(evt.Event)
-					if err != nil {
-						panic(err)
-					}
-					threadLogger.WithFields(
-						log.Fields{"Event": string(data)},
-					).Info(evt.EventSource)
+					handleEvent(threadLogger, evt)
 				}
 			}
 		})
 	})
+}
+
+func extIDtoString(extIDS [][]byte) []string {
+	out := make([]string, 0)
+	for _, xid := range extIDS {
+		out = append(out, fmtHex(xid))
+	}
+	return out
+}
+
+func fmtHex(d interface{}) string {
+	return fmt.Sprintf("%x", d)
+}
+
+// Filter and dispatch Events to logger
+func handleEvent(threadLogger *log.Entry, evt *eventmessages.FactomEvent) {
+	if e := evt.GetEntryCommit(); e != nil {
+		threadLogger.WithFields(
+			log.Fields{
+				"EventType":            "EntryCommit",
+				"EntityState":          e.EntityState,
+				"EntryHash":            fmtHex(e.EntryHash),
+				"Timestamp":            e.Timestamp,
+				"Credits":              e.Credits,
+				"EntryCreditPublicKey": fmtHex(e.EntryCreditPublicKey),
+				"Signature":            fmtHex(e.Signature),
+				"Version":              e.Version,
+			},
+		).Info(evt.EventSource)
+		return
+	}
+	if e := evt.GetEntryReveal(); e != nil {
+		threadLogger.WithFields(
+			log.Fields{
+				"EventType":   "EntryReveal",
+				"EntityState": e.EntityState,
+				"Timestamp":   e.Timestamp,
+				"ExternalIds": extIDtoString(e.Entry.ExternalIDs),
+				"ChainID":     fmtHex(e.Entry.ChainID),
+				"Content":     e.Entry.Content,
+				"Hash":        fmtHex(e.Entry.Hash),
+				"Version.":    e.Entry.Version,
+			},
+		).Info(evt.EventSource)
+		return
+	}
+	if e := evt.GetDirectoryBlockCommit(); e != nil {
+		blk := e.DirectoryBlock
+		hdr := blk.Header
+		threadLogger.WithFields(
+			log.Fields{
+				"EventType":                    "DirectoryBlockCommit",
+				"Header.BodyMerkleRoot":        fmtHex(hdr.BodyMerkleRoot),
+				"Header.PreviousKeyMerkleRoot": fmtHex(hdr.PreviousKeyMerkleRoot),
+				"Header.PreviousFullHash":      fmtHex(hdr.PreviousFullHash),
+				"Header.Timestamp ":            hdr.Timestamp,
+				"Header.BlockHeight ":          hdr.BlockHeight,
+				"Header.BlockCount":            hdr.BlockCount,
+				"Header.Version":               hdr.Version,
+				"Header.NetworkID":             hdr.NetworkID,
+				//"Entries": blk.Entries, // REVIEW: should we send entries?
+				"Hash":          fmtHex(blk.Hash),
+				"ChainID":       fmtHex(blk.ChainID),
+				"KeyMerkleRoot": blk.KeyMerkleRoot,
+			},
+		).Info(evt.EventSource)
+		return
+	}
+	if e := evt.GetNodeMessage(); e != nil {
+		threadLogger.WithFields(
+			log.Fields{
+				"EventType":           "NodeMessage",
+				"Level":               e.Level,
+				"MessageCode":         e.MessageCode,
+				"Message.MessageText": e.MessageText,
+			},
+		).Info(evt.EventSource)
+		return
+	}
+
+	data, err := json.Marshal(evt.Event)
+	if err != nil {
+		panic(err)
+	}
+
+	evtString := string(data)
+	threadLogger.WithFields(
+		log.Fields{"Event": evtString, "Prefix": evtString[2:10]},
+	).Info(evt.EventSource)
 }
