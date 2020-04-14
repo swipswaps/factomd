@@ -546,6 +546,22 @@ func handleEvent(threadLogger *log.Entry, evt *eventmessages.FactomEvent) {
 		).Info(evt.EventSource)
 		return
 	}
+	if e := evt.GetChainCommit(); e != nil {
+		threadLogger.WithFields(
+			log.Fields{
+				"EventType":            "ChainCommit",
+				"EntityState":          e.EntityState,
+				"EntryHash":            fmtHex(e.EntryHash),
+				"Weld":                 fmtHex(e.Weld),
+				"Timestamp":            e.Timestamp,
+				"Credits":              e.Credits,
+				"EntryCreditPublicKey": fmtHex(e.EntryCreditPublicKey),
+				"Signature":            fmtHex(e.Signature),
+				"Version":              e.Version,
+			},
+		).Info(evt.EventSource)
+		return
+	}
 	if e := evt.GetEntryReveal(); e != nil {
 		threadLogger.WithFields(
 			log.Fields{
@@ -594,6 +610,30 @@ func handleEvent(threadLogger *log.Entry, evt *eventmessages.FactomEvent) {
 		).Info(evt.EventSource)
 		return
 	}
+
+	if pe := evt.GetProcessListEvent(); pe != nil {
+		if e := pe.GetNewBlockEvent(); e != nil {
+			threadLogger.WithFields(
+				log.Fields{
+					"EventType": "NewBlock",
+					"Height":    e.NewBlockHeight,
+				},
+			).Info(evt.EventSource)
+			return
+		}
+		if e := pe.GetNewMinuteEvent(); e != nil {
+			threadLogger.WithFields(
+				log.Fields{
+					"EventType": "NewMinute",
+					"Minute":    e.NewMinute,
+				},
+			).Info(evt.EventSource)
+		}
+		return
+	}
+
+	// TODO: if this is a NewMin - suppress if it is Minute 10
+	// an external app should not depend on this...
 
 	data, err := json.Marshal(evt.Event)
 	if err != nil {

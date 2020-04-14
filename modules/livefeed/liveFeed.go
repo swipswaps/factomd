@@ -113,6 +113,7 @@ func (liveFeedService *liveFeedService) Send(factomEvent *eventmessages.FactomEv
 
 	factomEvent.IdentityChainID = liveFeedService.parentState.GetIdentityChainID().Bytes()
 	factomEvent.FactomNodeName = liveFeedService.parentState.GetFactomNodeName()
+	// REVIEW: this is a global setup
 	liveFeedService.factomEventPublisher.Write(factomEvent)
 }
 
