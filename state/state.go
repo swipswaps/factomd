@@ -2428,3 +2428,7 @@ func (s *State) BuildPubRegistry() {
 func (s *State) GetLiveFeedService() livefeed.LiveFeedService {
 	return s.LiveFeedService
 }
+
+func (s *State) GetLogger() interface{} {
+	return s.Logger.Logger
+}

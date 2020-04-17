@@ -7,10 +7,7 @@ package engine
 import (
 	"bytes"
 	"encoding/binary"
-	"encoding/json"
 	"fmt"
-	"github.com/FactomProject/factomd/modules/livefeed/eventmessages/generated/eventmessages"
-	"github.com/FactomProject/factomd/modules/pubsub"
 	"os"
 	"reflect"
 	"sync"
@@ -37,7 +34,6 @@ import (
 	"github.com/FactomProject/factomd/state"
 	"github.com/FactomProject/factomd/util"
 	"github.com/FactomProject/factomd/wsapi"
-	"github.com/FactomProject/logrustash"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -155,7 +151,7 @@ func NetStart(w *worker.Thread, p *globals.FactomParams, listenToStdin bool) {
 	}
 	startNetwork(w, p)
 	startFnodes(w)
-	startEventLogs(w, p)
+	startLiveFeed(p)
 	startWebserver(w)
 	startControlPanel(w)
 	simulation.StartSimControl(w, p.ListenTo, listenToStdin)
@@ -201,11 +197,12 @@ func initAnchors(s *state.State, reparse bool) {
 
 // start live feed service (for fnode 0 only)
 func startLiveFeed(p *globals.FactomParams) {
+
 	state0 := fnode.Get(0).State
 	config := state0.Cfg.(*util.FactomdConfig)
 
 	if config.LiveFeedAPI.EnableLiveFeedAPI || p.EnableLiveFeedAPI {
-		state0.LiveFeedService.Start(state0, config, p)
+		state0.LiveFeedService.StartEventLogs(state0, config, p)
 	}
 }
 
@@ -393,9 +390,11 @@ func makeServer(w *worker.Thread, p *globals.FactomParams) (node *fnode.FactomNo
 
 	node.State.Logger = log.WithFields(log.Fields{"node-name": node.State.GetFactomNodeName(), "identity": node.State.GetIdentityChainID().String()})
 
-	if p.UseLogstash {
-		hookLogstash(node.State, p.LogstashURL)
-	}
+	/*
+		if p.UseLogstash {
+			hookLogstash(node.State, p.LogstashURL)
+		}
+	*/
 
 	return node
 }
@@ -455,193 +454,4 @@ func AddNode() {
 	})
 	go p.Run()
 	p.WaitForRunning()
-}
-
-func hookLogstashLogger(logger *log.Logger, logStashURL string) error {
-	hook, err := logrustash.NewAsyncHook("tcp", logStashURL, "factomdLogs")
-	if err != nil {
-		fmt.Printf("Failed to connect to logstash %v", err)
-		return err
-	}
-
-	hook.ReconnectBaseDelay = time.Second // Wait for one second before first reconnect.
-	hook.ReconnectDelayMultiplier = 2
-	hook.MaxReconnectRetries = 10
-
-	logger.Hooks.Add(hook)
-	return nil
-
-}
-
-func hookLogstash(s *state.State, logStashURL string) error {
-	if _, enabled := os.LookupEnv("EVENTLOG"); !enabled {
-		return nil
-	}
-	return hookLogstashLogger(s.Logger.Logger, logStashURL)
-}
-
-// Forward only live feed events to Logstash
-func startEventLogs(w *worker.Thread, p *globals.FactomParams) {
-	// KLUDGE: rather than expose via command line options - set an ENV var
-	if _, enabled := os.LookupEnv("EVENTLOG"); !enabled {
-		return
-	}
-
-	if p.LogstashURL == "" {
-		panic("must set live feed url")
-	}
-
-	startLiveFeed(p) // FIXME: check to see it's already running
-
-	w.Spawn("LiveFeed Logs", func(w *worker.Thread) {
-		// TODO refactor threaded logger
-		threadLogger := log.WithFields(log.Fields{"thread": w.ID, "process": w.PID})
-		hookLogstashLogger(threadLogger.Logger, p.LogstashURL)
-
-		var feed *pubsub.SubChannel
-		w.OnReady(func() {
-			feed = pubsub.SubFactory.Channel(5000).Subscribe("/live-feed")
-		})
-		w.OnRun(func() {
-			for {
-				select {
-				case v, open := <-feed.Updates:
-					if !open {
-						return
-					}
-					evt := v.(*eventmessages.FactomEvent)
-					handleEvent(threadLogger, evt)
-				}
-			}
-		})
-	})
-}
-
-func extIDtoString(extIDS [][]byte) []string {
-	out := make([]string, 0)
-	for _, xid := range extIDS {
-		out = append(out, fmtHex(xid))
-	}
-	return out
-}
-
-func fmtHex(d interface{}) string {
-	return fmt.Sprintf("%x", d)
-}
-
-// Filter and dispatch Events to logger
-func handleEvent(threadLogger *log.Entry, evt *eventmessages.FactomEvent) {
-	if e := evt.GetEntryCommit(); e != nil {
-		threadLogger.WithFields(
-			log.Fields{
-				"EventType":            "EntryCommit",
-				"EntityState":          e.EntityState,
-				"EntryHash":            fmtHex(e.EntryHash),
-				"Timestamp":            e.Timestamp,
-				"Credits":              e.Credits,
-				"EntryCreditPublicKey": fmtHex(e.EntryCreditPublicKey),
-				"Signature":            fmtHex(e.Signature),
-				"Version":              e.Version,
-			},
-		).Info(evt.EventSource)
-		return
-	}
-	if e := evt.GetChainCommit(); e != nil {
-		threadLogger.WithFields(
-			log.Fields{
-				"EventType":            "ChainCommit",
-				"EntityState":          e.EntityState,
-				"EntryHash":            fmtHex(e.EntryHash),
-				"Weld":                 fmtHex(e.Weld),
-				"Timestamp":            e.Timestamp,
-				"Credits":              e.Credits,
-				"EntryCreditPublicKey": fmtHex(e.EntryCreditPublicKey),
-				"Signature":            fmtHex(e.Signature),
-				"Version":              e.Version,
-			},
-		).Info(evt.EventSource)
-		return
-	}
-	if e := evt.GetEntryReveal(); e != nil {
-		threadLogger.WithFields(
-			log.Fields{
-				"EventType":   "EntryReveal",
-				"EntityState": e.EntityState,
-				"Timestamp":   e.Timestamp,
-				"ExternalIds": extIDtoString(e.Entry.ExternalIDs),
-				"ChainID":     fmtHex(e.Entry.ChainID),
-				"Content":     e.Entry.Content,
-				"Hash":        fmtHex(e.Entry.Hash),
-				"Version.":    e.Entry.Version,
-			},
-		).Info(evt.EventSource)
-		return
-	}
-	if e := evt.GetDirectoryBlockCommit(); e != nil {
-		blk := e.DirectoryBlock
-		hdr := blk.Header
-		threadLogger.WithFields(
-			log.Fields{
-				"EventType":                    "DirectoryBlockCommit",
-				"Header.BodyMerkleRoot":        fmtHex(hdr.BodyMerkleRoot),
-				"Header.PreviousKeyMerkleRoot": fmtHex(hdr.PreviousKeyMerkleRoot),
-				"Header.PreviousFullHash":      fmtHex(hdr.PreviousFullHash),
-				"Header.Timestamp ":            hdr.Timestamp,
-				"Header.BlockHeight ":          hdr.BlockHeight,
-				"Header.BlockCount":            hdr.BlockCount,
-				"Header.Version":               hdr.Version,
-				"Header.NetworkID":             hdr.NetworkID,
-				//"Entries": blk.Entries, // REVIEW: should we send entries?
-				"Hash":          fmtHex(blk.Hash),
-				"ChainID":       fmtHex(blk.ChainID),
-				"KeyMerkleRoot": blk.KeyMerkleRoot,
-			},
-		).Info(evt.EventSource)
-		return
-	}
-	if e := evt.GetNodeMessage(); e != nil {
-		threadLogger.WithFields(
-			log.Fields{
-				"EventType":           "NodeMessage",
-				"Level":               e.Level,
-				"MessageCode":         e.MessageCode,
-				"Message.MessageText": e.MessageText,
-			},
-		).Info(evt.EventSource)
-		return
-	}
-
-	if pe := evt.GetProcessListEvent(); pe != nil {
-		if e := pe.GetNewBlockEvent(); e != nil {
-			threadLogger.WithFields(
-				log.Fields{
-					"EventType": "NewBlock",
-					"Height":    e.NewBlockHeight,
-				},
-			).Info(evt.EventSource)
-			return
-		}
-		if e := pe.GetNewMinuteEvent(); e != nil {
-			threadLogger.WithFields(
-				log.Fields{
-					"EventType": "NewMinute",
-					"Minute":    e.NewMinute,
-				},
-			).Info(evt.EventSource)
-		}
-		return
-	}
-
-	// TODO: if this is a NewMin - suppress if it is Minute 10
-	// an external app should not depend on this...
-
-	data, err := json.Marshal(evt.Event)
-	if err != nil {
-		panic(err)
-	}
-
-	evtString := string(data)
-	threadLogger.WithFields(
-		log.Fields{"Event": evtString, "Prefix": evtString[2:10]},
-	).Info(evt.EventSource)
 }

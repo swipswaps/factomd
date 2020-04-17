@@ -13,4 +13,5 @@ type StateEventServices interface {
 	GetLiveFeedService() LiveFeedService
 	GetFactomNodeName() string
 	GetPubRegistry() pubsub.IPubRegistry
+	GetLogger() interface{}
 }
