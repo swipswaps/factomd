@@ -153,7 +153,7 @@ func NetStart(w *worker.Thread, p *globals.FactomParams, listenToStdin bool) {
 	startFnodes(w)
 	startLiveFeed(p)
 	startWebserver(w)
-	startControlPanel(w)
+	//startControlPanel(w)
 	simulation.StartSimControl(w, p.ListenTo, listenToStdin)
 }
 

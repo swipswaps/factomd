@@ -176,6 +176,11 @@ func fmtHex(d interface{}) string {
 func (liveFeedService *liveFeedService) handleEvent(evt *eventmessages.FactomEvent) {
 	// TODO: handle stateChange events
 	if e := evt.GetEntryCommit(); e != nil {
+		// skip rejections - they seem to always happen right before acceptance
+		if e.EntityState == eventmessages.EntityState_REJECTED {
+			return
+		}
+
 		liveFeedService.eventLog.WithFields(
 			log.Fields{
 				"EventType":            "EntryCommit",
@@ -191,6 +196,11 @@ func (liveFeedService *liveFeedService) handleEvent(evt *eventmessages.FactomEve
 		return
 	}
 	if e := evt.GetChainCommit(); e != nil {
+		// skip rejections - they seem to always happen right before acceptance
+		if e.EntityState == eventmessages.EntityState_REJECTED {
+			return
+		}
+
 		liveFeedService.eventLog.WithFields(
 			log.Fields{
 				"EventType":            "ChainCommit",
@@ -207,6 +217,11 @@ func (liveFeedService *liveFeedService) handleEvent(evt *eventmessages.FactomEve
 		return
 	}
 	if e := evt.GetEntryReveal(); e != nil {
+		// skip rejections - they seem to always happen right before acceptance
+		if e.EntityState == eventmessages.EntityState_REJECTED {
+			return
+		}
+
 		liveFeedService.eventLog.WithFields(
 			log.Fields{
 				"EventType":   "EntryReveal",
@@ -238,7 +253,7 @@ func (liveFeedService *liveFeedService) handleEvent(evt *eventmessages.FactomEve
 				//"Entries": blk.Entries, // REVIEW: should we send entries?
 				"Hash":          fmtHex(blk.Hash),
 				"ChainID":       fmtHex(blk.ChainID),
-				"KeyMerkleRoot": blk.KeyMerkleRoot,
+				"KeyMerkleRoot": fmtHex(blk.KeyMerkleRoot),
 			},
 		).Info(evt.EventSource)
 		return
