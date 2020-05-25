@@ -27,6 +27,7 @@ type FBlock struct {
 	PrevKeyMR       interfaces.IHash `json:"prevkeymr"`       // Key Merkle root of previous block.
 	PrevLedgerKeyMR interfaces.IHash `json:"prevledgerkeymr"` // Sha3 of the previous Factoid Block
 	ExchRate        uint64           `json:"exchrate"`        // Factoshis per Entry Credit
+	MinExchRate     uint64           `json:"-"`               // Minimum fee over the last hour (6 blocks)
 	DBHeight        uint32           `json:"dbheight"`        // Directory Block height
 	// Header Expansion Size  varint
 	// Transaction count
@@ -133,6 +134,15 @@ func (b *FBlock) EndOfPeriod(period int) {
 			b.endOfPeriod[i] = 0
 		}
 	}
+}
+
+// Accessors for the MinExchangeRate.  This is maintained by the DBStateManager
+func (b *FBlock) GetMinExchRate() uint64 {
+	return b.MinExchRate
+}
+
+func (b *FBlock) SetMinExchRate(minExchRate uint64) {
+	b.MinExchRate = minExchRate
 }
 
 func (b *FBlock) GetTransactions() []interfaces.ITransaction {
@@ -548,7 +558,7 @@ func (b FBlock) ValidateTransaction(index int, trans interfaces.ITransaction) er
 		}
 	}
 
-	fee, err := trans.CalculateFee(b.ExchRate)
+	fee, err := trans.CalculateFee(b.MinExchRate)
 	if err != nil {
 		return err
 	}

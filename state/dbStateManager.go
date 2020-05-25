@@ -1135,6 +1135,28 @@ func (list *DBStateList) ProcessBlocks(d *DBState) (progress bool) {
 		list.State.FactoshisPerEC = d.FactoidBlock.GetExchRate()
 	}
 
+	{ // We need the last 6 exchange rates in order to use the minimum exchange rate to
+		// validate transactions.  We do this so we can change the FCT to EC exchange rate
+		// without causing disruption to users, particularly exchanges.
+		// Note that we would have to do Database accesses if we didn't have this list.
+		fss := fs.(*FactoidState)
+
+		// Add the current exchange rate to the 12 last exchange rates
+		if len(fss.PastSixFactoishisPerEC) >= 6 { // If we have 11 already, then drop the oldest,
+			copy(fss.PastSixFactoishisPerEC[:5], fss.PastSixFactoishisPerEC[1:]) // and add the newest
+			fss.PastSixFactoishisPerEC[5] = s.GetFactoshisPerEC()
+		} else { //
+			fss.PastSixFactoishisPerEC = append(fss.PastSixFactoishisPerEC, s.GetFactoshisPerEC())
+		}
+		min := s.GetFactoshisPerEC() // Look over the exchange rates over the last six blocks, and get the minimum
+		for _, v := range fss.PastSixFactoishisPerEC {
+			if v < min {
+				min = v // If this one is smaller, keep it.
+			}
+		}
+		d.FactoidBlock.SetMinExchRate(min) // Set the minimum exchange rate on the block
+	}
+
 	fs.ProcessEndOfBlock(list.State)
 
 	// Promote the currently scheduled next FER

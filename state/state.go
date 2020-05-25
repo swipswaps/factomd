@@ -1099,7 +1099,9 @@ func (s *State) Init() {
 	s.FactoidBalancesP = map[[32]byte]int64{}
 	s.ECBalancesP = map[[32]byte]int64{}
 
+	//
 	fs := new(FactoidState)
+
 	fs.State = s
 	s.FactoidState = fs
 

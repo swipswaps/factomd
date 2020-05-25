@@ -53,6 +53,9 @@ type IFBlock interface {
 	// Accessors for the Exchange rate
 	SetExchRate(uint64)
 	GetExchRate() uint64
+	SetMinExchRate(uint64)
+	GetMinExchRate(uint64)
+
 	// Accessors for the transactions
 	GetTransactions() []ITransaction
 

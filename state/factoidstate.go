@@ -26,10 +26,11 @@ import (
 var FACTOID_CHAINID_HASH = primitives.NewHash(constants.FACTOID_CHAINID)
 
 type FactoidState struct {
-	DBHeight     uint32
-	State        *State
-	CurrentBlock interfaces.IFBlock
-	Wallet       interfaces.ISCWallet
+	DBHeight               uint32
+	State                  *State
+	PastSixFactoishisPerEC []uint64
+	CurrentBlock           interfaces.IFBlock
+	Wallet                 interfaces.ISCWallet
 }
 
 var _ interfaces.IFactoidState = (*FactoidState)(nil)
