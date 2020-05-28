@@ -1062,10 +1062,10 @@ func (list *DBStateList) ProcessBlocks(d *DBState) (progress bool) {
 	// *******************
 	// Factoid Block Processing
 	// *******************
-	fs := list.State.GetFactoidState()
+	fs := list.State.GetFactoidState().(*FactoidState)
 
 	s.LogPrintf("dbstateprocess", "ProcessBlocks(%d) Process Factoids dbht %d factoid",
-		dbht, fs.(*FactoidState).DBHeight)
+		dbht, fs.DBHeight)
 
 	// get all the prior balances of the Factoid addresses that may have changed
 	// in this block.  If you want the balance of the highest saved block, look to
@@ -1107,7 +1107,48 @@ func (list *DBStateList) ProcessBlocks(d *DBState) (progress bool) {
 	}
 	list.State.ECBalancesPMutex.Unlock()
 
-	// Process the Factoid End of Block
+	// Process the Factoid End of Block. First we have to make sure we have a history of past
+	// EC exchange rates.
+
+	{ // We need the last 6 exchange rates in order to use the minimum exchange rate to
+		// validate transactions.  We do this so we can change the FCT to EC exchange rate
+		// without causing disruption to users, particularly exchanges.
+		// Note that we would have to do Database accesses if we didn't have this list.
+
+		// If this is the first time we have collected the history of exchange rates, then go
+		// to the database and collect what we can for the previous 5 blocks.  Then we will fall into
+		// the logoic that adds the next exchange rate to the list.
+		if len(fs.PastSixFactoishisPerEC) == 0 {
+			ht := int(d.DirectoryBlock.GetHeader().GetDBHeight())
+			for hs := ht - 5; hs < ht; hs++ {
+				if hs >= 0 {
+					// We should never have an error pulling past factoid blocks, but if we do, log it and go on.
+					fb, err := list.State.DB.FetchFBlockByHeight(uint32(hs))
+					if err != nil || fb == nil {
+						list.State.LogPrintf("fatalerr", "%s %s", "Error getting EC history", err.Error())
+					} else {
+						fs.PastSixFactoishisPerEC = append(fs.PastSixFactoishisPerEC, fb.GetExchRate())
+					}
+				}
+			}
+		}
+
+		// Add the current exchange rate to the 6 last exchange rates
+		if len(fs.PastSixFactoishisPerEC) >= 6 { // If we have 11 already, then drop the oldest,
+			copy(fs.PastSixFactoishisPerEC[:5], fs.PastSixFactoishisPerEC[1:]) // and add the newest
+			fs.PastSixFactoishisPerEC[5] = d.GetFactoidBlock().GetExchRate()
+		} else { //
+			fs.PastSixFactoishisPerEC = append(fs.PastSixFactoishisPerEC, d.GetFactoidBlock().GetExchRate())
+		}
+		min := s.GetFactoshisPerEC() // Look over the exchange rates over the last six blocks, and get the minimum
+		for _, v := range fs.PastSixFactoishisPerEC {
+			if v < min && min != 0 {
+				min = v // If this one is smaller, keep it.
+			}
+		}
+		d.FactoidBlock.SetMinExchRate(min) // Set the minimum exchange rate on the block
+	}
+
 	err = fs.AddTransactionBlock(d.FactoidBlock)
 	if err != nil {
 		panic(err)
@@ -1118,7 +1159,7 @@ func (list *DBStateList) ProcessBlocks(d *DBState) (progress bool) {
 	}
 
 	if list.State.DBFinished {
-		fs.(*FactoidState).DBHeight = dbht
+		fs.DBHeight = dbht
 		list.State.Balancehash = fs.GetBalanceHash(false)
 	}
 
@@ -1133,28 +1174,6 @@ func (list *DBStateList) ProcessBlocks(d *DBState) (progress bool) {
 			//	" - Height ", d.DirectoryBlock.GetHeader().GetDBHeight()))
 		}
 		list.State.FactoshisPerEC = d.FactoidBlock.GetExchRate()
-	}
-
-	{ // We need the last 6 exchange rates in order to use the minimum exchange rate to
-		// validate transactions.  We do this so we can change the FCT to EC exchange rate
-		// without causing disruption to users, particularly exchanges.
-		// Note that we would have to do Database accesses if we didn't have this list.
-		fss := fs.(*FactoidState)
-
-		// Add the current exchange rate to the 12 last exchange rates
-		if len(fss.PastSixFactoishisPerEC) >= 6 { // If we have 11 already, then drop the oldest,
-			copy(fss.PastSixFactoishisPerEC[:5], fss.PastSixFactoishisPerEC[1:]) // and add the newest
-			fss.PastSixFactoishisPerEC[5] = s.GetFactoshisPerEC()
-		} else { //
-			fss.PastSixFactoishisPerEC = append(fss.PastSixFactoishisPerEC, s.GetFactoshisPerEC())
-		}
-		min := s.GetFactoshisPerEC() // Look over the exchange rates over the last six blocks, and get the minimum
-		for _, v := range fss.PastSixFactoishisPerEC {
-			if v < min {
-				min = v // If this one is smaller, keep it.
-			}
-		}
-		d.FactoidBlock.SetMinExchRate(min) // Set the minimum exchange rate on the block
 	}
 
 	fs.ProcessEndOfBlock(list.State)
@@ -1228,7 +1247,7 @@ func (list *DBStateList) ProcessBlocks(d *DBState) (progress bool) {
 		list.WriteDBStateToDebugFile(d)
 	}
 
-	fs.(*FactoidState).DBHeight = list.State.GetDirectoryBlock().GetHeader().GetDBHeight()
+	fs.DBHeight = list.State.GetDirectoryBlock().GetHeader().GetDBHeight()
 
 	tbh := list.State.FactoidState.GetBalanceHash(true) // recompute temp balance hash here
 	list.State.Balancehash = fs.GetBalanceHash(false)
@@ -1251,7 +1270,7 @@ func (list *DBStateList) ProcessBlocks(d *DBState) (progress bool) {
 		// code in ProcessEOM for minute 10 will have moved us forward
 		s.SetLeaderTimestamp(d.DirectoryBlock.GetTimestamp())
 		// todo: is there a reason not to do this in MoveStateToHeight?
-		fs.(*FactoidState).DBHeight = dbht + 1
+		fs.DBHeight = dbht + 1
 		s.MoveStateToHeight(dbht+1, 0)
 	}
 

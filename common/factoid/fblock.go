@@ -558,7 +558,11 @@ func (b FBlock) ValidateTransaction(index int, trans interfaces.ITransaction) er
 		}
 	}
 
-	fee, err := trans.CalculateFee(b.MinExchRate)
+	if b.GetMinExchRate() != b.GetExchRate() {
+		fmt.Printf("MinRate %8d  Rate %8d\n", b.GetMinExchRate(), b.GetExchRate())
+	}
+
+	fee, err := trans.CalculateFee(b.GetExchRate())
 	if err != nil {
 		return err
 	}
