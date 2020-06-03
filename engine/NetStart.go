@@ -13,6 +13,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/FactomProject/factomd/modules/debugsettings"
+
 	"github.com/FactomProject/factomd/common"
 	"github.com/FactomProject/factomd/common/constants"
 	"github.com/FactomProject/factomd/common/globals"
@@ -25,7 +27,7 @@ import (
 	"github.com/FactomProject/factomd/fnode"
 	llog "github.com/FactomProject/factomd/log"
 	controlpanel "github.com/FactomProject/factomd/modules/controlPanel"
-	"github.com/FactomProject/factomd/modules/debugsettings"
+	"github.com/FactomProject/factomd/modules/ipfs"
 	"github.com/FactomProject/factomd/modules/leader"
 	"github.com/FactomProject/factomd/modules/registry"
 	"github.com/FactomProject/factomd/modules/worker"
@@ -34,6 +36,7 @@ import (
 	"github.com/FactomProject/factomd/state"
 	"github.com/FactomProject/factomd/util"
 	"github.com/FactomProject/factomd/wsapi"
+	"github.com/FactomProject/logrustash"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -454,4 +457,20 @@ func AddNode() {
 	})
 	go p.Run()
 	p.WaitForRunning()
+}
+
+// enable output to logstash
+func hookLogstash(s *state.State, logStashURL string) error {
+	hook, err := logrustash.NewAsyncHook("tcp", logStashURL, "factomdLogs")
+	if err != nil {
+		fmt.Printf("Failed to connect to logstash %v", err)
+		return err
+	}
+
+	hook.ReconnectBaseDelay = time.Second // Wait for one second before first reconnect.
+	hook.ReconnectDelayMultiplier = 2
+	hook.MaxReconnectRetries = 10
+
+	s.Logger.Logger.Hooks.Add(hook)
+	return nil
 }

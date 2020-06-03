@@ -15,7 +15,7 @@ services:
             - "8090:8090"
         volumes:
             - ./factom/factomd_0.conf:/root/.factom/m2/factomd.conf:ro
-        command: -sim_stdin=false -nodename=Fnode0 -customnet=net -network=CUSTOM -blktime=15 -logstash -logurl=logstash:8345
+        command: -sim_stdin=false -nodename=Fnode0 -customnet=net -network=CUSTOM -blktime=600 -logstash -logurl=logstash:8345
         networks:
             factomd:
                 ipv4_address: 10.7.0.1
@@ -34,7 +34,7 @@ services:
             - "8190:8090"
         volumes:
             - ./factom/factomd_1.conf:/root/.factom/m2/factomd.conf:ro
-        command: -sim_stdin=false -nodename=Fnode1 -customnet=net -network=CUSTOM -blktime=15 -logstash -logurl=logstash:8345
+        command: -sim_stdin=false -nodename=Fnode1 -customnet=net -network=CUSTOM -blktime=600 -logstash -logurl=logstash:8345
         networks:
             factomd:
                 ipv4_address: 10.7.0.2
@@ -53,7 +53,7 @@ services:
             - "8290:8090"
         volumes:
             - ./factom/factomd_2.conf:/root/.factom/m2/factomd.conf:ro
-        command: -sim_stdin=false -nodename=Fnode2 -customnet=net -network=CUSTOM -blktime=15 -logstash -logurl=logstash:8345
+        command: -sim_stdin=false -nodename=Fnode2 -customnet=net -network=CUSTOM -blktime=600 -logstash -logurl=logstash:8345
         networks:
             factomd:
                 ipv4_address: 10.7.0.3
