@@ -27,7 +27,6 @@ import (
 	"github.com/FactomProject/factomd/fnode"
 	llog "github.com/FactomProject/factomd/log"
 	controlpanel "github.com/FactomProject/factomd/modules/controlPanel"
-	"github.com/FactomProject/factomd/modules/ipfs"
 	"github.com/FactomProject/factomd/modules/leader"
 	"github.com/FactomProject/factomd/modules/registry"
 	"github.com/FactomProject/factomd/modules/worker"
