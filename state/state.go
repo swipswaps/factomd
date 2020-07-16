@@ -980,7 +980,7 @@ func (s *State) LoadConfig(filename string, networkFlag string) {
 
 		s.LocalServerPrivKey = "4c38c72fc5cdad68f13b74674d3ffb1f3d63a112710868c9b08946553448d26d"
 		s.FactoshisPerEC = 006666
-		s.FERChainId = "111111118d918a8be684e0dac725493a75862ef96d2d3f43f84b26969329bf03"
+		s.FERChainId = constants.FERChainID
 		s.ExchangeRateAuthorityPublicKey = "3b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da29"
 		s.DirectoryBlockInSeconds = 6
 		s.PortNumber = 8088
@@ -1224,7 +1224,7 @@ func (s *State) Init() {
 	//StubIdentityCache(s)
 	//needed for multiple nodes with FER.  remove for singe node launch
 	if s.FERChainId == "" {
-		s.FERChainId = "111111118d918a8be684e0dac725493a75862ef96d2d3f43f84b26969329bf03"
+		s.FERChainId = constants.FERChainID
 	}
 	if s.ExchangeRateAuthorityPublicKey == "" {
 		s.ExchangeRateAuthorityPublicKey = "3b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da29"

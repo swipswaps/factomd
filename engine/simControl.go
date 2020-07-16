@@ -1250,6 +1250,38 @@ func SimControl(listenTo int, listenStdin bool) {
 					continue
 				}
 
+				// Rc -- Set all the nodes to expect an Exchange Rate Public Key with a private key of all zeros
+				if b[1] == 'c' {
+					//
+					for _, fn := range fnodes {
+						// Private key all zeroes:
+						// Public key:  3b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da29
+						fn.State.ExchangeRateAuthorityPublicKey = "3b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da29"
+					}
+					continue
+				}
+
+				if b[1] == 'x' {
+
+					if len(b) == 2 {
+						os.Stderr.WriteString(fmt.Sprintf("Need to specify an EC exchange Rate\n"))
+						continue
+					}
+					exRate, err := strconv.Atoi(b[2:])
+					if err != nil {
+						os.Stderr.WriteString(fmt.Sprintf("Setting an exchange rate is of the form Rx{nnn}\n"))
+						continue
+					}
+					os.Stderr.WriteString(fmt.Sprintf("Current EC Exchange %08d New Exchange Rate %08d\n",
+						fnodes[ListenTo].State.GetFactoidState().GetCurrentBlock().GetExchRate(), exRate))
+					loadGenerator.CreateFERChain() // Will do nothing if the chain already exists.
+					loadGenerator.SetExchangeRate(
+						fnodes[ListenTo].State.GetEntryBlockDBHeightProcessing()+1,
+						1,
+						uint64(exRate))
+					continue
+				}
+
 				if b[1] == 't' {
 					if len(b) >= 3 {
 						nn, err := strconv.Atoi(b[2:])
@@ -1459,6 +1491,8 @@ func SimControl(listenTo int, listenStdin bool) {
 				os.Stderr.WriteString("Lh.i          Proposes a cancel for the descriptor h at index i\n")
 				os.Stderr.WriteString("Rnnn          Set load generator to write entries at nnn per second\n")
 				os.Stderr.WriteString("Re            Turn on 'tight' mode, that buys ECs in only small amounts when running Rnnn\n")
+				os.Stderr.WriteString("Rc            Set the Exchange Rate Authority Public Key of all nodes to allow FER testing\n")
+				os.Stderr.WriteString("Rx{nnn}       Set the EC Exchange Rate to nnn where nnn < 1.  Ex: Rx1000 sets the EC exchange rate to 1000\n")
 				os.Stderr.WriteString("Rtnnn         Add a signed constant to the timestamp of load generator FCT TXs.\n")
 
 				//os.Stderr.WriteString("i[m/b/a][N]   Shows only the Mhash, block signing key, or anchor key up to the Nth identity\n")

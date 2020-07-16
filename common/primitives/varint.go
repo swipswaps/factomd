@@ -4,44 +4,6 @@
 
 package primitives
 
-import (
-	"math"
-
-	"github.com/FactomProject/factomd/common/primitives/random"
-)
-
-// RandomVarInt returns a random variable integer
-func RandomVarInt() uint64 {
-	length := random.RandIntBetween(1, 11) // generates [1,11) --> 1-10
-
-	switch length {
-	case 1:
-		return random.RandUInt64Between(0x00, 0x7F)
-	case 2:
-		return random.RandUInt64Between(0x80, 0x3FFF)
-	case 3:
-		return random.RandUInt64Between(0x4000, 0x1FFFFF)
-	case 4:
-		return random.RandUInt64Between(0x200000, 0x0FFFFFFF)
-	case 5:
-		return random.RandUInt64Between(0x10000000, 0x7FFFFFFFF)
-	case 6:
-		return random.RandUInt64Between(0x800000000, 0x3FFFFFFFFFF)
-	case 7:
-		return random.RandUInt64Between(0x40000000000, 0x1FFFFFFFFFFFF)
-	case 8:
-		return random.RandUInt64Between(0x2000000000000, 0x0FFFFFFFFFFFFFF)
-	case 9:
-		return random.RandUInt64Between(0x100000000000000, 0x7FFFFFFFFFFFFFFF)
-	case 10:
-		return random.RandUInt64Between(0x8000000000000000, math.MaxUint64)
-	default:
-		panic("Internal varint error")
-	}
-
-	return 0
-}
-
 // VarIntLength returns the length of the variable integer when encoded as a var int
 func VarIntLength(v uint64) uint64 {
 	buf := new(Buffer)

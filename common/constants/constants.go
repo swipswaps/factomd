@@ -491,3 +491,7 @@ const (
 //To be increased whenever the data being saved changes from the last version
 const SaveStateVersion = 13
 const PreBootWindow = 20 // allow an N minute window before boot where messages will be accepted
+
+// Factoid Exchange Rage (FER) Chain ID where we expect changes to the exchange rate to be signed and posted
+const FERChainID = "211111118d918a8be684e0dac725493a75862ef96d2d3f43f84b26969329bf03"
+const FERPublicKey = "123"

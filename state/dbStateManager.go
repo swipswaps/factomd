@@ -1134,19 +1134,25 @@ func (list *DBStateList) ProcessBlocks(d *DBState) (progress bool) {
 		}
 
 		// Add the current exchange rate to the 6 last exchange rates
-		if len(fs.PastSixFactoishisPerEC) >= 6 { // If we have 11 already, then drop the oldest,
+		newFactoidExchangeRate := d.GetFactoidBlock().GetExchRate()
+		if newFactoidExchangeRate == 0 {
+			// If the exchange rate is zero, then we always ignore.
+			fmt.Printf("Exchange rate is zero at block height %d\n", d.GetDirectoryBlock().GetHeader().GetDBHeight())
+		} else if len(fs.PastSixFactoishisPerEC) >= 6 { // If we have 11 already, then drop the oldest,
 			copy(fs.PastSixFactoishisPerEC[:5], fs.PastSixFactoishisPerEC[1:]) // and add the newest
-			fs.PastSixFactoishisPerEC[5] = d.GetFactoidBlock().GetExchRate()
+			fs.PastSixFactoishisPerEC[5] = newFactoidExchangeRate
 		} else { //
-			fs.PastSixFactoishisPerEC = append(fs.PastSixFactoishisPerEC, d.GetFactoidBlock().GetExchRate())
+			fs.PastSixFactoishisPerEC = append(fs.PastSixFactoishisPerEC, newFactoidExchangeRate)
 		}
-		min := s.GetFactoshisPerEC() // Look over the exchange rates over the last six blocks, and get the minimum
-		for _, v := range fs.PastSixFactoishisPerEC {
-			if v < min && min != 0 {
-				min = v // If this one is smaller, keep it.
+		if newFactoidExchangeRate > 0 {
+			min := newFactoidExchangeRate // Look over the exchange rates over the last six blocks, and get the minimum
+			for _, v := range fs.PastSixFactoishisPerEC {
+				if v < min && min != 0 {
+					min = v // If this one is smaller, keep it.
+				}
 			}
+			d.FactoidBlock.SetMinExchRate(min) // Set the minimum exchange rate on the block
 		}
-		d.FactoidBlock.SetMinExchRate(min) // Set the minimum exchange rate on the block
 	}
 
 	err = fs.AddTransactionBlock(d.FactoidBlock)

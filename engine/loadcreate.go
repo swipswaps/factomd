@@ -3,8 +3,16 @@ package engine
 import (
 	"bytes"
 	"encoding/binary"
+	"encoding/json"
+	"fmt"
 	"math/rand"
+	"os"
 	"time"
+
+	"github.com/FactomProject/factomd/common/constants"
+
+	ed "github.com/FactomProject/ed25519"
+	"github.com/FactomProject/factom"
 
 	"crypto/sha256"
 
@@ -21,14 +29,17 @@ import (
 )
 
 type LoadGenerator struct {
-	ECKey     *primitives.PrivateKey // Entry Credit private key
-	ToSend    int                    // How much to send
-	PerSecond atomic.AtomicInt       // How much per second
-	stop      chan bool              // Stop the go routine
-	running   atomic.AtomicBool      // We are running
-	tight     atomic.AtomicBool      // Only allocate ECs as needed (more EC purchases)
-	txoffset  int64                  // Offset to be added to the timestamp of created tx to test time limits.
-	state     *state.State           // Access to logging
+	ECKey       *primitives.PrivateKey // Entry Credit private key
+	ToSend      int                    // How much to send
+	PerSecond   atomic.AtomicInt       // How much per second
+	stop        chan bool              // Stop the go routine
+	running     atomic.AtomicBool      // We are running
+	tight       atomic.AtomicBool      // Only allocate ECs as needed (more EC purchases)
+	chainExists atomic.AtomicBool      // We have the FER chain already
+	fee         atomic.AtomicBool      // If fee == true, then change the fees as we go
+	rate        atomic.AtomicInt64     // Current Rate
+	txoffset    int64                  // Offset to be added to the timestamp of created tx to test time limits.
+	state       *state.State           // Access to logging
 }
 
 // NewLoadGenerator makes a new load generator. The state is used for funding the transaction
@@ -40,6 +51,20 @@ func NewLoadGenerator(s *state.State) *LoadGenerator {
 
 	return lg
 }
+
+//func (lg *LoadGenerator) Fees() {
+//
+//	for lg.fee.Load() {
+//		time.Sleep(1 * time.Second)
+//		if lg.rate.Load() > 10000 {
+//			lg.rate.Store(900)
+//		}
+//		lg.rate.Add(100)
+//
+//		nextRate := lg.rate.Load()
+//		for s
+//	}
+//}
 
 func (lg *LoadGenerator) Run() {
 	if lg.running.Load() {
@@ -71,7 +96,7 @@ func (lg *LoadGenerator) Run() {
 
 		for i := 0; i < top; i++ {
 			var c interfaces.IMsg
-			e := RandomEntry()
+			e := RandomEntry(nil)
 			if chain == nil {
 				c = lg.NewCommitChain(e)
 				chain = e.ChainID
@@ -92,18 +117,19 @@ func (lg *LoadGenerator) Stop() {
 	lg.stop <- true
 }
 
-func RandomEntry() *entryBlock.Entry {
-	entry := entryBlock.NewEntry()
-	entry.Content = primitives.ByteSlice{random.RandByteSliceOfLen(rand.Intn(128) + 128)}
-	entry.ExtIDs = make([]primitives.ByteSlice, rand.Intn(4)+1)
-	raw := make([][]byte, len(entry.ExtIDs))
-	for i := range entry.ExtIDs {
-		entry.ExtIDs[i] = primitives.ByteSlice{random.RandByteSliceOfLen(rand.Intn(32) + 32)}
-		raw[i] = entry.ExtIDs[i].Bytes
+func RandomEntry(entry *entryBlock.Entry) *entryBlock.Entry {
+	if entry == nil {
+		entry.Content = primitives.ByteSlice{random.RandByteSliceOfLen(rand.Intn(128) + 128)}
+		entry.ExtIDs = make([]primitives.ByteSlice, rand.Intn(4)+1)
+		raw := make([][]byte, len(entry.ExtIDs))
+		for i := range entry.ExtIDs {
+			entry.ExtIDs[i] = primitives.ByteSlice{random.RandByteSliceOfLen(rand.Intn(32) + 32)}
+			raw[i] = entry.ExtIDs[i].Bytes
+		}
 	}
-
 	sum := sha256.New()
-	for _, v := range entry.ExtIDs {
+	for i, v := range entry.ExtIDs {
+		fmt.Printf("%d %x\n", i, v)
 		x := sha256.Sum256(v.Bytes)
 		sum.Write(x[:])
 	}
@@ -124,7 +150,7 @@ func (lg *LoadGenerator) NewRevealEntry(entry *entryBlock.Entry) *messages.Revea
 
 var cnt int
 var goingUp bool
-var limitBuys = true // We limit buys only after one attempted purchase, so people can fund identities in testing
+var limitBuys = true // We limit buys only after the first only attempted purchase, so people can fund identities in testing
 
 func (lg *LoadGenerator) KeepUsFunded() {
 
@@ -142,19 +168,6 @@ func (lg *LoadGenerator) KeepUsFunded() {
 		}
 
 		//EC3Eh7yQKShgjkUSFrPbnQpboykCzf4kw9QHxi47GGz5P2k3dbab is EC address
-		if lg.PerSecond == 0 && limitBuys {
-			if i%100 == 0 {
-				// Log our occasional realization that we have nothing to do.
-				outEC, _ := primitives.HexToHash("c23ae8eec2beb181a0da926bd2344e988149fbe839fbc7489f2096e7d6110243")
-				outAdd := factoid.NewAddress(outEC.Bytes())
-				ecBal := s.GetE(true, outAdd.Fixed())
-
-				lg.state.LogPrintf("loadgenerator", "Tight %7s Total TX %6d for a total of %8d entry credits balance %d.",
-					ts, buys, totalBought, ecBal)
-			}
-			time.Sleep(5 * time.Second)
-			continue
-		}
 
 		if !limitBuys {
 			level = 200 // Only do this once, after that look for requests for load to drive EC buys.
@@ -182,7 +195,7 @@ func (lg *LoadGenerator) KeepUsFunded() {
 			lg.state.LogPrintf("loadgenerator", "Tight %7s Total TX %6d for a total of %8d entry credits balance %d.",
 				ts, buys, totalBought, ecBal)
 		}
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(10 * time.Millisecond)
 	}
 }
 
@@ -247,4 +260,80 @@ func milliTime(offset int64) (r []byte) {
 	m := t/1e6 + offset
 	binary.Write(buf, binary.BigEndian, m)
 	return buf.Bytes()[2:]
+}
+
+// FEREntry
+// This is a representation of the FER data.  Basically the json of this will be the factom entry content
+type FEREntry struct {
+	ExpirationHeight       uint32 `json:"expiration_height"`        // Height Entry is invalid if not activated. (6 blks from activation at most)
+	TargetActivationHeight uint32 `json:"target_activation_height"` // Height to activate the entry
+	Priority               uint32 `json:"priority"`                 // Some priority > 0.  Lets multiple FEREntries per block, with the highest priority winning
+	TargetPrice            uint64 `json:"target_price"`             // Factoshis per EC so 1/10 cent * TargetPrice / 1000 = FCT price
+	Version                string `json:"version"`                  // Should always be 1.0 until we update the FER implementation
+}
+
+// CreateFERChain
+// When running a simulation, we have to create the FERChain to change the exchange rate.
+// This function does this for us.
+func (lg *LoadGenerator) CreateFERChain() {
+
+	if lg.chainExists.Load() {
+		return
+	}
+
+	chainID, _ := primitives.HexToHash(constants.FERChainID)
+	eb, err := lg.state.DB.FetchEBlockHead(chainID)
+	// Only create the FER chain if it doesn't exist.
+	if err != nil || eb == nil {
+		// create the FER chain by creating an Entry
+		fer := entryBlock.NewEntry()
+		// Add the Extended IDs (ExtIDs)
+		extIDs1 := primitives.ByteSlice{Bytes: []byte("FCT EC Conversion Rate Chain")}
+		extIDs2 := primitives.ByteSlice{Bytes: []byte("1950454129")}
+		content := primitives.ByteSlice{Bytes: []byte("This chain contains messages which coordinate " +
+			"the FCT to EC conversion rate amongst factomd nodes.")}
+
+		fer.ExtIDs = append(fer.ExtIDs, extIDs1)
+		fer.ExtIDs = append(fer.ExtIDs, extIDs2)
+		// Content can be anything, but we will use the same content from the Main Net
+		fer.Content = content
+		// Compute the ChainID
+		fer = RandomEntry(fer)
+
+		c := lg.NewCommitChain(fer)
+		e := lg.NewRevealEntry(fer)
+		lg.state.APIQueue().Enqueue(c)
+		lg.state.APIQueue().Enqueue(e)
+	}
+}
+
+// SetExchangeRate -- Write an entry to change the EC Exchange rate into the FER chain.
+// This is only going to work if the unit test or the configuration file has set the ExchangeRateAuthorityPublicKey
+// to the public key for the null (all zeros) private key.
+func (lg *LoadGenerator) SetExchangeRate(DBHeight uint32, priority uint32, factoshis uint64) {
+
+	fer := new(FEREntry)
+	fer.ExpirationHeight = DBHeight + 2
+	fer.Priority = priority
+	fer.TargetPrice = factoshis
+	fer.Version = "1.0"
+
+	entryJson, err := json.Marshal(fer)
+
+	if err != nil {
+		os.Stderr.WriteString("Could not marshal the data into an FEREntry\n")
+		return
+	}
+
+	e := new(factom.Entry)
+	e.ExtIDs = append(e.ExtIDs, []byte("FCT EC Conversion Rate Chain"))
+	e.ChainID = constants.FERChainID
+
+	var signingPrivateKey [64]byte
+	ed.GetPublicKey(&signingPrivateKey)
+	signingSignature := ed.Sign(&signingPrivateKey, entryJson)
+
+	e.ExtIDs = append(e.ExtIDs, signingSignature[:])
+	e.Content = entryJson
+
 }

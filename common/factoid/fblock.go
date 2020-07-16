@@ -138,6 +138,9 @@ func (b *FBlock) EndOfPeriod(period int) {
 
 // Accessors for the MinExchangeRate.  This is maintained by the DBStateManager
 func (b *FBlock) GetMinExchRate() uint64 {
+	if b.MinExchRate == 0 { // Never return zero as the minimum.  If I don't have a minimum exchange rate,
+		return b.GetExchRate() // then return the current block's exchange rate.
+	}
 	return b.MinExchRate
 }
 
@@ -562,7 +565,7 @@ func (b FBlock) ValidateTransaction(index int, trans interfaces.ITransaction) er
 		fmt.Printf("MinRate %8d  Rate %8d\n", b.GetMinExchRate(), b.GetExchRate())
 	}
 
-	fee, err := trans.CalculateFee(b.GetExchRate())
+	fee, err := trans.CalculateFee(b.GetMinExchRate())
 	if err != nil {
 		return err
 	}

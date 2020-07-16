@@ -10,6 +10,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/FactomProject/factomd/common/constants"
+
 	ed "github.com/FactomProject/ed25519"
 	"github.com/FactomProject/factom"
 	"github.com/FactomProject/factomd/common/directoryBlock"
@@ -59,7 +61,7 @@ func MakeFEREntryWithHeightFromContent(passedResidentHeight uint32, passedTarget
 
 	// Make a new Factom entry and populate it
 	anEntry := new(factom.Entry)
-	anEntry.ChainID = "111111118d918a8be684e0dac725493a75862ef96d2d3f43f84b26969329bf03"
+	anEntry.ChainID = constants.FERChainID
 	anEntry.ExtIDs = append(anEntry.ExtIDs, signingSignature[:])
 	anEntry.Content = entryJson
 
@@ -93,7 +95,7 @@ func CreateAndPopulateTestStateForFER(testEntries []FEREntryWithHeight, desiredH
 	}*/
 	s.SetFactoshisPerEC(1)
 	state.LoadDatabase(s)
-	s.FERChainId = "111111118d918a8be684e0dac725493a75862ef96d2d3f43f84b26969329bf03"
+	s.FERChainId = constants.FERChainID
 	s.UpdateState()
 	go s.ValidatorLoop()
 	time.Sleep(20 * time.Millisecond)
@@ -302,7 +304,7 @@ func CreateTestEntryBlockForFER(p interfaces.IEntryBlock, height uint32) (*entry
 	} else {
 		e.Header.SetPrevKeyMR(primitives.NewZeroHash())
 		e.Header.SetDBHeight(0)
-		chainId := "111111118d918a8be684e0dac725493a75862ef96d2d3f43f84b26969329bf03"
+		chainId := constants.FERChainID
 		hexBytes, _ := hex.DecodeString(chainId)
 		chainIdHash := primitives.NewHash(hexBytes)
 		e.Header.SetChainID(chainIdHash)
