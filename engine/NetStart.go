@@ -61,7 +61,7 @@ func echo(s string, more ...interface{}) {
 
 func echoConfig(s *state.State, p *globals.FactomParams) {
 
-	fmt.Println("")
+	fmt.Println()
 	fmt.Println(">>>>>>>>>>>>>>>>")
 	fmt.Println(">>>>>>>>>>>>>>>> Factom parameters")
 	fmt.Println(">>>>>>>>>>>>>>>>")

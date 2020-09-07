@@ -46,7 +46,7 @@ func Factomd(w *worker.Thread, params *FactomParams, listenToStdin bool) {
 	fmt.Printf("Build: %s\n", Build)
 	fmt.Printf("Version: %s\n", FactomdVersion)
 	fmt.Printf("Start time: %s\n", time.Now().String())
-	fmt.Println("")
+	fmt.Println()
 	go StartProfiler(params.MemProfileRate, params.ExposeProfiling)
 	NetStart(w, params, listenToStdin)
 }
